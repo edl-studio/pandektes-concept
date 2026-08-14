@@ -11,6 +11,7 @@ export function CaseBookCard({
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  const Logo = caseSummary.Logo
 
   function handleOpen() {
     const rect = ref.current?.getBoundingClientRect()
@@ -29,7 +30,12 @@ export function CaseBookCard({
       }}
       style={{ cursor: 'pointer', width: 188, height: 233 }}
     >
-      <PkCaseBook caseNumber={caseSummary.caseNumber} title={caseSummary.title} pageCount={caseSummary.pageCount} />
+      <PkCaseBook
+        caseNumber={caseSummary.caseNumber}
+        title={caseSummary.title}
+        pageCount={caseSummary.pageCount}
+        logo={Logo ? <Logo /> : undefined}
+      />
     </div>
   )
 }

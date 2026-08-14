@@ -20,16 +20,9 @@ export interface PageStackProps {
    * look tiny against a much bigger sheet. Defaults to 1 (base size).
    */
   scale?: number
-  /**
-   * Fades sheet 0's skeleton away (revealing nothing — just a blank sheet).
-   * The real content itself is rendered as a separate, unscaled sibling by
-   * the consumer (see CaseDetailPage) rather than nested in here, since real
-   * rendered content (PDF/text) shouldn't be grown via transform either.
-   */
-  revealFirstPage?: boolean
 }
 
-export function PageStack({ pageCount, mode, scale = 1, revealFirstPage }: PageStackProps) {
+export function PageStack({ pageCount, mode, scale = 1 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
 
   return (
@@ -45,23 +38,9 @@ export function PageStack({ pageCount, mode, scale = 1, revealFirstPage }: PageS
             zIndex: pageCount - i,
           } as CSSProperties
 
-          const hideSkeleton = i === 0 && revealFirstPage
-
-          // Iris wipe: mask-size 0 = fully closed/hidden. Explicit equal
-          // width/height (not a %, which resolves independently against the
-          // sheet's non-square box and stretches the circle into an ellipse)
-          // keeps it a true circle; 320px comfortably covers the base
-          // 180x233 sheet's diagonal (~294px) — the ancestor's own
-          // transform:scale grows this uniformly along with everything else.
-          const skeletonStyle = {
-            WebkitMaskSize: hideSkeleton ? '0px 0px' : '320px 320px',
-            maskSize: hideSkeleton ? '0px 0px' : '320px 320px',
-            pointerEvents: hideSkeleton ? 'none' : 'auto',
-          } as CSSProperties
-
           return (
             <div key={i} className="pk-page-stack__sheet" style={style}>
-              <div className="pk-page-stack__sheet-skeleton" style={skeletonStyle}>
+              <div className="pk-page-stack__sheet-skeleton">
                 <PkPageSkeleton />
               </div>
             </div>

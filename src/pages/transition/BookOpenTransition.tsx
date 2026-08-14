@@ -31,6 +31,7 @@ export function BookOpenTransition({
   onComplete: () => void
 }) {
   const [phase, setPhase] = useState<Phase>('sliding')
+  const Logo = caseSummary.Logo
 
   useEffect(() => {
     const t1 = SLIDE_MS
@@ -89,7 +90,12 @@ export function BookOpenTransition({
           {/* No caseNumber/title passed — the transition never shows this
               text, so there's nothing in the DOM that could leak through
               during the reposition. */}
-          <PkCaseBook pageCount={caseSummary.pageCount} open coverExiting={phase === 'cover-exiting'} />
+          <PkCaseBook
+            pageCount={caseSummary.pageCount}
+            logo={Logo ? <Logo /> : undefined}
+            open
+            coverExiting={phase === 'cover-exiting'}
+          />
         </motion.div>
       )}
 

@@ -1,3 +1,6 @@
+import type { ComponentType } from 'react'
+import { HojesteretLogo, OstreLandsretLogo, SoHandelsrettenLogo } from './court-logos'
+
 export interface CaseSummary {
   id: string
   caseNumber: string
@@ -6,6 +9,8 @@ export interface CaseSummary {
   pageCount: number
   /** URL to the real judgment PDF, when we have one. Falls back to the abstract placeholder image otherwise. */
   documentUrl?: string
+  /** Court seal rendered on the case-book cover. */
+  Logo?: ComponentType
 }
 
 export const CASES: CaseSummary[] = [
@@ -16,18 +21,21 @@ export const CASES: CaseSummary[] = [
       'A temp posted to Boeing for years counts as a salaried employee — Flair Group (formerly Adecco) v. HK Danmark',
     pageCount: 6,
     documentUrl: '/documents/bs-60017-2024-hjr.pdf',
+    Logo: HojesteretLogo,
   },
   {
     id: 'bs-8528-2023-olr',
     caseNumber: 'BS-8528/2023-OLR',
     title: 'Østre Landsret upholds split ruling on vikarloven and funktionærloven coverage across joined appeals',
     pageCount: 4,
+    Logo: OstreLandsretLogo,
   },
   {
     id: 'bs-13671-2021-shr',
     caseNumber: 'BS-13671/2021-SHR',
     title: 'Sø- og Handelsretten rules on kr. 419,770.90 claim under funktionærloven vs. vikarloven coverage',
     pageCount: 3,
+    Logo: SoHandelsrettenLogo,
   },
 ]
 

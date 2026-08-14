@@ -1,6 +1,7 @@
-import { forwardRef, type CSSProperties, type HTMLAttributes } from 'react'
+import { forwardRef, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { BookIcon } from './BookIcon'
+import { CoverLogo } from './CoverLogo'
 import { PAGE_SKELETON_GROUPS } from './skeleton-layouts'
 import './case-book.css'
 
@@ -22,6 +23,8 @@ export interface PkCaseBookProps extends HTMLAttributes<HTMLDivElement> {
   open?: boolean
   /** Slides + fades the front/back covers away, leaving only the page stack visible. */
   coverExiting?: boolean
+  /** Custom cover mark. Any SVG (or img). Receives the same embossed treatment as the default book icon. */
+  logo?: ReactNode
   testId?: string
 }
 
@@ -55,7 +58,7 @@ export function PkPageSkeleton() {
 }
 
 export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
-  ({ caseNumber, title, pageCount = DEFAULT_PAGE_COUNT, open, coverExiting, className, testId, ...props }, ref) => {
+  ({ caseNumber, title, pageCount = DEFAULT_PAGE_COUNT, open, coverExiting, logo, className, testId, ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -98,9 +101,7 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
             <FlipEdge />
             <span className="pk-case-book__spine" />
           </div>
-          <div className="pk-case-book__icon">
-            <BookIcon />
-          </div>
+          <CoverLogo>{logo ?? <BookIcon />}</CoverLogo>
         </div>
       </div>
     )
