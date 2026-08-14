@@ -1,0 +1,14 @@
+/*
+ * Import order is load-bearing: @import rules are hoisted above inline
+ * rules regardless of position, so the @layer ordering statement must be
+ * imported first, before Tailwind registers its own layers — otherwise
+ * @layer pk content lands below Tailwind's base/utilities and loses.
+ */
+@import './layers.css';
+@import './consumer.css';
+@import '@fontsource/geist-sans/400.css';
+@import '@fontsource/geist-sans/500.css';
+@import '@fontsource/geist-sans/600.css';
+@import './fonts.css';
+@import './tokens.css';
+@import './pk-composites.css';

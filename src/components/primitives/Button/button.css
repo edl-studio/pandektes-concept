@@ -1,0 +1,92 @@
+@layer pk {
+  .pk-button__root {
+    --_bg: transparent;
+    --_bg-hover: rgb(var(--pk-color-core-black) / 0.04);
+    --_color: var(--pk-color-content-primary);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pk-d1-5);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    border: none;
+    outline: none;
+    border-radius: var(--pk-radius-md);
+    background-color: var(--_bg);
+    color: var(--_color);
+    font-family: var(--pk-font-family-base);
+    font-size: var(--pk-font-size-14);
+    font-weight: var(--pk-font-weight-medium);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 0 0 0 var(--pk-color-surface-body), 0 0 0 0 var(--pk-color-accent-weak);
+  }
+
+  /* Inset gradient border ring — mirrors DsButton's ::before mask technique */
+  .pk-button__root::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(0deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .pk-button__root:hover:not([data-disabled]) {
+      background-color: var(--_bg-hover);
+    }
+  }
+
+  .pk-button__root:active:not([data-disabled]) {
+    opacity: 0.85;
+  }
+
+  .pk-button__root:focus-visible {
+    box-shadow:
+      0 0 0 1px var(--pk-color-surface-body),
+      0 0 0 3px var(--pk-color-accent-weak);
+  }
+
+  .pk-button--primary {
+    --_bg: var(--pk-color-accent-base);
+    --_bg-hover: var(--pk-color-accent-mid);
+    --_color: var(--pk-color-static-white);
+  }
+
+  .pk-button--primary::before {
+    display: none;
+  }
+
+  .pk-button--ghost::before {
+    display: none;
+  }
+
+  .pk-button--sm {
+    height: var(--pk-d7);
+    padding: 0 var(--pk-d3);
+  }
+
+  .pk-button--md {
+    height: var(--pk-d8);
+    padding: 0 var(--pk-d4);
+  }
+
+  .pk-button--lg {
+    height: var(--pk-d9);
+    padding: 0 var(--pk-d5);
+  }
+
+  .pk-button__root[data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

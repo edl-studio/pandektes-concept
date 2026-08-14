@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+
+/*
+ * Bridges --pk-* tokens into Tailwind v4's @theme so page/layout code can
+ * write bg-surface-body, text-content-primary, font-heading, etc. Wipe TW's
+ * default color/font ramps first so only our tokens are available as
+ * utilities — prevents accidental use of Tailwind's stock palette.
+ */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+
+  --color-accent: var(--pk-color-accent-base);
+  --color-accent-mid: var(--pk-color-accent-mid);
+  --color-accent-weak: var(--pk-color-accent-weak);
+
+  --color-surface-body: var(--pk-color-surface-body);
+  --color-surface-raised: var(--pk-color-surface-raised);
+
+  --color-content-primary: var(--pk-color-content-primary);
+  --color-content-secondary: var(--pk-color-content-secondary);
+  --color-content-tertiary: var(--pk-color-content-tertiary);
+  --color-content-quaternary: var(--pk-color-content-quaternary);
+
+  --color-white: var(--pk-color-static-white);
+  --color-black: var(--pk-color-static-black);
+
+  --font-heading: var(--pk-font-family-heading);
+  --font-sans: var(--pk-font-family-base);
+
+  --radius-sm: var(--pk-radius-sm);
+  --radius-md: var(--pk-radius-md);
+  --radius-lg: var(--pk-radius-lg);
+  --radius-xl: var(--pk-radius-xl);
+  --radius-2xl: var(--pk-radius-2xl);
+}
+
+@layer base {
+  * {
+    border-color: var(--pk-color-border-gradient-end);
+  }
+
+  body {
+    background-color: var(--pk-color-surface-body);
+    color: var(--pk-color-content-primary);
+    font-family: var(--pk-font-family-base);
+  }
+}

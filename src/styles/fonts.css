@@ -1,0 +1,61 @@
+/*
+ * Gambetta — headline font only. Body/meta copy uses Geist (imported via
+ * @fontsource/geist-sans in index.css). Variable weights are omitted in
+ * favour of the static cuts actually used in the type scale (light/regular/
+ * medium/semibold/bold) to keep the axis surface small and predictable.
+ */
+
+@font-face {
+  font-family: 'Gambetta';
+  src:
+    url('../assets/fonts/gambetta/Gambetta-Light.woff2') format('woff2'),
+    url('../assets/fonts/gambetta/Gambetta-Light.woff') format('woff'),
+    url('../assets/fonts/gambetta/Gambetta-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gambetta';
+  src:
+    url('../assets/fonts/gambetta/Gambetta-Regular.woff2') format('woff2'),
+    url('../assets/fonts/gambetta/Gambetta-Regular.woff') format('woff'),
+    url('../assets/fonts/gambetta/Gambetta-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gambetta';
+  src:
+    url('../assets/fonts/gambetta/Gambetta-Medium.woff2') format('woff2'),
+    url('../assets/fonts/gambetta/Gambetta-Medium.woff') format('woff'),
+    url('../assets/fonts/gambetta/Gambetta-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gambetta';
+  src:
+    url('../assets/fonts/gambetta/Gambetta-Semibold.woff2') format('woff2'),
+    url('../assets/fonts/gambetta/Gambetta-Semibold.woff') format('woff'),
+    url('../assets/fonts/gambetta/Gambetta-Semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gambetta';
+  src:
+    url('../assets/fonts/gambetta/Gambetta-Bold.woff2') format('woff2'),
+    url('../assets/fonts/gambetta/Gambetta-Bold.woff') format('woff'),
+    url('../assets/fonts/gambetta/Gambetta-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}

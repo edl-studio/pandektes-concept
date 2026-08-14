@@ -1,0 +1,86 @@
+/*
+ * Design tokens, extracted from the Figma color styles for this project
+ * (Accent, Surface1/2, Content1-4, Border). Two-tier structure, mirroring
+ * the axon-maestro DS: raw "core" RGB channel triplets wrapped by semantic
+ * "--pk-color-*" tokens that resolve to valid colors so opacity composition
+ * works (rgb(var(--pk-color-core-accent) / 0.5)).
+ */
+
+@layer theme {
+  :root {
+    /* ── Core color channels ── */
+    --pk-color-core-accent: 125 35 52;       /* #7D2334 */
+    --pk-color-core-surface-1: 250 249 247;  /* #FAF9F7 */
+    --pk-color-core-surface-2: 255 255 255;  /* #FFFFFF */
+    --pk-color-core-content-1: 25 25 25;     /* #191919 */
+    --pk-color-core-content-2: 102 102 102;  /* #666666 */
+    --pk-color-core-content-3: 127 127 127;  /* #7F7F7F */
+    --pk-color-core-content-4: 153 153 153;  /* #999999 */
+    --pk-color-core-white: 255 255 255;
+    --pk-color-core-black: 0 0 0;
+
+    /* ── Semantic colors ── */
+    --pk-color-accent-base: rgb(var(--pk-color-core-accent));
+    --pk-color-accent-mid: color-mix(in srgb, rgb(var(--pk-color-core-accent)) 85%, black);
+    --pk-color-accent-weak: rgb(var(--pk-color-core-accent) / 0.12);
+
+    --pk-color-surface-body: rgb(var(--pk-color-core-surface-1));
+    --pk-color-surface-raised: rgb(var(--pk-color-core-surface-2));
+
+    --pk-color-content-primary: rgb(var(--pk-color-core-content-1));
+    --pk-color-content-secondary: rgb(var(--pk-color-core-content-2));
+    --pk-color-content-tertiary: rgb(var(--pk-color-core-content-3));
+    --pk-color-content-quaternary: rgb(var(--pk-color-core-content-4));
+
+    --pk-color-static-white: rgb(var(--pk-color-core-white));
+    --pk-color-static-black: rgb(var(--pk-color-core-black));
+
+    /* Inset gradient border ring — matches DsButton/DsInput's ::before treatment */
+    --pk-color-border-gradient-start: rgb(var(--pk-color-core-black) / 0.05);
+    --pk-color-border-gradient-end: rgb(var(--pk-color-core-black) / 0.10);
+
+    /* ── Spacing — 4px base unit ── */
+    --pk-d0-5: 2px;
+    --pk-d1: 4px;
+    --pk-d1-5: 6px;
+    --pk-d2: 8px;
+    --pk-d2-5: 10px;
+    --pk-d3: 12px;
+    --pk-d4: 16px;
+    --pk-d5: 20px;
+    --pk-d6: 24px;
+    --pk-d7: 28px;
+    --pk-d8: 32px;
+    --pk-d9: 36px;
+    --pk-d10: 40px;
+    --pk-d12: 48px;
+    --pk-d16: 64px;
+
+    /* ── Radius ── */
+    --pk-radius-sm: 6px;
+    --pk-radius-md: 10px;
+    --pk-radius-lg: 14px;
+    --pk-radius-xl: 20px;
+    --pk-radius-2xl: 28px;
+
+    /* ── Typography ── */
+    --pk-font-family-heading: 'Gambetta', serif;
+    --pk-font-family-base: 'Geist', system-ui, sans-serif;
+
+    --pk-font-size-12: 0.75rem;  /* 12px */
+    --pk-font-size-13: 0.8125rem; /* 13px */
+    --pk-font-size-14: 0.875rem; /* 14px */
+    --pk-font-size-16: 1rem;     /* 16px */
+    --pk-font-size-18: 1.125rem; /* 18px */
+    --pk-font-size-20: 1.25rem;  /* 20px */
+    --pk-font-size-24: 1.5rem;   /* 24px */
+    --pk-font-size-32: 2rem;     /* 32px */
+    --pk-font-size-40: 2.5rem;   /* 40px */
+
+    --pk-font-weight-light: 300;
+    --pk-font-weight-regular: 400;
+    --pk-font-weight-medium: 500;
+    --pk-font-weight-semibold: 600;
+    --pk-font-weight-bold: 700;
+  }
+}

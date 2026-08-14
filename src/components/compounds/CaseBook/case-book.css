@@ -1,0 +1,277 @@
+@layer pk {
+  /*
+   * Structure mirrors the Figma frame 1:1 — CoverBack (holds the case
+   * metadata text, currently hidden behind the front cover) sits at the
+   * bottom of the stack, a fanned stack of 6 "Page" frames peeks out to the
+   * bottom-right, and CoverFront (spine seam + embossed book icon) sits on
+   * top facing the viewer.
+   */
+
+  .pk-case-book__root {
+    --_width: 188px;
+    --_height: 233px;
+    --_cover-front-width: 180px;
+    --_spread: 1;
+
+    position: relative;
+    isolation: isolate;
+    width: var(--_width);
+    height: var(--_height);
+    font-family: var(--pk-font-family-base);
+    perspective: 600px;
+  }
+
+  /*
+   * Hovering (or the `open` prop applying `--open`) spreads the page fan 2x
+   * and tilts the front cover open. `--open` reuses the exact same
+   * choreography so a click-to-open sequence can trigger it programmatically
+   * ahead of a route transition.
+   */
+  .pk-case-book__root:hover,
+  .pk-case-book__root--open {
+    --_spread: 2;
+  }
+
+  /* ── CoverBack — carries the case number + title, sits under everything ── */
+
+  .pk-case-book__cover-back {
+    position: absolute;
+    isolation: isolate;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--pk-d3);
+    padding: var(--pk-d4);
+    border-radius: var(--pk-radius-md);
+    background-color: var(--pk-color-accent-base);
+    box-shadow: inset 0 0 0 0.5px rgb(var(--pk-color-core-black) / 0.2);
+    overflow: hidden;
+    transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+  }
+
+  .pk-case-book__root--cover-exiting .pk-case-book__cover-back {
+    transform: translateX(-260px);
+    opacity: 0;
+  }
+
+  .pk-case-book__cover-back::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgb(var(--pk-color-core-black) / 0.2);
+    pointer-events: none;
+  }
+
+  .pk-case-book__case-number {
+    position: relative;
+    z-index: 1;
+    font-family: var(--pk-font-family-base);
+    font-size: 6px;
+    font-weight: var(--pk-font-weight-medium);
+    line-height: 1.3;
+    color: var(--pk-color-static-white);
+  }
+
+  .pk-case-book__case-title {
+    position: relative;
+    z-index: 1;
+    font-family: var(--pk-font-family-heading);
+    font-size: 12px;
+    font-weight: var(--pk-font-weight-regular);
+    line-height: 1.3;
+    color: var(--pk-color-static-white);
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Flip-edge seam — a 1px light + 1px dark sliver 8px from the spine */
+  .pk-case-book__flip-edge {
+    position: absolute;
+    top: 0;
+    left: var(--pk-d2);
+    width: 2px;
+    height: 100%;
+    display: flex;
+  }
+
+  .pk-case-book__flip-edge span {
+    width: 1px;
+    height: 100%;
+  }
+
+  .pk-case-book__flip-edge span:first-child {
+    background-color: rgb(var(--pk-color-core-white) / 0.1);
+  }
+
+  .pk-case-book__flip-edge span:last-child {
+    background-color: rgb(var(--pk-color-core-black) / 0.1);
+  }
+
+  .pk-case-book__spine {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--pk-d2);
+    height: 100%;
+    background-color: rgb(var(--pk-color-core-black) / 0.1);
+  }
+
+  /*
+   * Pages — dynamic fanned stack. Page 0 sits 8px right of the cover and
+   * carries the visible skeleton content; each subsequent page adds +2px
+   * of x-offset and -0.5deg of rotation, and is drawn beneath the previous
+   * one so only its edge peeks out. Sized to match the cover exactly.
+   */
+
+  .pk-case-book__pages {
+    position: absolute;
+    inset: 0;
+    transform: translateX(0);
+    transition: transform 0.3s ease-out;
+  }
+
+  .pk-case-book__root:hover .pk-case-book__pages,
+  .pk-case-book__root--open .pk-case-book__pages {
+    transform: translateX(4px);
+  }
+
+  .pk-case-book__page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--_cover-front-width);
+    height: var(--_height);
+    transform: translate(calc(var(--_page-x) * var(--_spread)), calc(var(--_page-y) * var(--_spread)))
+      rotate(calc(var(--_page-rotation) * var(--_spread)));
+    transform-origin: top left;
+    transition: transform 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: var(--pk-d4);
+    padding: var(--pk-d6) var(--pk-d4);
+    border-radius: var(--pk-radius-md);
+    background-color: var(--pk-color-static-white);
+    overflow: hidden;
+  }
+
+  /* Inset gradient border — same mask technique as PkButton, using the
+     top-to-bottom 5%→10% black ramp for a subtle elevation edge. */
+  .pk-case-book__page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .pk-case-book__text-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--pk-d1-5);
+  }
+
+  .pk-case-book__skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: var(--pk-d1);
+    height: 8px;
+  }
+
+  .pk-case-book__skeleton-bar {
+    position: relative;
+    flex-shrink: 0;
+    height: 8px;
+    border-radius: 2px;
+    background-color: rgb(var(--pk-color-core-black) / 0.1);
+    overflow: hidden;
+  }
+
+  .pk-case-book__skeleton-bar--fill {
+    flex: 1;
+  }
+
+  /* Shimmer sweep — a soft highlight travels left-to-right across each bar. */
+  .pk-case-book__skeleton-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgb(var(--pk-color-core-white) / 0.45), transparent);
+    animation: pk-skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pk-skeleton-shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  /* ── CoverFront — spine seam + embossed book icon, sits on top ── */
+
+  .pk-case-book__cover-front {
+    position: absolute;
+    top: 0;
+    left: -0.5px;
+    width: var(--_cover-front-width);
+    height: var(--_height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--pk-radius-md);
+    background-color: var(--pk-color-accent-base);
+    background-image: linear-gradient(100deg, transparent, rgb(var(--pk-color-core-black) / 0.15));
+    box-shadow: inset 0 0 0 0.5px rgb(var(--pk-color-core-black) / 0.2);
+    overflow: hidden;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease-out, opacity 0.4s ease-in;
+  }
+
+  .pk-case-book__root:hover .pk-case-book__cover-front,
+  .pk-case-book__root--open .pk-case-book__cover-front {
+    transform: rotateY(-10deg);
+  }
+
+  /* Exiting overrides the open tilt — the cover continues its motion by sliding away instead. */
+  .pk-case-book__root--cover-exiting .pk-case-book__cover-front {
+    transform: translateX(-260px) rotateY(-10deg);
+    transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+    opacity: 0;
+  }
+
+  .pk-case-book__cover-front-edge {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 10px;
+    height: 100%;
+  }
+
+  .pk-case-book__cover-front-edge .pk-case-book__flip-edge {
+    left: var(--pk-d2);
+  }
+
+  .pk-case-book__cover-front-edge .pk-case-book__spine {
+    width: var(--pk-d2);
+  }
+
+  .pk-case-book__icon {
+    position: relative;
+    width: 40px;
+    height: 44px;
+  }
+
+  .pk-case-book__icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}

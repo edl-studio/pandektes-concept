@@ -1,0 +1,73 @@
+/*
+ * Composite typography shorthands. Headline styles use Gambetta;
+ * UI/body/meta styles use Geist. Dual-registered as `.pk\:name` (for use
+ * inside components/ under @layer pk) and bare `.name` (consumer usage in
+ * pages/layout, unlayered so it wins over utilities when needed).
+ */
+
+@layer pk-composites {
+  .pk\:heading-40,
+  .heading-40 {
+    font-family: var(--pk-font-family-heading);
+    font-size: var(--pk-font-size-40);
+    font-weight: var(--pk-font-weight-semibold);
+    line-height: 1.15;
+  }
+
+  .pk\:heading-32,
+  .heading-32 {
+    font-family: var(--pk-font-family-heading);
+    font-size: var(--pk-font-size-32);
+    font-weight: var(--pk-font-weight-semibold);
+    line-height: 1.2;
+  }
+
+  .pk\:heading-24,
+  .heading-24 {
+    font-family: var(--pk-font-family-heading);
+    font-size: var(--pk-font-size-24);
+    font-weight: var(--pk-font-weight-medium);
+    line-height: 1.25;
+  }
+
+  .pk\:heading-20,
+  .heading-20 {
+    font-family: var(--pk-font-family-heading);
+    font-size: var(--pk-font-size-20);
+    font-weight: var(--pk-font-weight-medium);
+    line-height: 1.3;
+  }
+
+  .pk\:text-body-16,
+  .text-body-16 {
+    font-family: var(--pk-font-family-base);
+    font-size: var(--pk-font-size-16);
+    font-weight: var(--pk-font-weight-regular);
+    line-height: 1.5;
+  }
+
+  .pk\:text-body-14,
+  .text-body-14 {
+    font-family: var(--pk-font-family-base);
+    font-size: var(--pk-font-size-14);
+    font-weight: var(--pk-font-weight-regular);
+    line-height: 1.45;
+  }
+
+  .pk\:text-ui-14-medium,
+  .text-ui-14-medium {
+    font-family: var(--pk-font-family-base);
+    font-size: var(--pk-font-size-14);
+    font-weight: var(--pk-font-weight-medium);
+    line-height: 1.3;
+  }
+
+  .pk\:text-meta-12,
+  .text-meta-12 {
+    font-family: var(--pk-font-family-base);
+    font-size: var(--pk-font-size-12);
+    font-weight: var(--pk-font-weight-regular);
+    line-height: 1.3;
+    color: var(--pk-color-content-tertiary);
+  }
+}
