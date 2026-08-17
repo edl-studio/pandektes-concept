@@ -10,8 +10,14 @@ export interface OriginRect {
   y: number
   width: number
   height: number
+  /** Hover tilt of the tile book, in degrees. Eased to 0 during the lift. */
+  rotation?: number
+  /** Tile overflow, in unscaled book pixels. `bottom` drives how far the lift rises. */
+  clip?: { top: number; right: number; bottom: number; left: number }
 }
 
+const LIFT_MS = 280
+const LIFT_AIR_PX = 12
 const SLIDE_MS = 500
 const COVER_EXIT_MS = 400
 const FAN_HOLD_MS = 100 // brief beat at the handoff so the fan→list restack has a "before" to animate from
@@ -19,7 +25,7 @@ const REORGANIZE_MS = 500
 const SCALE_MS = 450 // must match page-stack.css's sheet width/height transition duration (0.45s) — see note below
 const SETTLE_MS = 400
 
-type Phase = 'sliding' | 'cover-exiting' | 'fanned' | 'reorganizing' | 'scaling' | 'settling'
+type Phase = 'lifting' | 'sliding' | 'cover-exiting' | 'fanned' | 'reorganizing' | 'scaling' | 'settling'
 
 export function BookOpenTransition({
   caseSummary,
@@ -30,17 +36,19 @@ export function BookOpenTransition({
   originRect: OriginRect
   onComplete: () => void
 }) {
-  const [phase, setPhase] = useState<Phase>('sliding')
+  const [phase, setPhase] = useState<Phase>('lifting')
   const Logo = caseSummary.Logo
 
   useEffect(() => {
-    const t1 = SLIDE_MS
+    const t0 = LIFT_MS
+    const t1 = t0 + SLIDE_MS
     const t2 = t1 + COVER_EXIT_MS
     const t3 = t2 + FAN_HOLD_MS
     const t4 = t3 + REORGANIZE_MS
     const t5 = t4 + SCALE_MS
     const t6 = t5 + SETTLE_MS
     const timers = [
+      setTimeout(() => setPhase('sliding'), t0),
       setTimeout(() => setPhase('cover-exiting'), t1),
       setTimeout(() => setPhase('fanned'), t2),
       setTimeout(() => setPhase('reorganizing'), t3),
@@ -72,13 +80,18 @@ export function BookOpenTransition({
   const stackLeftSmall = window.innerWidth / 2 - PAGE_WIDTH / 2
   const stackLeftLarge = window.innerWidth / 2 - PAGE_WIDTH * SCALE / 2
 
-  const showBook = phase === 'sliding' || phase === 'cover-exiting'
+  const isLifting = phase === 'lifting'
+  const showBook = phase === 'lifting' || phase === 'sliding' || phase === 'cover-exiting'
   const isReorganized = phase === 'reorganizing' || phase === 'scaling' || phase === 'settling'
   const isScaled = phase === 'scaling' || phase === 'settling'
   const isSettled = phase === 'settling'
-  // Timeline thumbs are CSS-scaled (0.5) with transform-origin top left.
+  // Timeline thumbs are CSS-scaled (0.5 / 0.525) with transform-origin top left.
   // Grow from that visual size so the overlay doesn't pop to 188×233.
   const startScale = originRect.width / BOOK_WIDTH
+  const startRotation = originRect.rotation ?? 0
+  // Rise by the part the tile used to hide, plus a little air, so the full
+  // book clears the card before it scales and flies.
+  const liftY = originRect.y - ((originRect.clip?.bottom ?? 0) * startScale + LIFT_AIR_PX)
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
@@ -86,9 +99,21 @@ export function BookOpenTransition({
         <motion.div
           className="fixed"
           style={{ width: BOOK_WIDTH, height: BOOK_HEIGHT, transformOrigin: 'top left' }}
-          initial={{ x: originRect.x, y: originRect.y, scale: startScale }}
-          animate={{ x: bookCenterX, y: bookCenterY, scale: 1 }}
-          transition={{ duration: SLIDE_MS / 1000, ease: 'easeInOut' }}
+          initial={{
+            x: originRect.x,
+            y: originRect.y,
+            scale: startScale,
+            rotate: startRotation,
+          }}
+          animate={
+            isLifting
+              ? { x: originRect.x, y: liftY, scale: startScale, rotate: 0 }
+              : { x: bookCenterX, y: bookCenterY, scale: 1, rotate: 0 }
+          }
+          transition={{
+            duration: (isLifting ? LIFT_MS : SLIDE_MS) / 1000,
+            ease: isLifting ? 'easeOut' : 'easeInOut',
+          }}
         >
           {/* No caseNumber/title passed — the transition never shows this
               text, so there's nothing in the DOM that could leak through

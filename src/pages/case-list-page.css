@@ -425,6 +425,13 @@
   transform: scale(0.525) rotate(var(--co-book-tilt, 0deg));
 }
 
+/* Instantly drop the tile book once the overlay has taken over, so the
+   page fade cannot crossfade two copies. */
+.co-doc-thumb-book--lifted {
+  visibility: hidden;
+  transition: none;
+}
+
 .co-doc-info {
   flex: 1;
   padding: var(--pk-d3) var(--pk-d5);

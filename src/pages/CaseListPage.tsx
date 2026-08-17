@@ -19,6 +19,7 @@ import {
 import { InputCopy } from '@/components/ui/input-copy'
 import { PkButton } from '@/components/primitives/Button'
 import { BookOpenTransition, type OriginRect } from './transition/BookOpenTransition'
+import { BOOK_HEIGHT, BOOK_WIDTH } from './transition/layout'
 import './case-list-page.css'
 
 const SOURCE_PDF_URL = CASES[0].documentUrl
@@ -189,6 +190,7 @@ function TimelineItem({
   isFirst,
   isLast,
   bookTilt,
+  lifted,
   onOpen,
 }: {
   instanceLabel: string
@@ -197,6 +199,7 @@ function TimelineItem({
   isFirst: boolean
   isLast: boolean
   bookTilt: number
+  lifted: boolean
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
   const [bookOpen, setBookOpen] = useState(false)
@@ -206,13 +209,31 @@ function TimelineItem({
   const caseNumberDisplay = caseSummary.caseNumber.replace('/', ' · ')
 
   function handleOpen() {
-    const rect = bookRef.current?.getBoundingClientRect()
-    if (!rect) return
+    const book = bookRef.current
+    const thumb = book?.parentElement
+    if (!book || !thumb) return
+
+    // Layout origin (transform-origin: top left), not the rotated AABB —
+    // so the overlay starts on the same point the CSS thumb is anchored to.
+    const thumbRect = thumb.getBoundingClientRect()
+    const bookStyle = getComputedStyle(book)
+    const originX = thumbRect.left + parseFloat(bookStyle.left)
+    const originY = thumbRect.top + parseFloat(bookStyle.top)
+    const startScale = bookOpen ? 0.525 : 0.5
+    const rotation = bookOpen ? bookTilt : 0
+
     onOpen(caseSummary, {
-      x: rect.left,
-      y: rect.top,
-      width: rect.width,
-      height: rect.height,
+      x: originX,
+      y: originY,
+      width: BOOK_WIDTH * startScale,
+      height: BOOK_HEIGHT * startScale,
+      rotation,
+      clip: {
+        top: Math.max(0, (thumbRect.top - originY) / startScale),
+        right: Math.max(0, (originX + BOOK_WIDTH * startScale - thumbRect.right) / startScale),
+        bottom: Math.max(0, (originY + BOOK_HEIGHT * startScale - thumbRect.bottom) / startScale),
+        left: Math.max(0, (thumbRect.left - originX) / startScale),
+      },
     })
   }
 
@@ -253,7 +274,7 @@ function TimelineItem({
               pageCount={caseSummary.pageCount}
               logo={Logo ? <Logo /> : undefined}
               open={bookOpen}
-              className="co-doc-thumb-book"
+              className={`co-doc-thumb-book${lifted ? ' co-doc-thumb-book--lifted' : ''}`}
             />
           </div>
           <div className="co-doc-info">
@@ -381,6 +402,7 @@ export function CaseListPage() {
                 bookTilt={bookTilt}
                 isFirst={i === 0}
                 isLast={i === TIMELINE_ENTRIES.length - 1}
+                lifted={active?.caseSummary.id === caseSummary.id}
                 onOpen={(caseSummary, originRect) => setActive({ caseSummary, originRect })}
               />
             ))}
