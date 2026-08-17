@@ -7,17 +7,90 @@
 /* ── Page shell ──────────────────────────────────────────────────────── */
 
 .co-page {
+  --co-column: 640px;
+  --co-appbar-height: 48px;
+  --co-gutter: var(--pk-d6);
+
   min-height: 100vh;
   background-color: var(--pk-color-surface-body);
   display: flex;
-  justify-content: center;
-  padding: 0 var(--pk-d6);
+  flex-direction: column;
+  align-items: center;
+}
+
+.co-appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  align-self: stretch;
+  height: var(--co-appbar-height);
+  background-color: var(--pk-color-surface-body);
+  border-bottom: 1px solid rgb(0 0 0 / 0.08);
+}
+
+.co-appbar-inner {
+  width: 100%;
+  max-width: calc(var(--co-column) + 2 * var(--co-gutter));
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--co-gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.co-appbar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-d2);
+  color: var(--pk-color-content-primary);
+  text-decoration: none;
+}
+
+.co-appbar-title {
+  font-family: var(--pk-font-family-heading);
+  font-size: var(--pk-font-size-20);
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+.co-appbar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-d5);
+  pointer-events: none;
+}
+
+.co-appbar-skel {
+  position: relative;
+  height: 8px;
+  border-radius: 2px;
+  background-color: rgb(var(--pk-color-core-black) / 0.1);
+  overflow: hidden;
+}
+
+.co-appbar-skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(var(--pk-color-core-white) / 0.45), transparent);
+  animation: co-appbar-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes co-appbar-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 .co-content {
   width: 100%;
-  max-width: 640px;
-  padding: 96px 0;
+  max-width: calc(var(--co-column) + 2 * var(--co-gutter));
+  padding: 64px var(--co-gutter) 96px;
   display: flex;
   flex-direction: column;
   gap: var(--pk-d8);
@@ -378,12 +451,12 @@
 
 @media (max-width: 700px) {
   .co-page {
-    padding: 0 var(--pk-d4);
+    --co-gutter: var(--pk-d4);
   }
 
   .co-content {
-    max-width: 100%;
-    padding: 48px 0;
+    padding-top: 48px;
+    padding-bottom: 48px;
   }
 
   .co-holding-grid {

@@ -85,6 +85,16 @@ const ICheck: FC = () => (
   <HugeiconsIcon icon={Tick02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
+function PkMark() {
+  return (
+    <svg width={16} height={20} viewBox="0 0 16 20" fill="currentColor" aria-hidden>
+      <path d="M 10.813 10 C 12.184 9.964 13.487 9.435 14.453 8.522 C 15.418 7.609 15.972 6.383 15.998 5.098 C 16.055 2.295 13.552 0.001 10.562 0.001 L 0.149 0.001 C 0.109 0.001 0.072 0.016 0.044 0.042 C 0.016 0.068 0 0.103 0 0.14 L 0 1.529 C 0 1.565 0.016 1.601 0.044 1.627 C 0.072 1.653 0.109 1.667 0.149 1.667 C 1.065 1.703 1.932 2.07 2.567 2.691 C 3.202 3.313 3.556 4.14 3.555 5 L 3.555 14.582 C 3.555 15.282 3.852 15.953 4.38 16.448 C 4.907 16.943 5.623 17.221 6.37 17.221 C 6.409 17.221 6.447 17.206 6.474 17.18 C 6.502 17.154 6.518 17.119 6.518 17.082 L 6.518 6.413 C 6.515 6.271 6.568 6.134 6.667 6.027 C 6.765 5.92 6.903 5.851 7.053 5.834 C 7.135 5.826 7.218 5.835 7.297 5.859 C 7.376 5.884 7.448 5.923 7.509 5.976 C 7.571 6.028 7.62 6.092 7.653 6.163 C 7.686 6.234 7.703 6.311 7.703 6.389 L 7.703 17.36 C 7.703 18.06 7.999 18.731 8.527 19.225 C 9.055 19.72 9.771 19.998 10.517 19.998 C 10.556 19.998 10.594 19.984 10.622 19.957 C 10.65 19.931 10.665 19.896 10.665 19.859 L 10.665 10.139 C 10.665 10.102 10.681 10.066 10.709 10.04 C 10.736 10.014 10.774 10 10.813 10 Z" />
+    </svg>
+  )
+}
+
+const NAV_SKELETON_WIDTHS = [48, 72, 56] as const
+
 // ── Shared atoms ──────────────────────────────────────────────────────
 
 function Chip({
@@ -263,6 +273,20 @@ const TIMELINE_ENTRIES = CASES.map((cs, i) => ({
 export function CaseListPage() {
   return (
     <div className="co-page">
+      <header className="co-appbar">
+        <div className="co-appbar-inner">
+          <Link to="/" className="co-appbar-logo">
+            <PkMark />
+            <span className="co-appbar-title">Pandektes</span>
+          </Link>
+          <nav className="co-appbar-nav" aria-hidden="true">
+            {NAV_SKELETON_WIDTHS.map((width) => (
+              <span key={width} className="co-appbar-skel" style={{ width }} />
+            ))}
+          </nav>
+        </div>
+      </header>
+
       <main className="co-content">
         {/* ── Case header ───────────────────────────────── */}
         <header className="co-case-header">
@@ -274,6 +298,11 @@ export function CaseListPage() {
             <h1 className="co-case-title">Flair Group v. HK Danmark</h1>
             <p className="co-case-desc">{PLACEHOLDER}</p>
           </div>
+          <Citations
+            citations={CITATION_ITEMS}
+            idPrefix={CITATION_PREFIX}
+            defaultOpen
+          />
         </header>
 
         <Divider />
@@ -283,11 +312,6 @@ export function CaseListPage() {
           <SectionHeader
             title="Case holding"
             citation={citationMarker('holding-win', 1, PLACEHOLDER)}
-          />
-          <Citations
-            citations={CITATION_ITEMS}
-            idPrefix={CITATION_PREFIX}
-            defaultOpen
           />
           <div className="co-holding-grid">
             <HoldingCard
