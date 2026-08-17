@@ -90,7 +90,7 @@
 
 .pk-inline-citation-source {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--pk-d3);
   padding: var(--pk-d3);
 }
@@ -124,8 +124,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-top: 2px;
+  gap: 0px;
 }
 
 .pk-inline-citation-source-title {

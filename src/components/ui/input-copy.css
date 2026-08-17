@@ -1,7 +1,6 @@
 .pk-input-copy {
   display: inline-flex;
   width: fit-content;
-  max-width: 100%;
 }
 
 .pk-input-copy--disabled {
@@ -13,22 +12,26 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  max-width: 100%;
-  padding: 0;
+  margin: -1px -3px;
+  padding: 1px 3px;
   border: none;
+  border-radius: 3px;
   background: none;
-  color: var(--pk-color-content-tertiary);
+  color: var(--pk-color-accent-base);
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-12);
   font-weight: var(--pk-font-weight-regular);
   line-height: 1;
   cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.pk-input-copy__button:hover {
+  color: var(--pk-color-accent-base);
+  background-color: var(--pk-color-accent-weak);
 }
 
 .pk-input-copy__value {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

@@ -467,7 +467,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--pk-d2);
-  padding-top: 2px; /* optically align with dot centre */
+  padding-top: 6px; /* optically align with dot centre */
 }
 
 .co-timeline-label {
