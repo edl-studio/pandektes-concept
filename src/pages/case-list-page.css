@@ -65,60 +65,6 @@
   flex-shrink: 0;
 }
 
-/* ── Citation badge — inline span inside a paragraph ────────────────── */
-
-.co-citation {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-  margin: 0;
-  padding: var(--pk-d0-5) var(--pk-d2) var(--pk-d0-5) var(--pk-d1-5);
-  border: none;
-  border-radius: 6px;
-  appearance: none;
-  font-family: var(--pk-font-family-base);
-  font-size: var(--pk-font-size-12);
-  font-weight: var(--pk-font-weight-regular);
-  line-height: 18px;
-  vertical-align: middle;
-  color: var(--pk-color-content-tertiary);
-  background-color: var(--pk-color-surface-raised);
-  width: auto;
-  align-self: flex-start;
-  cursor: pointer;
-}
-
-.co-citation:hover,
-.co-citation[data-popup-open] {
-  color: var(--pk-color-content-secondary);
-}
-
-.co-citation:focus {
-  outline: none;
-}
-
-.co-citation:focus-visible {
-  box-shadow:
-    0 0 0 1px var(--pk-color-surface-body),
-    0 0 0 3px var(--pk-color-accent-weak);
-}
-
-.co-citation::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
 /* ── Case header ─────────────────────────────────────────────────────── */
 
 .co-case-header {
@@ -173,126 +119,12 @@
   color: var(--pk-color-content-primary);
 }
 
-/* Description paragraph — badge sits inline via .co-citation span */
 .co-section-desc {
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-14);
   font-weight: var(--pk-font-weight-regular);
   line-height: 1.5;
   color: var(--pk-color-content-secondary);
-}
-
-/* ── Sources ─────────────────────────────────────────────────────────── */
-
-.co-sources {
-  display: flex;
-  flex-direction: column;
-}
-
-.co-sources-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--pk-d0-5);
-  font-family: var(--pk-font-family-base);
-  font-size: var(--pk-font-size-12);
-  font-weight: var(--pk-font-weight-regular);
-  line-height: 1;
-  color: var(--pk-color-content-secondary);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.co-sources-toggle:hover {
-  color: var(--pk-color-accent-base);
-}
-
-.co-sources-chevron--up {
-  display: none;
-}
-
-.co-sources-toggle[data-panel-open] .co-sources-chevron--up {
-  display: inline-flex;
-}
-
-.co-sources-toggle[data-panel-open] .co-sources-chevron--down {
-  display: none;
-}
-
-.co-sources-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--pk-d3);
-  padding-top: var(--pk-d3);
-}
-
-.co-source-row {
-  display: flex;
-  align-items: center;
-  gap: var(--pk-d1-5);
-  height: 26px;
-  cursor: pointer;
-}
-
-.co-source-thumb {
-  position: relative;
-  width: 20px;
-  height: 25px;
-  border-radius: 4px;
-  background-color: rgb(0 0 0 / 0.08);
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.co-source-thumb::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.co-source-text {
-  display: flex;
-  flex-direction: column;
-  padding-top: var(--pk-d1);
-  gap: 4px;
-}
-
-.co-source-text > span:not(.co-source-rule) {
-  font-family: var(--pk-font-family-base);
-  font-size: var(--pk-font-size-14);
-  font-weight: var(--pk-font-weight-regular);
-  line-height: 1;
-  color: var(--pk-color-content-secondary);
-  transition: color 0.15s ease;
-}
-
-.co-source-rule {
-  display: block;
-  height: 2px;
-  background-color: transparent;
-  background-image: radial-gradient(circle, rgb(0 0 0 / 0.18) 1px, transparent 1.2px);
-  background-size: 6px 2px;
-  background-repeat: repeat-x;
-  background-position: left center;
-}
-
-.co-source-row:hover .co-source-text > span:not(.co-source-rule) {
-  color: var(--pk-color-accent-base);
-}
-
-.co-source-row:hover .co-source-rule {
-  background-image: radial-gradient(circle, rgb(var(--pk-color-core-accent) / 0.5) 1px, transparent 1.2px);
 }
 
 /* ── Holding cards ───────────────────────────────────────────────────── */

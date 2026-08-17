@@ -3,60 +3,58 @@ import { Link } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Calendar04Icon,
-  GoogleDocIcon,
   TaskDone02Icon,
   ThumbsUpIcon,
   ThumbsDownIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
   ArrowUp02Icon,
   Tick02Icon,
 } from '@hugeicons/core-free-icons'
 import { CASES, type CaseSummary } from './case-data'
 import { PkCaseBook } from '@/components/compounds/CaseBook'
-import { PdfPageCanvas } from '@/components/compounds/PageStack'
 import {
-  InlineCitation,
-  InlineCitationCard,
-  InlineCitationCardBody,
-  InlineCitationCardTrigger,
-  InlineCitationCarousel,
-  InlineCitationCarouselContent,
-  InlineCitationCarouselHeader,
-  InlineCitationCarouselIndex,
-  InlineCitationCarouselItem,
-  InlineCitationCarouselNext,
-  InlineCitationCarouselPrev,
-  InlineCitationQuote,
-  InlineCitationSource,
-  InlineCitationText,
-} from '@/components/ai-elements/inline-citation'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+  Citation,
+  Citations,
+  type CitationItem,
+} from '@/components/ai-elements/citations'
 import { InputCopy } from '@/components/ui/input-copy'
 import { PkButton } from '@/components/primitives/Button'
 import './case-list-page.css'
 
 const SOURCE_PDF_URL = CASES[0].documentUrl
-const SOURCE_THUMB_WIDTH = 20
-const CITATION_THUMB_WIDTH = 40
+const CITATION_PREFIX = 'case-sources'
 
-const CITATION_SOURCES = [
+const CITATION_ITEMS: CitationItem[] = [
   {
+    id: 'holding-win',
     title: 'Domsdatabasen_13870.pdf',
-    description: 'page 2 · §3',
+    domain: 'page 2 · §3',
     url: SOURCE_PDF_URL,
     pageNumber: 2,
     quote:
       'Appellant 3 is entitled to compensation of DKK 282,338.09 under funktionærloven.',
   },
   {
+    id: 'holding-lose',
     title: 'Domsdatabasen_13870.pdf',
-    description: 'page 2 · §3',
+    domain: 'page 2 · §3',
     url: SOURCE_PDF_URL,
     pageNumber: 2,
     quote: 'The claims of appellants 1 and 2 under vikarloven are dismissed.',
   },
-] as const
+]
+
+function citationMarker(id: string, index: number, text?: ReactNode) {
+  const source = CITATION_ITEMS.find((item) => item.id === id)
+  return (
+    <Citation
+      citationId={id}
+      index={index}
+      idPrefix={CITATION_PREFIX}
+      source={source}
+      text={text}
+    />
+  )
+}
 
 // ── Icon wrappers (12px, stroke 1.5px absolute) ───────────────────────
 
@@ -65,10 +63,6 @@ const ICON_STROKE = 1
 
 const ICalendar: FC = () => (
   <HugeiconsIcon icon={Calendar04Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
-)
-
-const IDoc: FC = () => (
-  <HugeiconsIcon icon={GoogleDocIcon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const ITaskDone: FC = () => (
@@ -83,38 +77,12 @@ const IThumbsDown: FC = () => (
   <HugeiconsIcon icon={ThumbsDownIcon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
-const IChevronUp: FC = () => (
-  <HugeiconsIcon icon={ChevronUpIcon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
-)
-
-const IChevronDown: FC = () => (
-  <HugeiconsIcon icon={ChevronDownIcon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
-)
-
 const IArrowUp: FC = () => (
   <HugeiconsIcon icon={ArrowUp02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const ICheck: FC = () => (
   <HugeiconsIcon icon={Tick02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
-)
-
-const IPdf: FC = () => (
-  <svg
-    className="co-icon"
-    width={ICON_SIZE}
-    height={ICON_SIZE}
-    fill="none"
-    viewBox="0 0 40 40"
-    aria-hidden="true"
-  >
-    <path fill="#D92D20" d="M4 4a4 4 0 0 1 4-4h16l12 12v24a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" />
-    <path fill="#fff" d="m24 0 12 12h-8a4 4 0 0 1-4-4z" opacity={0.3} />
-    <path
-      fill="#fff"
-      d="M11.75 32v-6.546h2.582q.744 0 1.268.285.524.281.8.783.277.498.277 1.15 0 .653-.28 1.151a1.94 1.94 0 0 1-.816.777q-.53.278-1.285.278H12.65v-1.11h1.423q.399 0 .658-.137a.9.9 0 0 0 .39-.386q.13-.25.13-.572 0-.326-.13-.57a.88.88 0 0 0-.39-.38q-.262-.137-.665-.137h-.933V32zm8.147 0h-2.32v-6.546h2.339q.987 0 1.7.394.712.39 1.096 1.122.387.731.387 1.75 0 1.024-.387 1.759-.384.735-1.102 1.128-.717.393-1.713.393m-.937-1.186h.879q.614 0 1.032-.217.422-.22.633-.68.214-.464.214-1.196 0-.726-.214-1.186a1.4 1.4 0 0 0-.63-.677q-.418-.218-1.032-.218h-.882zM24.124 32v-6.546h4.334v1.142h-2.95v1.56h2.662v1.14h-2.662V32z"
-    />
-  </svg>
 )
 
 // ── Shared atoms ──────────────────────────────────────────────────────
@@ -136,117 +104,8 @@ function Chip({
   )
 }
 
-function CitationCard({ label }: { label: string }) {
-  return (
-    <InlineCitationCard>
-      <InlineCitationCardTrigger aria-label={`Citation: ${label}`}>
-        <IPdf />
-        {label}
-      </InlineCitationCardTrigger>
-      <InlineCitationCardBody>
-        <InlineCitationCarousel>
-          <InlineCitationCarouselHeader>
-            <InlineCitationCarouselPrev />
-            <InlineCitationCarouselNext />
-            <InlineCitationCarouselIndex />
-          </InlineCitationCarouselHeader>
-          <InlineCitationCarouselContent>
-            {CITATION_SOURCES.map((source, index) => (
-              <InlineCitationCarouselItem key={`${source.title}-${index}`}>
-                <InlineCitationSource
-                  title={source.title}
-                  description={source.description}
-                  thumbnail={
-                    source.url ? (
-                      <PdfPageCanvas
-                        url={source.url}
-                        pageNumber={source.pageNumber}
-                        targetWidth={CITATION_THUMB_WIDTH}
-                      />
-                    ) : null
-                  }
-                />
-                <InlineCitationQuote>{source.quote}</InlineCitationQuote>
-              </InlineCitationCarouselItem>
-            ))}
-          </InlineCitationCarouselContent>
-        </InlineCitationCarousel>
-      </InlineCitationCardBody>
-    </InlineCitationCard>
-  )
-}
-
-/** Inline citation — optional cited text highlights when the badge is hovered */
-function CitationBadge({ children, text }: { children: string; text?: ReactNode }) {
-  return (
-    <InlineCitation>
-      {text != null && (
-        <>
-          <InlineCitationText>{text}</InlineCitationText>{' '}
-        </>
-      )}
-      <CitationCard label={children} />
-    </InlineCitation>
-  )
-}
-
 function Divider() {
   return <hr className="co-divider" />
-}
-
-// ── Sources (expandable) ──────────────────────────────────────────────
-
-function SourceRow({
-  label,
-  url,
-  pageNumber,
-}: {
-  label: string
-  url?: string
-  pageNumber?: number
-}) {
-  return (
-    <div className="co-source-row">
-      <div className="co-source-thumb" aria-hidden="true">
-        {url && (
-          <PdfPageCanvas url={url} pageNumber={pageNumber} targetWidth={SOURCE_THUMB_WIDTH} />
-        )}
-      </div>
-      <div className="co-source-text">
-        <span>{label}</span>
-        <span className="co-source-rule" aria-hidden="true" />
-      </div>
-    </div>
-  )
-}
-
-function Sources() {
-  return (
-    <Collapsible defaultOpen className="co-sources">
-      <CollapsibleTrigger className="co-sources-toggle">
-        <IDoc />
-        <span>2 sources</span>
-        <span className="co-sources-chevron co-sources-chevron--up">
-          <IChevronUp />
-        </span>
-        <span className="co-sources-chevron co-sources-chevron--down">
-          <IChevronDown />
-        </span>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="co-sources-panel">
-          {CITATION_SOURCES.map((source, index) => (
-            <SourceRow
-              key={`${source.title}-${index}`}
-              label={`${source.title} · ${source.description}`}
-              url={source.url}
-              pageNumber={source.pageNumber}
-            />
-          ))}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
-  )
 }
 
 // ── HoldingCard ───────────────────────────────────────────────────────
@@ -263,7 +122,7 @@ function HoldingCard({
   verdict: string
   /** Second line — subtitle in content-secondary */
   detail: string
-  citation: string
+  citation?: ReactNode
   variant: 'win' | 'lose'
 }) {
   return (
@@ -271,9 +130,7 @@ function HoldingCard({
       <div className={`co-holding-avatar co-holding-avatar--${variant}`}>{icon}</div>
       <div className="co-holding-body">
         <p className="co-holding-verdict">{verdict}</p>
-        <p className="co-holding-detail">
-          <CitationBadge text={detail}>{citation}</CitationBadge>
-        </p>
+        <p className="co-holding-detail">{citation ?? detail}</p>
       </div>
     </div>
   )
@@ -284,14 +141,17 @@ function HoldingCard({
 const PLACEHOLDER =
   'Short summary below the title so the title above could be shorter. Think of it as a full official title of this entity. While the title above is short, quick entity identifier.'
 
-function SectionHeader({ title, citation }: { title: string; citation?: string }) {
+const HOLDING_WIN =
+  'A long-term posting to Boeing brought the worker within funktionærloven. The court awarded DKK 282,338.09 in salary and holiday pay, treating the assignment as ordinary salaried employment rather than a temporary agency placement.'
+
+const HOLDING_LOSE =
+  'The joined vikarloven claims were dismissed. The court found no basis for agency-work compensation once the relationship was classified as salaried employment, and the remaining appellants were left without a separate remedy.'
+
+function SectionHeader({ title, citation }: { title: string; citation?: ReactNode }) {
   return (
     <div className="co-section-header">
       <h2 className="co-section-title">{title}</h2>
-      {/* Citation badge is an inline span inside the <p> — "as a span" */}
-      <p className="co-section-desc">
-        {citation ? <CitationBadge text={PLACEHOLDER}>{citation}</CitationBadge> : PLACEHOLDER}
-      </p>
+      <p className="co-section-desc">{citation ?? PLACEHOLDER}</p>
     </div>
   )
 }
@@ -420,21 +280,28 @@ export function CaseListPage() {
 
         {/* ── Case holding ──────────────────────────────── */}
         <section className="co-section" aria-label="Case holding">
-          <SectionHeader title="Case holding" citation="Page 2 · §3" />
-          <Sources />
+          <SectionHeader
+            title="Case holding"
+            citation={citationMarker('holding-win', 1, PLACEHOLDER)}
+          />
+          <Citations
+            citations={CITATION_ITEMS}
+            idPrefix={CITATION_PREFIX}
+            defaultOpen
+          />
           <div className="co-holding-grid">
             <HoldingCard
               icon={<IThumbsUp />}
               verdict="Appellant 3 won."
-              detail="A long-term posting to Boeing brought the worker within funktionærloven. The court awarded DKK 282,338.09 in salary and holiday pay, treating the assignment as ordinary salaried employment rather than a temporary agency placement."
-              citation="Page 2 · §3"
+              detail={HOLDING_WIN}
+              citation={citationMarker('holding-win', 1, HOLDING_WIN)}
               variant="win"
             />
             <HoldingCard
               icon={<IThumbsDown />}
               verdict="Appellant 1 and 2 lost."
-              detail="The joined vikarloven claims were dismissed. The court found no basis for agency-work compensation once the relationship was classified as salaried employment, and the remaining appellants were left without a separate remedy."
-              citation="Page 2 · §3"
+              detail={HOLDING_LOSE}
+              citation={citationMarker('holding-lose', 2, HOLDING_LOSE)}
               variant="lose"
             />
           </div>
@@ -444,7 +311,10 @@ export function CaseListPage() {
 
         {/* ── Procedural history ────────────────────────── */}
         <section className="co-section" aria-label="Procedural history">
-          <SectionHeader title="Procedural history" citation="Page 2 · §3" />
+          <SectionHeader
+            title="Procedural history"
+            citation={citationMarker('holding-win', 1, PLACEHOLDER)}
+          />
           <div className="co-timeline" role="list">
             {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (
               <TimelineItem
