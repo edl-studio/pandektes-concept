@@ -15,7 +15,7 @@
     text-decoration: none;
     border: none;
     outline: none;
-    border-radius: var(--pk-radius-md);
+    border-radius: 999px;
     background-color: var(--_bg);
     color: var(--_color);
     font-family: var(--pk-font-family-base);

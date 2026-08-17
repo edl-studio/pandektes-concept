@@ -4,6 +4,17 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl
 
+const pdfCache = new Map<string, ReturnType<typeof pdfjsLib.getDocument>['promise']>()
+
+function getPdf(url: string) {
+  let loading = pdfCache.get(url)
+  if (!loading) {
+    loading = pdfjsLib.getDocument({ url }).promise
+    pdfCache.set(url, loading)
+  }
+  return loading
+}
+
 export interface PdfPageCanvasProps {
   url: string
   pageNumber?: number
@@ -18,7 +29,7 @@ export function PdfPageCanvas({ url, pageNumber = 1, targetWidth }: PdfPageCanva
     let cancelled = false
 
     async function render() {
-      const pdf = await pdfjsLib.getDocument({ url }).promise
+      const pdf = await getPdf(url)
       const page = await pdf.getPage(pageNumber)
       const dpr = window.devicePixelRatio || 1
       const baseViewport = page.getViewport({ scale: 1 })

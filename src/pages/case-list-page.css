@@ -1,0 +1,552 @@
+/*
+ * Case overview home — page-level styles.
+ * Intentionally unlayered so these win over @layer pk component defaults
+ * when the .co-doc-thumb-book selector needs to override pk-case-book__root.
+ */
+
+/* ── Page shell ──────────────────────────────────────────────────────── */
+
+.co-page {
+  min-height: 100vh;
+  background-color: var(--pk-color-surface-body);
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--pk-d6);
+}
+
+.co-content {
+  width: 100%;
+  max-width: 640px;
+  padding: 96px 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d8);
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────── */
+
+.co-divider {
+  border: none;
+  border-top: 1px solid rgb(0 0 0 / 0.1);
+  margin: 0;
+}
+
+/* ── Meta row ────────────────────────────────────────────────────────── */
+
+.co-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ── Chip (inline label + icon) ──────────────────────────────────────── */
+
+.co-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-12);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 1;
+  color: var(--pk-color-content-secondary);
+}
+
+.co-chip--muted {
+  color: var(--pk-color-content-tertiary);
+}
+
+.co-icon {
+  flex-shrink: 0;
+}
+
+/* ── Citation badge — inline span inside a paragraph ────────────────── */
+
+.co-citation {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: var(--pk-d0-5) var(--pk-d2) var(--pk-d0-5) var(--pk-d1-5);
+  border-radius: 6px;
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-12);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 18px;
+  vertical-align: middle;
+  color: var(--pk-color-content-tertiary);
+  background-color: var(--pk-color-surface-raised);
+  width: auto;
+  align-self: flex-start;
+}
+
+.co-citation::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Case header ─────────────────────────────────────────────────────── */
+
+.co-case-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d6);
+}
+
+.co-case-titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d4);
+}
+
+.co-case-title {
+  font-family: var(--pk-font-family-heading);
+  font-size: var(--pk-font-size-24);
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--pk-color-content-primary);
+}
+
+.co-case-desc {
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-14);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 1.5;
+  color: var(--pk-color-content-secondary);
+}
+
+/* ── Section ─────────────────────────────────────────────────────────── */
+
+.co-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d6);
+}
+
+.co-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d4);
+}
+
+.co-section-title {
+  font-family: var(--pk-font-family-heading);
+  font-size: var(--pk-font-size-20);
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: var(--pk-color-content-primary);
+}
+
+/* Description paragraph — badge sits inline via .co-citation span */
+.co-section-desc {
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-14);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 1.5;
+  color: var(--pk-color-content-secondary);
+}
+
+/* ── Sources ─────────────────────────────────────────────────────────── */
+
+.co-sources {
+  display: flex;
+  flex-direction: column;
+}
+
+.co-sources-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pk-d0-5);
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-12);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 1;
+  color: var(--pk-color-content-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.co-sources-toggle:hover {
+  color: var(--pk-color-accent-base);
+}
+
+.co-sources-chevron--up {
+  display: none;
+}
+
+.co-sources-toggle[data-panel-open] .co-sources-chevron--up {
+  display: inline-flex;
+}
+
+.co-sources-toggle[data-panel-open] .co-sources-chevron--down {
+  display: none;
+}
+
+.co-sources-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d3);
+  padding-top: var(--pk-d3);
+}
+
+.co-source-row {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-d1-5);
+  height: 26px;
+  cursor: pointer;
+}
+
+.co-source-thumb {
+  position: relative;
+  width: 20px;
+  height: 25px;
+  border-radius: 4px;
+  background-color: rgb(0 0 0 / 0.08);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.co-source-thumb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.co-source-text {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--pk-d1);
+  gap: 4px;
+}
+
+.co-source-text > span:not(.co-source-rule) {
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-14);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 1;
+  color: var(--pk-color-content-secondary);
+  transition: color 0.15s ease;
+}
+
+.co-source-rule {
+  display: block;
+  height: 2px;
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgb(0 0 0 / 0.18) 1px, transparent 1.2px);
+  background-size: 6px 2px;
+  background-repeat: repeat-x;
+  background-position: left center;
+}
+
+.co-source-row:hover .co-source-text > span:not(.co-source-rule) {
+  color: var(--pk-color-accent-base);
+}
+
+.co-source-row:hover .co-source-rule {
+  background-image: radial-gradient(circle, rgb(var(--pk-color-core-accent) / 0.5) 1px, transparent 1.2px);
+}
+
+/* ── Holding cards ───────────────────────────────────────────────────── */
+
+.co-holding-grid {
+  display: flex;
+  gap: var(--pk-d2);
+}
+
+.co-holding-card {
+  flex: 1;
+  border-radius: 12px;
+  background-color: var(--pk-color-surface-raised);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d6);
+  padding: var(--pk-d4);
+  border: 1px solid rgb(0 0 0 / 0.08);
+  border-bottom-width: 2px;
+}
+
+.co-holding-avatar {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: var(--pk-color-surface-raised);
+  color: var(--pk-color-content-secondary);
+}
+
+.co-holding-avatar--win {
+  background-color: var(--pk-color-accent-base);
+  color: var(--pk-color-static-white);
+}
+
+.co-holding-avatar--lose {
+  background-color: var(--pk-color-surface-raised);
+  color: var(--pk-color-content-secondary);
+}
+
+.co-holding-avatar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.co-holding-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d1);
+  flex: 1;
+}
+
+/* Verdict line — accent colour */
+.co-holding-verdict {
+  font-family: var(--pk-font-family-heading);
+  font-size: var(--pk-font-size-18);
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 1.25;
+  color: var(--pk-color-accent);
+}
+
+/* Detail / subtitle — content-secondary */
+.co-holding-detail {
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-14);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 1.4;
+  color: var(--pk-color-content-secondary);
+}
+
+/* ── Timeline ────────────────────────────────────────────────────────── */
+
+.co-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d2);
+}
+
+.co-timeline-item {
+  display: flex;
+  align-items: stretch;
+  gap: var(--pk-d3);
+}
+
+.co-timeline-rail {
+  width: 32px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pk-d2);
+}
+
+.co-timeline-dot {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--pk-color-surface-raised);
+  color: var(--pk-color-content-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.co-timeline-dot--accent {
+  background-color: var(--pk-color-accent-base);
+  color: var(--pk-color-static-white);
+}
+
+.co-timeline-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.co-timeline-connector {
+  flex: 1;
+  width: 2px;
+  min-height: var(--pk-d8);
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgb(0 0 0 / 0.18) 1px, transparent 1.2px);
+  background-size: 2px 6px;
+  background-repeat: repeat-y;
+  background-position: center top;
+}
+
+.co-timeline-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d4);
+  padding-bottom: var(--pk-d6);
+}
+
+.co-timeline-item:last-child .co-timeline-body {
+  padding-bottom: 0;
+}
+
+.co-timeline-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d2);
+  padding-top: 2px; /* optically align with dot centre */
+}
+
+.co-timeline-label {
+  font-family: var(--pk-font-family-heading);
+  font-size: var(--pk-font-size-16);
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 1.3;
+  letter-spacing: -0.04em;
+  color: var(--pk-color-content-primary);
+}
+
+/* ── Document card ───────────────────────────────────────────────────── */
+
+.co-doc-card {
+  display: flex;
+  border-radius: 12px;
+  background-color: var(--pk-color-surface-raised);
+  overflow: hidden;
+  position: relative;
+  min-height: 91px;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  border-bottom-width: 2px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.co-doc-card:hover {
+  background-color: var(--pk-color-surface-body);
+}
+
+.co-doc-thumb {
+  position: relative;
+  width: 127px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Scale the case book down 0.5× to create the thumbnail.
+   transform doesn't affect layout, so we absolute-position the book
+   and let overflow: hidden on the parent provide the clip. */
+.co-doc-thumb-book {
+  position: absolute;
+  top: 12px;
+  left: 20px;
+  transform: scale(0.5);
+  transform-origin: top left;
+  pointer-events: none;
+  transition: transform 0.25s ease;
+}
+
+.co-doc-card:hover .co-doc-thumb-book {
+  transform: scale(0.525) rotate(var(--co-book-tilt, 0deg));
+}
+
+.co-doc-info {
+  flex: 1;
+  padding: var(--pk-d3) var(--pk-d5);
+  display: flex;
+  align-items: center;
+  gap: var(--pk-d4);
+  min-width: 0;
+}
+
+.co-doc-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--pk-d2);
+  min-width: 0;
+  flex: 1;
+}
+
+.co-doc-name {
+  font-family: var(--pk-font-family-heading);
+  font-size: var(--pk-font-size-16);
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: var(--pk-color-content-primary);
+}
+
+/* ── Responsive: narrow screens ──────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  .co-page {
+    padding: 0 var(--pk-d4);
+  }
+
+  .co-content {
+    max-width: 100%;
+    padding: 48px 0;
+  }
+
+  .co-holding-grid {
+    flex-direction: column;
+  }
+
+  .co-holding-card {
+    flex: unset;
+  }
+
+  .co-meta-row {
+    flex-wrap: wrap;
+    gap: var(--pk-d3);
+  }
+
+  .co-doc-thumb {
+    width: 100px;
+  }
+
+  .co-doc-info {
+    padding: var(--pk-d3);
+  }
+}
