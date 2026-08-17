@@ -22,8 +22,8 @@
 .co-page--exiting {
   opacity: 0;
   pointer-events: none;
-  /* Hold the card through the sheaf extract (BookOpenTransition LIFT_MS). */
-  transition: opacity 0.35s ease 0.28s;
+  /* Hold the card through the book sink (0.4s). */
+  transition: opacity 0.35s ease 0.4s;
 }
 
 .co-appbar {
@@ -412,26 +412,42 @@
 
 /* Scale the case book down 0.5× to create the thumbnail.
    transform doesn't affect layout, so we absolute-position the book
-   and let overflow: hidden on the parent provide the clip. */
+   and let overflow: hidden on the parent provide the clip.
+   --co-press is the click-to-hold squash (1 at rest, ~0.91 while held). */
+@property --co-press {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
 .co-doc-thumb-book {
+  --co-press: 1;
   position: absolute;
   top: 12px;
   left: 20px;
-  transform: scale(0.5);
+  transform: scale(calc(0.5 * var(--co-press)));
   transform-origin: top left;
   pointer-events: none;
   transition: transform 0.25s ease;
 }
 
-.co-doc-card:hover .co-doc-thumb-book {
-  transform: scale(0.525) rotate(var(--co-book-tilt, 0deg));
+.co-doc-thumb-book--holding {
+  transition: none;
 }
 
-/* Instantly drop the tile book once the overlay has taken over, so the
-   page fade cannot crossfade two copies. */
-.co-doc-thumb-book--lifted {
-  visibility: hidden;
-  transition: none;
+.co-doc-card:hover .co-doc-thumb-book {
+  transform: scale(calc(0.525 * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
+}
+
+/* Slide the real book down through the thumb clip so the tile goes empty
+   as the overlay sheaf leaves. translateY is in screen px (before scale). */
+.co-doc-thumb-book--sinking {
+  transform: translateY(160px) scale(calc(0.5 * var(--co-press)));
+  transition: transform 0.4s ease-in;
+}
+
+.co-doc-card:hover .co-doc-thumb-book--sinking {
+  transform: translateY(160px) scale(calc(0.525 * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
 }
 
 .co-doc-info {

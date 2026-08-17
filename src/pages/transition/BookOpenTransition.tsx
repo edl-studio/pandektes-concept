@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { animate, motion, useMotionValue } from 'framer-motion'
-import { PkCaseBook } from '@/components/compounds/CaseBook'
 import { PageStack } from '@/components/compounds/PageStack'
 import type { CaseSummary } from '../case-data'
 import {
@@ -18,7 +17,7 @@ export interface OriginRect {
   y: number
   width: number
   height: number
-  /** Hover tilt of the tile book, in degrees. Kept on the covers; eased to 0 on the sheets. */
+  /** Hover tilt of the tile book, in degrees. Eased to 0 on the sheets. */
   rotation?: number
   /** Whether the tile book was in its hover-open state (cover ajar, pages spread). */
   open?: boolean
@@ -28,9 +27,8 @@ export interface OriginRect {
   tile?: { left: number; top: number; right: number; bottom: number }
 }
 
-const LIFT_MS = 280
+export const LIFT_MS = 280
 const FLY_MS = 1050
-const COVER_FADE_MS = 300
 const REORGANIZE_MS = 500
 const SCALE_MS = 450 // must match page-stack.css's sheet width/height transition duration (0.45s) — see note below
 const SETTLE_MS = 400
@@ -38,11 +36,6 @@ const SETTLE_MS = 400
 const APEX_TOP = 48
 
 type Phase = 'lifting' | 'sliding' | 'reorganizing' | 'scaling' | 'settling'
-
-function tileInset(tile: NonNullable<OriginRect['tile']>, openTop: boolean) {
-  const top = openTop ? 0 : tile.top
-  return `inset(${top}px ${window.innerWidth - tile.right}px ${window.innerHeight - tile.bottom}px ${tile.left}px)`
-}
 
 /** Quadratic Bézier. `p1` is the control point — the curve only aims at it. */
 function quadBezier(t: number, p0: number, p1: number, p2: number) {
@@ -73,8 +66,6 @@ export function BookOpenTransition({
   onComplete: () => void
 }) {
   const [phase, setPhase] = useState<Phase>('lifting')
-  const [coverExtracting, setCoverExtracting] = useState(false)
-  const Logo = caseSummary.Logo
 
   const stackHandoffY = window.innerHeight / 2 - BOOK_HEIGHT / 2
   const stackRestY = DETAIL_TOP
@@ -107,11 +98,6 @@ export function BookOpenTransition({
   const rotateMv = useMotionValue(startRotation)
 
   useEffect(() => {
-    let innerRaf = 0
-    const raf = requestAnimationFrame(() => {
-      innerRaf = requestAnimationFrame(() => setCoverExtracting(true))
-    })
-
     const p0x = startLeft
     const p0y = originRect.y
     const p2x = stackLeftSmall
@@ -151,8 +137,6 @@ export function BookOpenTransition({
       setTimeout(onComplete, t4),
     ]
     return () => {
-      cancelAnimationFrame(raf)
-      cancelAnimationFrame(innerRaf)
       stops.forEach((playback) => playback.stop())
       timers.forEach(clearTimeout)
     }
@@ -160,42 +144,17 @@ export function BookOpenTransition({
   }, [])
 
   const isLifting = phase === 'lifting'
-  const showCovers = isLifting || phase === 'sliding'
   const isReorganized = phase === 'reorganizing' || phase === 'scaling' || phase === 'settling'
   const isScaled = phase === 'scaling' || phase === 'settling'
 
-  const tile = originRect.tile
-  const sheetClip = isLifting && tile ? tileInset(tile, true) : undefined
-  const coverClip = tile ? tileInset(tile, false) : undefined
-
-  const coverStyle = {
-    width: BOOK_WIDTH,
-    height: BOOK_HEIGHT,
-    transformOrigin: 'top left',
-    left: originRect.x,
-    top: originRect.y,
-    transform: `scale(${startScale}) rotate(${startRotation}deg)`,
-    opacity: isLifting ? 1 : 0,
-    transition: `opacity ${COVER_FADE_MS}ms ease-out`,
-  } as const
+  // Only pixels above the book are visible, so the sheaf cannot paint on
+  // the front cover. Frame 0 sits on this edge and is fully clipped.
+  const sheetClip = isLifting
+    ? `inset(0 0 ${window.innerHeight - originRect.y}px 0)`
+    : undefined
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Back board stays in the tile, under the lifting sheaf. */}
-      {showCovers && (
-        <div className="fixed inset-0 z-[1]" style={coverClip ? { clipPath: coverClip } : undefined}>
-          <div className="fixed" style={coverStyle}>
-            <PkCaseBook
-              caseNumber={caseSummary.caseNumber}
-              title={caseSummary.title}
-              hidePages
-              hideFrontCover
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Sheets follow an inverted-U: up, across a high apex, down into center. */}
       <div
         className="fixed inset-0 z-[2]"
         style={sheetClip ? { clipPath: sheetClip } : undefined}
@@ -218,22 +177,6 @@ export function BookOpenTransition({
           />
         </motion.div>
       </div>
-
-      {/* Front board stays in the tile, opens further, then eases shut as it fades. */}
-      {showCovers && (
-        <div className="fixed inset-0 z-[3]" style={coverClip ? { clipPath: coverClip } : undefined}>
-          <div className="fixed" style={coverStyle}>
-            <PkCaseBook
-              logo={Logo ? <Logo /> : undefined}
-              hidePages
-              hideBackCover
-              open={wasOpen || coverExtracting}
-              extracting={coverExtracting && isLifting}
-              coverClosing={!isLifting}
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -1,4 +1,5 @@
-import { useRef, useState, type CSSProperties, type FC, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
+import { animate } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -203,10 +204,78 @@ function TimelineItem({
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
   const [bookOpen, setBookOpen] = useState(false)
+  const [holding, setHolding] = useState(false)
+  const [sinking, setSinking] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!lifted) {
+      setSinking(false)
+      return
+    }
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setSinking(true))
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [lifted])
+  const press = useRef({
+    down: false,
+    value: 1,
+    shouldOpen: false,
+    playback: null as { stop: () => void } | null,
+  })
   const Logo = caseSummary.Logo
   const filename = docFilename(caseSummary)
   const caseNumberDisplay = caseSummary.caseNumber.replace('/', ' · ')
+
+  function setPress(value: number) {
+    press.current.value = value
+    bookRef.current?.style.setProperty('--co-press', String(value))
+  }
+
+  function stopPress() {
+    press.current.playback?.stop()
+    press.current.playback = null
+  }
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return
+    event.currentTarget.setPointerCapture(event.pointerId)
+    press.current.down = true
+    press.current.shouldOpen = false
+    setHolding(true)
+    stopPress()
+    press.current.playback = animate(press.current.value, 0.91, {
+      duration: 0.35,
+      ease: 'easeOut',
+      onUpdate: setPress,
+    })
+  }
+
+  function handlePointerUp() {
+    if (!press.current.down) return
+    press.current.down = false
+    press.current.shouldOpen = false
+    stopPress()
+    setHolding(false)
+    handleOpen()
+  }
+
+  async function handlePointerCancel() {
+    if (!press.current.down && !press.current.shouldOpen) return
+    press.current.down = false
+    press.current.shouldOpen = false
+    stopPress()
+    const spring = animate(press.current.value, 1, {
+      type: 'spring',
+      stiffness: 420,
+      damping: 16,
+      onUpdate: setPress,
+    })
+    press.current.playback = spring
+    await spring
+    setHolding(false)
+  }
 
   function handleOpen() {
     const book = bookRef.current
@@ -271,7 +340,9 @@ function TimelineItem({
           style={{ '--co-book-tilt': `${bookTilt}deg` } as CSSProperties}
           onMouseEnter={() => setBookOpen(true)}
           onMouseLeave={() => setBookOpen(false)}
-          onClick={handleOpen}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
         >
           <div className="co-doc-thumb" aria-hidden="true">
             <PkCaseBook
@@ -281,7 +352,9 @@ function TimelineItem({
               pageCount={caseSummary.pageCount}
               logo={Logo ? <Logo /> : undefined}
               open={bookOpen}
-              className={`co-doc-thumb-book${lifted ? ' co-doc-thumb-book--lifted' : ''}`}
+              hidePages={sinking}
+              extracting={sinking}
+              className={`co-doc-thumb-book${holding ? ' co-doc-thumb-book--holding' : ''}${sinking ? ' co-doc-thumb-book--sinking' : ''}`}
             />
           </div>
           <div className="co-doc-info">
@@ -295,6 +368,7 @@ function TimelineItem({
               variant="outline"
               size="sm"
               type="button"
+              onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => {
                 event.stopPropagation()
                 handleOpen()
