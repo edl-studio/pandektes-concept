@@ -1,0 +1,27 @@
+.pk-shared-layout-bg {
+  width: 100%;
+}
+
+.pk-shared-layout-bg-item {
+  position: relative;
+}
+
+.pk-shared-layout-bg-pill-wrap {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.pk-shared-layout-bg-pill {
+  pointer-events: none;
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  background-color: var(--pk-color-accent-weak);
+}
+
+.pk-shared-layout-bg-content {
+  position: relative;
+  z-index: 1;
+}

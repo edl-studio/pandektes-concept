@@ -4,13 +4,14 @@ import {
   BookOpen02Icon,
   ChevronDownIcon,
 } from '@hugeicons/core-free-icons'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
   type ReactNode,
   useId,
 } from 'react'
 import { PdfPageCanvas } from '@/components/compounds/PageStack'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/motion/popover'
+import { SharedLayoutBg } from '@/components/motion/shared-layout-bg'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import './citations.css'
@@ -230,34 +231,31 @@ export function CitationList({
   const resolvedPrefix = idPrefix ?? `citation-list-${baseId.replace(/:/g, '')}`
 
   return (
-    <div className={cn('pk-citation-list', className)}>
-      <AnimatePresence mode="popLayout">
-        {citations.map((citation, index) => (
-          <motion.div
-            layout="position"
-            key={citation.id}
-            initial={reduce ? { opacity: 1 } : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -3 }}
-            transition={
-              reduce
-                ? { duration: 0 }
-                : {
-                    opacity: { duration: 0.18, ease: EASE_OUT },
-                    y: SPRING_LAYOUT,
-                    layout: SPRING_LAYOUT,
-                  }
-            }
-          >
-            <CitationRow
-              citation={citation}
-              index={index + 1}
-              idPrefix={resolvedPrefix}
-            />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
+    <SharedLayoutBg className={cn('pk-citation-list', className)} inset={4}>
+      {citations.map((citation, index) => (
+        <motion.div
+          layout="position"
+          key={citation.id}
+          initial={reduce ? { opacity: 1 } : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            reduce
+              ? { duration: 0 }
+              : {
+                  opacity: { duration: 0.18, ease: EASE_OUT },
+                  y: SPRING_LAYOUT,
+                  layout: SPRING_LAYOUT,
+                }
+          }
+        >
+          <CitationRow
+            citation={citation}
+            index={index + 1}
+            idPrefix={resolvedPrefix}
+          />
+        </motion.div>
+      ))}
+    </SharedLayoutBg>
   )
 }
 
@@ -301,7 +299,7 @@ export function Citations({
           />
         </span>
       </CollapsibleTrigger>
-      <CollapsibleContent id={contentId}>
+      <CollapsibleContent id={contentId} className="pk-citations-panel-wrap">
         <CitationList
           citations={citations}
           idPrefix={resolvedPrefix}

@@ -204,7 +204,6 @@
 
 .co-holding-grid {
   display: flex;
-  flex-direction: column;
   gap: var(--pk-d2);
 }
 

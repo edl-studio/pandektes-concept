@@ -206,6 +206,13 @@
   transform: rotate(180deg);
 }
 
+.pk-citations-panel-wrap[data-open],
+.pk-citations-panel-wrap[data-panel-open],
+.pk-citations[data-open] .pk-citations-panel-wrap,
+.pk-citations[data-panel-open] .pk-citations-panel-wrap {
+  overflow: visible;
+}
+
 .pk-citations-panel {
   padding-top: var(--pk-d3);
 }
