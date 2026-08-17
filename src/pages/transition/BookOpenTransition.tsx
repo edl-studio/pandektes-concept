@@ -14,6 +14,8 @@ export interface OriginRect {
   rotation?: number
   /** Tile overflow, in unscaled book pixels. `bottom` drives how far the lift rises. */
   clip?: { top: number; right: number; bottom: number; left: number }
+  /** Viewport box of the tile clip. Stays put while the book lifts through it. */
+  tile?: { left: number; top: number; right: number; bottom: number }
 }
 
 const LIFT_MS = 280
@@ -92,10 +94,18 @@ export function BookOpenTransition({
   // Rise by the part the tile used to hide, plus a little air, so the full
   // book clears the card before it scales and flies.
   const liftY = originRect.y - ((originRect.clip?.bottom ?? 0) * startScale + LIFT_AIR_PX)
+  // Viewport-fixed slot: open at the top so the book can leave upward, closed
+  // on the other three sides so frame 0 still matches the cropped tile.
+  const tile = originRect.tile
+  const slotClip =
+    isLifting && tile
+      ? `inset(0 ${window.innerWidth - tile.right}px ${window.innerHeight - tile.bottom}px ${tile.left}px)`
+      : undefined
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
       {showBook && (
+        <div className="fixed inset-0" style={slotClip ? { clipPath: slotClip } : undefined}>
         <motion.div
           className="fixed"
           style={{ width: BOOK_WIDTH, height: BOOK_HEIGHT, transformOrigin: 'top left' }}
@@ -125,6 +135,7 @@ export function BookOpenTransition({
             coverExiting={phase === 'cover-exiting'}
           />
         </motion.div>
+        </div>
       )}
 
       {!showBook && (

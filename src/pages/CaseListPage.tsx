@@ -234,6 +234,12 @@ function TimelineItem({
         bottom: Math.max(0, (originY + BOOK_HEIGHT * startScale - thumbRect.bottom) / startScale),
         left: Math.max(0, (thumbRect.left - originX) / startScale),
       },
+      tile: {
+        left: thumbRect.left,
+        top: thumbRect.top,
+        right: thumbRect.right,
+        bottom: thumbRect.bottom,
+      },
     })
   }
 
