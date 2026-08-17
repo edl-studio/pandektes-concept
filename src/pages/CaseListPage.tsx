@@ -1,5 +1,5 @@
-import { useState, type CSSProperties, type FC, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { useRef, useState, type CSSProperties, type FC, type ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Calendar04Icon,
@@ -18,6 +18,7 @@ import {
 } from '@/components/ai-elements/citations'
 import { InputCopy } from '@/components/ui/input-copy'
 import { PkButton } from '@/components/primitives/Button'
+import { BookOpenTransition, type OriginRect } from './transition/BookOpenTransition'
 import './case-list-page.css'
 
 const SOURCE_PDF_URL = CASES[0].documentUrl
@@ -188,6 +189,7 @@ function TimelineItem({
   isFirst,
   isLast,
   bookTilt,
+  onOpen,
 }: {
   instanceLabel: string
   date: string
@@ -195,11 +197,24 @@ function TimelineItem({
   isFirst: boolean
   isLast: boolean
   bookTilt: number
+  onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
   const [bookOpen, setBookOpen] = useState(false)
+  const bookRef = useRef<HTMLDivElement>(null)
   const Logo = caseSummary.Logo
   const filename = docFilename(caseSummary)
   const caseNumberDisplay = caseSummary.caseNumber.replace('/', ' · ')
+
+  function handleOpen() {
+    const rect = bookRef.current?.getBoundingClientRect()
+    if (!rect) return
+    onOpen(caseSummary, {
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height,
+    })
+  }
 
   return (
     <div className="co-timeline-item">
@@ -228,9 +243,11 @@ function TimelineItem({
           style={{ '--co-book-tilt': `${bookTilt}deg` } as CSSProperties}
           onMouseEnter={() => setBookOpen(true)}
           onMouseLeave={() => setBookOpen(false)}
+          onClick={handleOpen}
         >
           <div className="co-doc-thumb" aria-hidden="true">
             <PkCaseBook
+              ref={bookRef}
               caseNumber={caseSummary.caseNumber}
               title={caseSummary.title}
               pageCount={caseSummary.pageCount}
@@ -246,8 +263,16 @@ function TimelineItem({
                 <Chip label={`PDF · ${caseSummary.pageCount} pages`} muted />
               </div>
             </div>
-            <PkButton variant="outline" size="sm" asChild>
-              <Link to={`/case/${caseSummary.id}`}>Open</Link>
+            <PkButton
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                handleOpen()
+              }}
+            >
+              Open
             </PkButton>
           </div>
         </div>
@@ -271,8 +296,15 @@ const TIMELINE_ENTRIES = CASES.map((cs, i) => ({
 }))
 
 export function CaseListPage() {
+  const [active, setActive] = useState<{
+    caseSummary: CaseSummary
+    originRect: OriginRect
+  } | null>(null)
+  const navigate = useNavigate()
+
   return (
-    <div className="co-page">
+    <>
+    <div className={`co-page${active ? ' co-page--exiting' : ''}`}>
       <header className="co-appbar">
         <div className="co-appbar-inner">
           <Link to="/" className="co-appbar-logo">
@@ -349,11 +381,24 @@ export function CaseListPage() {
                 bookTilt={bookTilt}
                 isFirst={i === 0}
                 isLast={i === TIMELINE_ENTRIES.length - 1}
+                onOpen={(caseSummary, originRect) => setActive({ caseSummary, originRect })}
               />
             ))}
           </div>
         </section>
       </main>
     </div>
+
+    {active && (
+      <BookOpenTransition
+        caseSummary={active.caseSummary}
+        originRect={active.originRect}
+        onComplete={() => {
+          window.scrollTo(0, 0)
+          navigate(`/case/${active.caseSummary.id}`)
+        }}
+      />
+    )}
+    </>
   )
 }

@@ -76,15 +76,18 @@ export function BookOpenTransition({
   const isReorganized = phase === 'reorganizing' || phase === 'scaling' || phase === 'settling'
   const isScaled = phase === 'scaling' || phase === 'settling'
   const isSettled = phase === 'settling'
+  // Timeline thumbs are CSS-scaled (0.5) with transform-origin top left.
+  // Grow from that visual size so the overlay doesn't pop to 188×233.
+  const startScale = originRect.width / BOOK_WIDTH
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
       {showBook && (
         <motion.div
           className="fixed"
-          style={{ width: BOOK_WIDTH, height: BOOK_HEIGHT }}
-          initial={{ x: originRect.x, y: originRect.y }}
-          animate={{ x: bookCenterX, y: bookCenterY }}
+          style={{ width: BOOK_WIDTH, height: BOOK_HEIGHT, transformOrigin: 'top left' }}
+          initial={{ x: originRect.x, y: originRect.y, scale: startScale }}
+          animate={{ x: bookCenterX, y: bookCenterY, scale: 1 }}
           transition={{ duration: SLIDE_MS / 1000, ease: 'easeInOut' }}
         >
           {/* No caseNumber/title passed — the transition never shows this

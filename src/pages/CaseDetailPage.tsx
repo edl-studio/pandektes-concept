@@ -15,6 +15,7 @@ export function CaseDetailPage() {
   const [showContent, setShowContent] = useState(false)
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     const timer = setTimeout(() => setShowContent(true), CONTENT_REVEAL_DELAY_MS)
     return () => clearTimeout(timer)
   }, [])
