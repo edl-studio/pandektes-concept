@@ -10,35 +10,19 @@
 }
 
 .pk-input-copy__button {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   max-width: 100%;
-  padding: 0 6px 0 8px;
+  padding: 0;
   border: none;
-  border-radius: 6px;
-  background-color: var(--pk-color-surface-raised);
-  color: var(--pk-color-content-secondary);
+  background: none;
+  color: var(--pk-color-content-tertiary);
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-12);
   font-weight: var(--pk-font-weight-regular);
-  line-height: 18px;
+  line-height: 1;
   cursor: pointer;
-}
-
-.pk-input-copy__button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
 }
 
 .pk-input-copy__value {
@@ -55,15 +39,10 @@
   width: 12px;
   height: 12px;
   flex-shrink: 0;
-  color: var(--pk-color-content-tertiary);
 }
 
 .pk-input-copy__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.pk-input-copy__button:hover .pk-input-copy__action {
-  color: var(--pk-color-content-secondary);
 }

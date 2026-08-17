@@ -16,6 +16,21 @@ import {
 import { CASES, type CaseSummary } from './case-data'
 import { PkCaseBook } from '@/components/compounds/CaseBook'
 import { PdfPageCanvas } from '@/components/compounds/PageStack'
+import {
+  InlineCitation,
+  InlineCitationCard,
+  InlineCitationCardBody,
+  InlineCitationCardTrigger,
+  InlineCitationCarousel,
+  InlineCitationCarouselContent,
+  InlineCitationCarouselHeader,
+  InlineCitationCarouselIndex,
+  InlineCitationCarouselItem,
+  InlineCitationCarouselNext,
+  InlineCitationCarouselPrev,
+  InlineCitationSource,
+  InlineCitationText,
+} from '@/components/ai-elements/inline-citation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { InputCopy } from '@/components/ui/input-copy'
 import { PkButton } from '@/components/primitives/Button'
@@ -23,6 +38,22 @@ import './case-list-page.css'
 
 const SOURCE_PDF_URL = CASES[0].documentUrl
 const SOURCE_THUMB_WIDTH = 20
+const CITATION_THUMB_WIDTH = 40
+
+const CITATION_SOURCES = [
+  {
+    title: 'Domsdatabasen_13870.pdf',
+    description: 'page 2 · §3',
+    url: SOURCE_PDF_URL,
+    pageNumber: 2,
+  },
+  {
+    title: 'Domsdatabasen_13870.pdf',
+    description: 'page 2 · §3',
+    url: SOURCE_PDF_URL,
+    pageNumber: 2,
+  },
+] as const
 
 // ── Icon wrappers (12px, stroke 1.5px absolute) ───────────────────────
 
@@ -106,13 +137,56 @@ function Chip({
   )
 }
 
-/** Inline citation badge — rendered as an inline-flex span inside text */
-function CitationBadge({ children }: { children: string }) {
+function CitationCard({ label }: { label: string }) {
   return (
-    <span className="co-citation">
-      <IPdf />
-      {children}
-    </span>
+    <InlineCitationCard>
+      <InlineCitationCardTrigger aria-label={`Citation: ${label}`}>
+        <IPdf />
+        {label}
+      </InlineCitationCardTrigger>
+      <InlineCitationCardBody>
+        <InlineCitationCarousel>
+          <InlineCitationCarouselHeader>
+            <InlineCitationCarouselPrev />
+            <InlineCitationCarouselNext />
+            <InlineCitationCarouselIndex />
+          </InlineCitationCarouselHeader>
+          <InlineCitationCarouselContent>
+            {CITATION_SOURCES.map((source, index) => (
+              <InlineCitationCarouselItem key={`${source.title}-${index}`}>
+                <InlineCitationSource
+                  title={source.title}
+                  description={source.description}
+                  thumbnail={
+                    source.url ? (
+                      <PdfPageCanvas
+                        url={source.url}
+                        pageNumber={source.pageNumber}
+                        targetWidth={CITATION_THUMB_WIDTH}
+                      />
+                    ) : null
+                  }
+                />
+              </InlineCitationCarouselItem>
+            ))}
+          </InlineCitationCarouselContent>
+        </InlineCitationCarousel>
+      </InlineCitationCardBody>
+    </InlineCitationCard>
+  )
+}
+
+/** Inline citation — optional cited text highlights when the badge is hovered */
+function CitationBadge({ children, text }: { children: string; text?: ReactNode }) {
+  return (
+    <InlineCitation>
+      {text != null && (
+        <>
+          <InlineCitationText>{text}</InlineCitationText>{' '}
+        </>
+      )}
+      <CitationCard label={children} />
+    </InlineCitation>
   )
 }
 
@@ -161,16 +235,14 @@ function Sources() {
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="co-sources-panel">
-          <SourceRow
-            label="Domsdatabasen_13870.pdf · page 2 · §3"
-            url={SOURCE_PDF_URL}
-            pageNumber={2}
-          />
-          <SourceRow
-            label="Domsdatabasen_13870.pdf · page 2 · §3"
-            url={SOURCE_PDF_URL}
-            pageNumber={2}
-          />
+          {CITATION_SOURCES.map((source, index) => (
+            <SourceRow
+              key={`${source.title}-${index}`}
+              label={`${source.title} · ${source.description}`}
+              url={source.url}
+              pageNumber={source.pageNumber}
+            />
+          ))}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -197,11 +269,15 @@ function HoldingCard({
   return (
     <div className="co-holding-card">
       <div className={`co-holding-avatar co-holding-avatar--${variant}`}>{icon}</div>
-      <div className="co-holding-body">
-        <p className="co-holding-verdict">{verdict}</p>
-        <p className="co-holding-detail">{detail}</p>
-      </div>
-      <CitationBadge>{citation}</CitationBadge>
+      <InlineCitation className="co-holding-citation">
+        <div className="co-holding-body">
+          <p className="co-holding-verdict">
+            <InlineCitationText>{verdict}</InlineCitationText>
+          </p>
+          <p className="co-holding-detail">{detail}</p>
+        </div>
+        <CitationCard label={citation} />
+      </InlineCitation>
     </div>
   )
 }
@@ -217,13 +293,7 @@ function SectionHeader({ title, citation }: { title: string; citation?: string }
       <h2 className="co-section-title">{title}</h2>
       {/* Citation badge is an inline span inside the <p> — "as a span" */}
       <p className="co-section-desc">
-        {PLACEHOLDER}
-        {citation && (
-          <>
-            {' '}
-            <CitationBadge>{citation}</CitationBadge>
-          </>
-        )}
+        {citation ? <CitationBadge text={PLACEHOLDER}>{citation}</CitationBadge> : PLACEHOLDER}
       </p>
     </div>
   )

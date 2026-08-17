@@ -27,8 +27,13 @@
 
 .co-divider {
   border: none;
-  border-top: 1px solid rgb(0 0 0 / 0.1);
+  height: 2px;
   margin: 0;
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgb(0 0 0 / 0.18) 1px, transparent 1.2px);
+  background-size: 6px 2px;
+  background-repeat: repeat-x;
+  background-position: left center;
 }
 
 /* ── Meta row ────────────────────────────────────────────────────────── */
@@ -68,8 +73,11 @@
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
+  margin: 0;
   padding: var(--pk-d0-5) var(--pk-d2) var(--pk-d0-5) var(--pk-d1-5);
+  border: none;
   border-radius: 6px;
+  appearance: none;
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-12);
   font-weight: var(--pk-font-weight-regular);
@@ -79,6 +87,22 @@
   background-color: var(--pk-color-surface-raised);
   width: auto;
   align-self: flex-start;
+  cursor: pointer;
+}
+
+.co-citation:hover,
+.co-citation[data-popup-open] {
+  color: var(--pk-color-content-secondary);
+}
+
+.co-citation:focus {
+  outline: none;
+}
+
+.co-citation:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--pk-color-surface-body),
+    0 0 0 3px var(--pk-color-accent-weak);
 }
 
 .co-citation::before {
@@ -289,6 +313,14 @@
   padding: var(--pk-d4);
   border: 1px solid rgb(0 0 0 / 0.08);
   border-bottom-width: 2px;
+}
+
+.co-holding-citation.pk-inline-citation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d6);
+  flex: 1;
+  min-height: 0;
 }
 
 .co-holding-avatar {
