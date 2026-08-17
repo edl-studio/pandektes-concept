@@ -1,9 +1,9 @@
 @layer pk {
   /*
    * Standalone page sheets — geometry mirrors PkCaseBook's own page fan
-   * exactly (same base 180x233 unit, same step values) so swapping from
-   * PkCaseBook to PageStack mid-transition (once the cover has exited) is
-   * visually seamless. `mode="list"` reorganizes the same sheets into a
+   * exactly (same base 180x233 unit, same step values, optional `spread`)
+   * so the sheaf can start inside the open book and stay the same sheets
+   * through lift → fly → list. `mode="list"` reorganizes them into a
    * vertically spaced column instead of a fanned stack.
    */
 

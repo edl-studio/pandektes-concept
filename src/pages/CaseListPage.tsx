@@ -228,6 +228,7 @@ function TimelineItem({
       width: BOOK_WIDTH * startScale,
       height: BOOK_HEIGHT * startScale,
       rotation,
+      open: bookOpen,
       clip: {
         top: Math.max(0, (thumbRect.top - originY) / startScale),
         right: Math.max(0, (originX + BOOK_WIDTH * startScale - thumbRect.right) / startScale),

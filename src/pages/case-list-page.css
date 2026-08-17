@@ -22,6 +22,8 @@
 .co-page--exiting {
   opacity: 0;
   pointer-events: none;
+  /* Hold the card through the sheaf extract (BookOpenTransition LIFT_MS). */
+  transition: opacity 0.35s ease 0.28s;
 }
 
 .co-appbar {

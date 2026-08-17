@@ -21,8 +21,18 @@ export interface PkCaseBookProps extends HTMLAttributes<HTMLDivElement> {
   pageCount?: number
   /** Forces the hover-open choreography (cover tilt + page spread) on programmatically. */
   open?: boolean
+  /** Opens the front cover further than hover (extract tilt) so sheets can leave. */
+  extracting?: boolean
+  /** Eases the front cover back to closed, overriding `open` / `extracting`. */
+  coverClosing?: boolean
   /** Slides + fades the front/back covers away, leaving only the page stack visible. */
   coverExiting?: boolean
+  /** Omit the page fan — used when an overlay owns the sheets. */
+  hidePages?: boolean
+  /** Omit the back board — used to sandwich overlay sheets between covers. */
+  hideBackCover?: boolean
+  /** Omit the front board. */
+  hideFrontCover?: boolean
   /** Custom cover mark. Any SVG (or img). Receives the same embossed treatment as the default book icon. */
   logo?: ReactNode
   testId?: string
@@ -58,51 +68,77 @@ export function PkPageSkeleton() {
 }
 
 export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
-  ({ caseNumber, title, pageCount = DEFAULT_PAGE_COUNT, open, coverExiting, logo, className, testId, ...props }, ref) => {
+  (
+    {
+      caseNumber,
+      title,
+      pageCount = DEFAULT_PAGE_COUNT,
+      open,
+      extracting,
+      coverClosing,
+      coverExiting,
+      hidePages,
+      hideBackCover,
+      hideFrontCover,
+      logo,
+      className,
+      testId,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <div
         ref={ref}
         className={twMerge(
           'pk-case-book__root',
           open && 'pk-case-book__root--open',
+          extracting && 'pk-case-book__root--extracting',
+          coverClosing && 'pk-case-book__root--cover-closing',
           coverExiting && 'pk-case-book__root--cover-exiting',
           className,
         )}
         data-testid={testId}
         {...props}
       >
-        <div className="pk-case-book__cover-back">
-          {caseNumber && <p className="pk-case-book__case-number">{caseNumber}</p>}
-          {title && <p className="pk-case-book__case-title">{title}</p>}
-          <FlipEdge />
-          <span className="pk-case-book__spine" />
-        </div>
-
-        <div className="pk-case-book__pages">
-          {/* Drawn back-to-front (highest offset first) so page 0 — the one
-              closest to the cover — paints last and sits on top. */}
-          {Array.from({ length: pageCount }, (_, pageIndex) => pageCount - 1 - pageIndex).map((pageIndex) => {
-            const style = {
-              '--_page-x': `${PAGE_BASE_OFFSET + pageIndex * PAGE_STEP_OFFSET}px`,
-              '--_page-y': `${pageIndex * PAGE_STEP_Y_OFFSET}px`,
-              '--_page-rotation': `${pageIndex * PAGE_STEP_ROTATION}deg`,
-            } as CSSProperties
-
-            return (
-              <div key={pageIndex} className="pk-case-book__page" style={style}>
-                {pageIndex === 0 && <PkPageSkeleton />}
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="pk-case-book__cover-front">
-          <div className="pk-case-book__cover-front-edge">
+        {!hideBackCover && (
+          <div className="pk-case-book__cover-back">
+            {caseNumber && <p className="pk-case-book__case-number">{caseNumber}</p>}
+            {title && <p className="pk-case-book__case-title">{title}</p>}
             <FlipEdge />
             <span className="pk-case-book__spine" />
           </div>
-          <CoverLogo>{logo ?? <BookIcon />}</CoverLogo>
-        </div>
+        )}
+
+        {!hidePages && (
+          <div className="pk-case-book__pages">
+            {/* Drawn back-to-front (highest offset first) so page 0 — the one
+                closest to the cover — paints last and sits on top. */}
+            {Array.from({ length: pageCount }, (_, pageIndex) => pageCount - 1 - pageIndex).map((pageIndex) => {
+              const style = {
+                '--_page-x': `${PAGE_BASE_OFFSET + pageIndex * PAGE_STEP_OFFSET}px`,
+                '--_page-y': `${pageIndex * PAGE_STEP_Y_OFFSET}px`,
+                '--_page-rotation': `${pageIndex * PAGE_STEP_ROTATION}deg`,
+              } as CSSProperties
+
+              return (
+                <div key={pageIndex} className="pk-case-book__page" style={style}>
+                  {pageIndex === 0 && <PkPageSkeleton />}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {!hideFrontCover && (
+          <div className="pk-case-book__cover-front">
+            <div className="pk-case-book__cover-front-edge">
+              <FlipEdge />
+              <span className="pk-case-book__spine" />
+            </div>
+            <CoverLogo>{logo ?? <BookIcon />}</CoverLogo>
+          </div>
+        )}
       </div>
     )
   },

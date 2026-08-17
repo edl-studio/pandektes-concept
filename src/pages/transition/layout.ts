@@ -12,6 +12,11 @@ export const SCALE = FULL_WIDTH / PAGE_WIDTH
 export const BOOK_WIDTH = 188
 export const BOOK_HEIGHT = 233
 
+/** PkCaseBook's open-state `.pk-case-book__pages { translateX }` , in unscaled book pixels. */
+export const OPEN_PAGE_NUDGE = 4
+/** Matches `.pk-case-book__root--open` `--_spread`. */
+export const OPEN_PAGE_SPREAD = 2
+
 // CaseDetailPage's structure is: p-12 padding, then a fixed-height header
 // block (the "Back to cases" link) — deliberately a fixed height rather
 // than text-flow-derived margin, so this constant stays exactly correct.

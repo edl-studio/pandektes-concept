@@ -20,10 +20,16 @@ export interface PageStackProps {
    * look tiny against a much bigger sheet. Defaults to 1 (base size).
    */
   scale?: number
+  /**
+   * Fan multiplier matching PkCaseBook's `--_spread`. 2 is the hover-open
+   * sheaf; 1 is the resting fan PageStack uses after the cover handoff.
+   */
+  spread?: number
 }
 
-export function PageStack({ pageCount, mode, scale = 1 }: PageStackProps) {
+export function PageStack({ pageCount, mode, scale = 1, spread = 1 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
+  const fan = mode === 'fan' ? spread : 1
 
   return (
     <div className="pk-page-stack__root" style={{ height, '--_stack-scale': scale } as CSSProperties}>
@@ -32,9 +38,9 @@ export function PageStack({ pageCount, mode, scale = 1 }: PageStackProps) {
         .reverse()
         .map((i) => {
           const style = {
-            '--_sheet-x': mode === 'fan' ? `${i * FAN_STEP_X * scale}px` : '0px',
-            '--_sheet-y': mode === 'fan' ? `${i * FAN_STEP_Y * scale}px` : `${i * (233 + LIST_GAP) * scale}px`,
-            '--_sheet-rotation': mode === 'fan' ? `${i * FAN_STEP_ROTATION}deg` : '0deg',
+            '--_sheet-x': mode === 'fan' ? `${i * FAN_STEP_X * fan * scale}px` : '0px',
+            '--_sheet-y': mode === 'fan' ? `${i * FAN_STEP_Y * fan * scale}px` : `${i * (233 + LIST_GAP) * scale}px`,
+            '--_sheet-rotation': mode === 'fan' ? `${i * FAN_STEP_ROTATION * fan}deg` : '0deg',
             zIndex: pageCount - i,
           } as CSSProperties
 

@@ -12,6 +12,7 @@
     --_height: 233px;
     --_cover-front-width: 180px;
     --_spread: 1;
+    --_cover-tilt: 0deg;
 
     position: relative;
     isolation: isolate;
@@ -30,6 +31,17 @@
   .pk-case-book__root:hover,
   .pk-case-book__root--open {
     --_spread: 2;
+    --_cover-tilt: -10deg;
+  }
+
+  /* Further than hover so a sheaf can leave; closing wins so the board
+     eases shut after the sheets have gone. */
+  .pk-case-book__root--extracting {
+    --_cover-tilt: -28deg;
+  }
+
+  .pk-case-book__root--cover-closing {
+    --_cover-tilt: 0deg;
   }
 
   /* ── CoverBack — carries the case number + title, sits under everything ── */
@@ -232,12 +244,8 @@
     overflow: hidden;
     transform-origin: left center;
     transform-style: preserve-3d;
+    transform: rotateY(var(--_cover-tilt));
     transition: transform 0.3s ease-out;
-  }
-
-  .pk-case-book__root:hover .pk-case-book__cover-front,
-  .pk-case-book__root--open .pk-case-book__cover-front {
-    transform: rotateY(-10deg);
   }
 
   /* Exiting overrides the open tilt — the cover continues its motion by sliding
