@@ -4,7 +4,6 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Calendar04Icon,
   GoogleDocIcon,
-  LegalDocument01Icon,
   TaskDone02Icon,
   ThumbsUpIcon,
   ThumbsDownIcon,
@@ -28,6 +27,7 @@ import {
   InlineCitationCarouselItem,
   InlineCitationCarouselNext,
   InlineCitationCarouselPrev,
+  InlineCitationQuote,
   InlineCitationSource,
   InlineCitationText,
 } from '@/components/ai-elements/inline-citation'
@@ -46,12 +46,15 @@ const CITATION_SOURCES = [
     description: 'page 2 · §3',
     url: SOURCE_PDF_URL,
     pageNumber: 2,
+    quote:
+      'Appellant 3 is entitled to compensation of DKK 282,338.09 under funktionærloven.',
   },
   {
     title: 'Domsdatabasen_13870.pdf',
     description: 'page 2 · §3',
     url: SOURCE_PDF_URL,
     pageNumber: 2,
+    quote: 'The claims of appellants 1 and 2 under vikarloven are dismissed.',
   },
 ] as const
 
@@ -66,10 +69,6 @@ const ICalendar: FC = () => (
 
 const IDoc: FC = () => (
   <HugeiconsIcon icon={GoogleDocIcon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
-)
-
-const ILegalDoc: FC = () => (
-  <HugeiconsIcon icon={LegalDocument01Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const ITaskDone: FC = () => (
@@ -167,6 +166,7 @@ function CitationCard({ label }: { label: string }) {
                     ) : null
                   }
                 />
+                <InlineCitationQuote>{source.quote}</InlineCitationQuote>
               </InlineCitationCarouselItem>
             ))}
           </InlineCitationCarouselContent>
@@ -269,15 +269,12 @@ function HoldingCard({
   return (
     <div className="co-holding-card">
       <div className={`co-holding-avatar co-holding-avatar--${variant}`}>{icon}</div>
-      <InlineCitation className="co-holding-citation">
-        <div className="co-holding-body">
-          <p className="co-holding-verdict">
-            <InlineCitationText>{verdict}</InlineCitationText>
-          </p>
-          <p className="co-holding-detail">{detail}</p>
-        </div>
-        <CitationCard label={citation} />
-      </InlineCitation>
+      <div className="co-holding-body">
+        <p className="co-holding-verdict">{verdict}</p>
+        <p className="co-holding-detail">
+          <CitationBadge text={detail}>{citation}</CitationBadge>
+        </p>
+      </div>
     </div>
   )
 }
@@ -349,8 +346,8 @@ function TimelineItem({
         <div className="co-timeline-header">
           <p className="co-timeline-label">{instanceLabel}</p>
           <div className="co-meta-row">
+            <InputCopy value={caseNumberDisplay} />
             <Chip icon={<ICalendar />} label={date} muted />
-            <Chip icon={<ILegalDoc />} label={caseNumberDisplay} muted />
             <Chip icon={<ITaskDone />} label="Final" muted />
           </div>
         </div>
@@ -429,14 +426,14 @@ export function CaseListPage() {
             <HoldingCard
               icon={<IThumbsUp />}
               verdict="Appellant 3 won."
-              detail="282,338.09 dkk under funktionærloven."
+              detail="A long-term posting to Boeing brought the worker within funktionærloven. The court awarded DKK 282,338.09 in salary and holiday pay, treating the assignment as ordinary salaried employment rather than a temporary agency placement."
               citation="Page 2 · §3"
               variant="win"
             />
             <HoldingCard
               icon={<IThumbsDown />}
               verdict="Appellant 1 and 2 lost."
-              detail="Vikarloven compensation claim dismissed."
+              detail="The joined vikarloven claims were dismissed. The court found no basis for agency-work compensation once the relationship was classified as salaried employment, and the remaining appellants were left without a separate remedy."
               citation="Page 2 · §3"
               variant="lose"
             />

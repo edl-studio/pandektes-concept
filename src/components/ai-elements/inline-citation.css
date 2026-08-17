@@ -38,7 +38,7 @@
   align-items: center;
   gap: var(--pk-d1);
   padding: var(--pk-d2) var(--pk-d2) var(--pk-d2) var(--pk-d2);
-  background-color: var(--pk-color-surface-body);
+  background-color: var(--pk-color-surface-raised);
   border-bottom: 1px solid rgb(0 0 0 / 0.06);
 }
 
@@ -156,10 +156,8 @@
 
 .pk-inline-citation-quote {
   margin: 0;
-  padding: 0 var(--pk-d3) var(--pk-d3);
-  border-left: 2px solid rgb(0 0 0 / 0.12);
-  margin-left: var(--pk-d3);
-  padding-left: var(--pk-d3);
+  padding: var(--pk-d3);
+  border-top: 1px solid rgb(0 0 0 / 0.06);
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-12);
   font-style: italic;

@@ -299,6 +299,7 @@
 
 .co-holding-grid {
   display: flex;
+  flex-direction: column;
   gap: var(--pk-d2);
 }
 
@@ -313,14 +314,6 @@
   padding: var(--pk-d4);
   border: 1px solid rgb(0 0 0 / 0.08);
   border-bottom-width: 2px;
-}
-
-.co-holding-citation.pk-inline-citation {
-  display: flex;
-  flex-direction: column;
-  gap: var(--pk-d6);
-  flex: 1;
-  min-height: 0;
 }
 
 .co-holding-avatar {
