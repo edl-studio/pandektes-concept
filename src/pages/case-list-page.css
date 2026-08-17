@@ -50,7 +50,7 @@
 .co-appbar-title {
   font-family: var(--pk-font-family-heading);
   font-size: var(--pk-font-size-20);
-  font-weight: var(--pk-font-weight-medium);
+  font-weight: var(--pk-font-weight-regular);
   line-height: 1.2;
   letter-spacing: -0.04em;
 }
