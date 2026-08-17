@@ -1,0 +1,59 @@
+.pk-popover {
+  position: relative;
+  display: inline-flex;
+  isolation: isolate;
+}
+
+.pk-popover-trigger {
+  position: relative;
+  z-index: 0;
+}
+
+.pk-popover-portal {
+  pointer-events: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  isolation: isolate;
+  width: 0;
+  height: 0;
+}
+
+.pk-popover-svg {
+  position: absolute;
+}
+
+.pk-popover-goo {
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.pk-popover-fill {
+  background-color: var(--pk-color-surface-raised);
+}
+
+.pk-popover-fill--trigger {
+  position: absolute;
+}
+
+.pk-popover-fill--blob {
+  position: absolute;
+  inset: 0;
+}
+
+.pk-popover-content-layer {
+  pointer-events: none;
+  position: absolute;
+  z-index: 10;
+}
+
+.pk-popover-clip {
+  position: absolute;
+  inset: 0;
+}
+
+.pk-popover-panel {
+  outline: none;
+}

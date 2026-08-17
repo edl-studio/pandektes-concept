@@ -48,7 +48,8 @@
     0 0 0 3px var(--pk-color-accent-weak);
 }
 
-.pk-citation[data-popup-open] {
+.pk-citation[data-popup-open],
+.pk-citation[data-state='open'] {
   color: var(--pk-color-content-secondary);
 }
 
@@ -70,12 +71,9 @@
 }
 
 .pk-citation-wrap:has(.pk-citation:hover) .pk-citation-text,
-.pk-citation-wrap:has([data-popup-open]) .pk-citation-text {
+.pk-citation-wrap:has([data-popup-open]) .pk-citation-text,
+.pk-citation-wrap:has([data-state='open']) .pk-citation-text {
   background-color: var(--pk-color-accent-weak);
-}
-
-.pk-citation-positioner {
-  z-index: 40;
 }
 
 .pk-citation-card {

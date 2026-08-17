@@ -1,4 +1,3 @@
-import { PreviewCard } from '@base-ui/react/preview-card'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   ArrowUpRight01Icon,
@@ -11,6 +10,7 @@ import {
   useId,
 } from 'react'
 import { PdfPageCanvas } from '@/components/compounds/PageStack'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/motion/popover'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import './citations.css'
@@ -107,38 +107,19 @@ export function Citation({
   className,
 }: CitationProps) {
   const href = `#${citationTargetId(idPrefix, citationId)}`
-  const marker = source ? (
-    <PreviewCard.Trigger
-      delay={0}
-      closeDelay={100}
-      href={href}
-      aria-label={`View citation ${index}`}
-      className={cn('pk-citation', className)}
-    >
-      {index}
-    </PreviewCard.Trigger>
-  ) : (
+  const marker = (
     <a href={href} aria-label={`View citation ${index}`} className={cn('pk-citation', className)}>
       {index}
     </a>
   )
 
   const badge = source ? (
-    <PreviewCard.Root>
-      {marker}
-      <PreviewCard.Portal>
-        <PreviewCard.Positioner
-          side="bottom"
-          align="start"
-          sideOffset={8}
-          className="pk-citation-positioner"
-        >
-          <PreviewCard.Popup className="pk-citation-card">
-            <CitationCardBody source={source} />
-          </PreviewCard.Popup>
-        </PreviewCard.Positioner>
-      </PreviewCard.Portal>
-    </PreviewCard.Root>
+    <Popover trigger="hover" side="bottom" align="start" sideOffset={14} panelRadius={12}>
+      <PopoverTrigger>{marker}</PopoverTrigger>
+      <PopoverContent className="pk-citation-card">
+        <CitationCardBody source={source} />
+      </PopoverContent>
+    </Popover>
   ) : (
     marker
   )
