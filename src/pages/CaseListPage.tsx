@@ -443,64 +443,69 @@ export function CaseListPage() {
             <h1 className="co-case-title">Flair Group v. HK Danmark</h1>
             <p className="co-case-desc">{PLACEHOLDER}</p>
           </div>
-          <Citations
-            citations={CITATION_ITEMS}
-            idPrefix={CITATION_PREFIX}
-            defaultOpen
-          />
         </header>
 
-        <Divider />
-
-        {/* ── Case holding ──────────────────────────────── */}
-        <section className="co-section" aria-label="Case holding">
-          <SectionHeader
-            title="Case holding"
-            citation={citationMarker('holding-win', 1, PLACEHOLDER)}
-          />
-          <div className="co-holding-grid">
-            <HoldingCard
-              icon={<IThumbsUp />}
-              verdict="Appellant 3 won."
-              detail={HOLDING_WIN}
-              citation={citationMarker('holding-win', 1, HOLDING_WIN)}
-              variant="win"
-            />
-            <HoldingCard
-              icon={<IThumbsDown />}
-              verdict="Appellant 1 and 2 lost."
-              detail={HOLDING_LOSE}
-              citation={citationMarker('holding-lose', 2, HOLDING_LOSE)}
-              variant="lose"
-            />
-          </div>
-        </section>
-
-        <Divider />
-
-        {/* ── Procedural history ────────────────────────── */}
-        <section className="co-section" aria-label="Procedural history">
-          <SectionHeader
-            title="Procedural history"
-            citation={citationMarker('holding-win', 1, PLACEHOLDER)}
-          />
-          <div className="co-timeline" role="list">
-            {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (
-              <TimelineItem
-                key={caseSummary.id}
-                instanceLabel={instanceLabel}
-                date={date}
-                caseSummary={caseSummary}
-                bookTilt={bookTilt}
-                isFirst={i === 0}
-                isLast={i === TIMELINE_ENTRIES.length - 1}
-                lifted={active?.caseSummary.id === caseSummary.id}
-                sinking={active?.caseSummary.id === caseSummary.id && active.sinking}
-                onOpen={(caseSummary, originRect) => setActive({ caseSummary, originRect, sinking: false })}
+        <div className="co-body">
+          <div className="co-body-holding">
+            <Divider />
+            <section className="co-section" aria-label="Case holding">
+              <SectionHeader
+                title="Case holding"
+                citation={citationMarker('holding-win', 1, PLACEHOLDER)}
               />
-            ))}
+              <div className="co-holding-grid">
+                <HoldingCard
+                  icon={<IThumbsUp />}
+                  verdict="Appellant 3 won."
+                  detail={HOLDING_WIN}
+                  citation={citationMarker('holding-win', 1, HOLDING_WIN)}
+                  variant="win"
+                />
+                <HoldingCard
+                  icon={<IThumbsDown />}
+                  verdict="Appellant 1 and 2 lost."
+                  detail={HOLDING_LOSE}
+                  citation={citationMarker('holding-lose', 2, HOLDING_LOSE)}
+                  variant="lose"
+                />
+              </div>
+            </section>
+            <Divider />
           </div>
-        </section>
+
+          <aside className="co-sources">
+            <Divider />
+            <Citations
+              citations={CITATION_ITEMS}
+              idPrefix={CITATION_PREFIX}
+              defaultOpen
+            />
+            <Divider />
+          </aside>
+
+          <section className="co-section co-body-history" aria-label="Procedural history">
+            <SectionHeader
+              title="Procedural history"
+              citation={citationMarker('holding-win', 1, PLACEHOLDER)}
+            />
+            <div className="co-timeline" role="list">
+              {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (
+                <TimelineItem
+                  key={caseSummary.id}
+                  instanceLabel={instanceLabel}
+                  date={date}
+                  caseSummary={caseSummary}
+                  bookTilt={bookTilt}
+                  isFirst={i === 0}
+                  isLast={i === TIMELINE_ENTRIES.length - 1}
+                  lifted={active?.caseSummary.id === caseSummary.id}
+                  sinking={active?.caseSummary.id === caseSummary.id && active.sinking}
+                  onOpen={(caseSummary, originRect) => setActive({ caseSummary, originRect, sinking: false })}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
       </main>
     </div>
 

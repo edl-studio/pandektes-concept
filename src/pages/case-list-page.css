@@ -8,6 +8,9 @@
 
 .co-page {
   --co-column: 640px;
+  --co-sidebar: 240px;
+  --co-body-gap: var(--pk-d8);
+  --co-shell: calc(var(--co-column) + var(--co-body-gap) + var(--co-sidebar));
   --co-appbar-height: 48px;
   --co-gutter: var(--pk-d6);
 
@@ -41,7 +44,7 @@
 
 .co-appbar-inner {
   width: 100%;
-  max-width: calc(var(--co-column) + 2 * var(--co-gutter));
+  max-width: calc(var(--co-shell) + 2 * var(--co-gutter));
   height: 100%;
   margin: 0 auto;
   padding: 0 var(--co-gutter);
@@ -100,7 +103,7 @@
 
 .co-content {
   width: 100%;
-  max-width: calc(var(--co-column) + 2 * var(--co-gutter));
+  max-width: calc(var(--co-shell) + 2 * var(--co-gutter));
   padding: 64px var(--co-gutter) 96px;
   display: flex;
   flex-direction: column;
@@ -118,6 +121,40 @@
   background-size: 6px 2px;
   background-repeat: repeat-x;
   background-position: left center;
+}
+
+/* ── Body: main column + sources sidebar ─────────────────────────────── */
+
+.co-body {
+  display: grid;
+  grid-template-columns: minmax(0, var(--co-column)) var(--co-sidebar);
+  grid-template-rows: auto auto;
+  column-gap: var(--co-body-gap);
+  row-gap: var(--pk-d8);
+  align-items: stretch;
+}
+
+.co-body-holding {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.co-sources {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.co-body-history {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.co-body-holding,
+.co-sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d8);
 }
 
 /* ── Meta row ────────────────────────────────────────────────────────── */
@@ -152,6 +189,8 @@
 /* ── Case header ─────────────────────────────────────────────────────── */
 
 .co-case-header {
+  width: 100%;
+  max-width: var(--co-column);
   display: flex;
   flex-direction: column;
   gap: var(--pk-d6);
@@ -488,14 +527,38 @@
 
 /* ── Responsive: narrow screens ──────────────────────────────────────── */
 
-@media (max-width: 700px) {
+@media (max-width: 960px) {
   .co-page {
     --co-gutter: var(--pk-d4);
+    --co-shell: var(--co-column);
   }
 
   .co-content {
     padding-top: 48px;
     padding-bottom: 48px;
+  }
+
+  .co-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .co-sources {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .co-body-holding {
+    grid-row: 2;
+  }
+
+  .co-body-history {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .co-body-holding > .co-divider:first-child {
+    display: none;
   }
 
   .co-holding-grid {
