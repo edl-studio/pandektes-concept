@@ -336,7 +336,7 @@ function TimelineItem({
 
         {/* Document card */}
         <div
-          className="co-doc-card"
+          className={`co-doc-card${lifted ? ' co-doc-card--lifted' : ''}`}
           style={{ '--co-book-tilt': `${bookTilt}deg` } as CSSProperties}
           onMouseEnter={() => setBookOpen(true)}
           onMouseLeave={() => setBookOpen(false)}
@@ -352,7 +352,7 @@ function TimelineItem({
               pageCount={caseSummary.pageCount}
               logo={Logo ? <Logo /> : undefined}
               open={bookOpen}
-              hidePages={sinking}
+              hidePages={lifted}
               extracting={sinking}
               className={`co-doc-thumb-book${holding ? ' co-doc-thumb-book--holding' : ''}${sinking ? ' co-doc-thumb-book--sinking' : ''}`}
             />

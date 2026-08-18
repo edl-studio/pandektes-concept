@@ -30,7 +30,8 @@ export interface OriginRect {
 export const LIFT_MS = 280
 const FLY_MS = 1050
 const REORGANIZE_MS = 500
-const SCALE_MS = 450 // must match page-stack.css's sheet width/height transition duration (0.45s) — see note below
+const STACK_HOLD_MS = 320 // beat on the small list before it grows
+const SCALE_MS = 700 // must match page-stack.css's sheet width/height transition duration (0.7s) — see note below
 const SETTLE_MS = 400
 /** Viewport Y the sheaf actually visits at the top of the inverted-U. */
 const APEX_TOP = 48
@@ -120,7 +121,7 @@ export function BookOpenTransition({
 
     const t0 = LIFT_MS
     const t1 = FLY_MS
-    const t2 = t1 + REORGANIZE_MS
+    const t2 = t1 + REORGANIZE_MS + STACK_HOLD_MS
     const t3 = t2 + SCALE_MS
     const t4 = t3 + SETTLE_MS
     const timers = [
@@ -147,36 +148,40 @@ export function BookOpenTransition({
   const isReorganized = phase === 'reorganizing' || phase === 'scaling' || phase === 'settling'
   const isScaled = phase === 'scaling' || phase === 'settling'
 
-  // Only pixels above the book are visible, so the sheaf cannot paint on
-  // the front cover. Frame 0 sits on this edge and is fully clipped.
-  const sheetClip = isLifting
-    ? `inset(0 0 ${window.innerHeight - originRect.y}px 0)`
-    : undefined
+  const tile = originRect.tile
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
-      <div
-        className="fixed inset-0 z-[2]"
-        style={sheetClip ? { clipPath: sheetClip } : undefined}
+      <motion.div
+        className="fixed z-[2]"
+        style={{
+          left: leftMv,
+          top: topMv,
+          scale: scaleMv,
+          rotate: rotateMv,
+          transformOrigin: 'top left',
+        }}
       >
-        <motion.div
-          className="fixed"
+        <PageStack
+          pageCount={caseSummary.pageCount}
+          mode={isReorganized ? 'list' : 'fan'}
+          scale={isScaled ? SCALE : 1}
+          spread={isLifting && wasOpen ? OPEN_PAGE_SPREAD : 1}
+        />
+      </motion.div>
+
+      {isLifting && tile && (
+        <div
+          className="fixed z-[3]"
           style={{
-            left: leftMv,
-            top: topMv,
-            scale: scaleMv,
-            rotate: rotateMv,
-            transformOrigin: 'top left',
+            left: tile.left,
+            top: tile.bottom,
+            width: tile.right - tile.left,
+            height: 64,
+            backgroundColor: 'var(--pk-color-surface-body)',
           }}
-        >
-          <PageStack
-            pageCount={caseSummary.pageCount}
-            mode={isReorganized ? 'list' : 'fan'}
-            scale={isScaled ? SCALE : 1}
-            spread={isLifting && wasOpen ? OPEN_PAGE_SPREAD : 1}
-          />
-        </motion.div>
-      </div>
+        />
+      )}
     </div>
   )
 }
