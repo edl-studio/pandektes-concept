@@ -19,7 +19,7 @@ export const CASES: CaseSummary[] = [
     caseNumber: 'BS-60017/2024-HJR',
     title:
       'A temp posted to Boeing for years counts as a salaried employee — Flair Group (formerly Adecco) v. HK Danmark',
-    pageCount: 6,
+    pageCount: 12,
     documentUrl: '/documents/bs-60017-2024-hjr.pdf',
     Logo: HojesteretLogo,
   },
