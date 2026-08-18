@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { motion } from 'framer-motion'
 import { PkPageSkeleton } from '@/components/compounds/CaseBook'
 import './page-stack.css'
 
@@ -25,9 +26,20 @@ export interface PageStackProps {
    * sheaf; 1 is the resting fan PageStack uses after the cover handoff.
    */
   spread?: number
+  /** Fan spread used for the overlay's first frame, before it springs outward. */
+  initialSpread?: number
+  /** Use the folder-like spring while the sheets are still a fan. */
+  springFan?: boolean
 }
 
-export function PageStack({ pageCount, mode, scale = 1, spread = 1 }: PageStackProps) {
+export function PageStack({
+  pageCount,
+  mode,
+  scale = 1,
+  spread = 1,
+  initialSpread = spread,
+  springFan = false,
+}: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
   const fan = mode === 'fan' ? spread : 1
 
@@ -38,18 +50,41 @@ export function PageStack({ pageCount, mode, scale = 1, spread = 1 }: PageStackP
         .reverse()
         .map((i) => {
           const style = {
-            '--_sheet-x': mode === 'fan' ? `${i * FAN_STEP_X * fan * scale}px` : '0px',
-            '--_sheet-y': mode === 'fan' ? `${i * FAN_STEP_Y * fan * scale}px` : `${i * (233 + LIST_GAP) * scale}px`,
-            '--_sheet-rotation': mode === 'fan' ? `${i * FAN_STEP_ROTATION * fan}deg` : '0deg',
             zIndex: pageCount - i,
           } as CSSProperties
+          const target = {
+            x: mode === 'fan' ? i * FAN_STEP_X * fan * scale : 0,
+            y: mode === 'fan' ? i * FAN_STEP_Y * fan * scale : i * (233 + LIST_GAP) * scale,
+            rotate: mode === 'fan' ? i * FAN_STEP_ROTATION * fan : 0,
+          }
+          const initial = {
+            x: i * FAN_STEP_X * initialSpread * scale,
+            y: i * FAN_STEP_Y * initialSpread * scale,
+            rotate: i * FAN_STEP_ROTATION * initialSpread,
+          }
 
           return (
-            <div key={i} className="pk-page-stack__sheet" style={style}>
+            <motion.div
+              key={i}
+              className="pk-page-stack__sheet"
+              style={style}
+              initial={initial}
+              animate={target}
+              transition={
+                mode === 'fan' && springFan
+                  ? {
+                      type: 'spring',
+                      stiffness: 120,
+                      damping: 13,
+                      delay: Math.min(i * 0.02, 0.1),
+                    }
+                  : { duration: 0.5, ease: 'easeInOut' }
+              }
+            >
               <div className="pk-page-stack__sheet-skeleton">
                 <PkPageSkeleton />
               </div>
-            </div>
+            </motion.div>
           )
         })}
     </div>

@@ -22,28 +22,6 @@
     perspective: 600px;
   }
 
-  /*
-   * Hovering (or the `open` prop applying `--open`) spreads the page fan 2x
-   * and tilts the front cover open. `--open` reuses the exact same
-   * choreography so a click-to-open sequence can trigger it programmatically
-   * ahead of a route transition.
-   */
-  .pk-case-book__root:hover,
-  .pk-case-book__root--open {
-    --_spread: 2;
-    --_cover-tilt: -10deg;
-  }
-
-  /* Further than hover so a sheaf can leave; closing wins so the board
-     eases shut after the sheets have gone. */
-  .pk-case-book__root--extracting {
-    --_cover-tilt: -28deg;
-  }
-
-  .pk-case-book__root--cover-closing {
-    --_cover-tilt: 0deg;
-  }
-
   /* ── CoverBack — carries the case number + title, sits under everything ── */
 
   .pk-case-book__cover-back {
@@ -138,13 +116,6 @@
   .pk-case-book__pages {
     position: absolute;
     inset: 0;
-    transform: translateX(0);
-    transition: transform 0.3s ease-out;
-  }
-
-  .pk-case-book__root:hover .pk-case-book__pages,
-  .pk-case-book__root--open .pk-case-book__pages {
-    transform: translateX(4px);
   }
 
   .pk-case-book__page {
@@ -153,10 +124,7 @@
     left: 0;
     width: var(--_cover-front-width);
     height: var(--_height);
-    transform: translate(calc(var(--_page-x) * var(--_spread)), calc(var(--_page-y) * var(--_spread)))
-      rotate(calc(var(--_page-rotation) * var(--_spread)));
     transform-origin: top left;
-    transition: transform 0.3s ease-out;
     display: flex;
     flex-direction: column;
     gap: var(--pk-d4);
@@ -244,15 +212,6 @@
     overflow: hidden;
     transform-origin: left center;
     transform-style: preserve-3d;
-    transform: rotateY(var(--_cover-tilt));
-    transition: transform 0.3s ease-out;
-  }
-
-  /* Exiting overrides the open tilt — the cover continues its motion by sliding
-     and twisting away, fully opaque so it reads as the same board leaving. */
-  .pk-case-book__root--cover-exiting .pk-case-book__cover-front {
-    transform: translateY(calc(-100vh - 100%)) rotateY(-10deg) rotate(-10deg);
-    transition: transform 0.4s ease-in;
   }
 
   .pk-case-book__cover-front-edge {

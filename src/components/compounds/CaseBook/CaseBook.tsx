@@ -1,4 +1,5 @@
-import { forwardRef, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react'
+import { forwardRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react'
+import { motion } from 'framer-motion'
 import { twMerge } from 'tailwind-merge'
 import { BookIcon } from './BookIcon'
 import { CoverLogo } from './CoverLogo'
@@ -11,6 +12,19 @@ const PAGE_BASE_OFFSET = 0 // px, first page starts flush with the cover (--_pag
 const PAGE_STEP_OFFSET = 2 // px, added per subsequent page (x-axis)
 const PAGE_STEP_ROTATION = 0.5 // deg, added per subsequent page
 const PAGE_STEP_Y_OFFSET = -1 // px, added per subsequent page (y-axis), starting at 0
+export const CASE_BOOK_HOVER_PAGE_LIFT = 20
+
+const SHEET_SPRING = {
+  type: 'spring',
+  stiffness: 120,
+  damping: 13,
+} as const
+
+const COVER_SPRING = {
+  type: 'spring',
+  stiffness: 120,
+  damping: 14,
+} as const
 
 export interface PkCaseBookProps extends HTMLAttributes<HTMLDivElement> {
   /** Case citation shown on the back cover, e.g. "BS-60017/2024-HJR". Omit to render no back-cover text at all. */
@@ -83,10 +97,17 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
       logo,
       className,
       testId,
+      onMouseEnter,
+      onMouseLeave,
       ...props
     },
     ref,
   ) => {
+    const [hovered, setHovered] = useState(false)
+    const expanded = Boolean(open || hovered)
+    const spread = expanded ? 2 : 1
+    const coverTilt = coverClosing ? 0 : extracting ? -28 : expanded ? -10 : 0
+
     return (
       <div
         ref={ref}
@@ -99,6 +120,14 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
           className,
         )}
         data-testid={testId}
+        onMouseEnter={(event) => {
+          setHovered(true)
+          onMouseEnter?.(event)
+        }}
+        onMouseLeave={(event) => {
+          setHovered(false)
+          onMouseLeave?.(event)
+        }}
         {...props}
       >
         {!hideBackCover && (
@@ -122,22 +151,47 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
               } as CSSProperties
 
               return (
-                <div key={pageIndex} className="pk-case-book__page" style={style}>
+                <motion.div
+                  key={pageIndex}
+                  className="pk-case-book__page"
+                  style={style}
+                  animate={{
+                    x: PAGE_BASE_OFFSET + pageIndex * PAGE_STEP_OFFSET * spread + (expanded ? 4 : 0),
+                    y: pageIndex * PAGE_STEP_Y_OFFSET * spread - (expanded ? CASE_BOOK_HOVER_PAGE_LIFT : 0),
+                    rotate: pageIndex * PAGE_STEP_ROTATION * spread,
+                  }}
+                  transition={{
+                    ...SHEET_SPRING,
+                    delay: expanded ? Math.min(pageIndex * 0.02, 0.1) : 0,
+                  }}
+                >
                   {pageIndex === 0 && <PkPageSkeleton />}
-                </div>
+                </motion.div>
               )
             })}
           </div>
         )}
 
         {!hideFrontCover && (
-          <div className="pk-case-book__cover-front">
+          <motion.div
+            className="pk-case-book__cover-front"
+            animate={{
+              rotateY: coverExiting ? -10 : coverTilt,
+              y: coverExiting ? '-120vh' : 0,
+              rotate: coverExiting ? -10 : 0,
+            }}
+            transition={
+              coverExiting
+                ? { duration: 0.4, ease: 'easeIn' }
+                : COVER_SPRING
+            }
+          >
             <div className="pk-case-book__cover-front-edge">
               <FlipEdge />
               <span className="pk-case-book__spine" />
             </div>
             <CoverLogo>{logo ?? <BookIcon />}</CoverLogo>
-          </div>
+          </motion.div>
         )}
       </div>
     )

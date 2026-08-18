@@ -30,8 +30,7 @@
     left: 0;
     width: calc(180px * var(--_stack-scale, 1));
     height: calc(233px * var(--_stack-scale, 1));
-    transform: translate(var(--_sheet-x), var(--_sheet-y)) rotate(var(--_sheet-rotation));
-    transition: transform 0.5s ease-in-out, width 0.7s ease-in-out, height 0.7s ease-in-out;
+    transition: width 0.7s ease-in-out, height 0.7s ease-in-out;
     border-radius: var(--pk-radius-md);
     background-color: var(--pk-color-surface-body);
     overflow: hidden;

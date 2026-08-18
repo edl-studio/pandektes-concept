@@ -172,11 +172,9 @@ export function CitationStack({
 
 function CitationRow({
   citation,
-  index,
   idPrefix,
 }: {
   citation: CitationItem
-  index: number
   idPrefix: string
 }) {
   const content = (
@@ -184,12 +182,8 @@ function CitationRow({
       <CitationFavicon url={citation.url} pageNumber={citation.pageNumber} />
       <span className="pk-citation-row-copy">
         <span className="pk-citation-row-title">{citation.title}</span>
-        {citation.domain ? (
-          <span className="pk-citation-row-domain">{citation.domain}</span>
-        ) : null}
       </span>
       <span className="pk-citation-row-meta">
-        <span className="pk-citation pk-citation--static">{index}</span>
         {citation.url ? (
           <HugeiconsIcon
             icon={ArrowUpRight01Icon}
@@ -232,7 +226,7 @@ export function CitationList({
 
   return (
     <SharedLayoutBg className={cn('pk-citation-list', className)} inset={4}>
-      {citations.map((citation, index) => (
+      {citations.map((citation) => (
         <motion.div
           layout="position"
           key={citation.id}
@@ -250,7 +244,6 @@ export function CitationList({
         >
           <CitationRow
             citation={citation}
-            index={index + 1}
             idPrefix={resolvedPrefix}
           />
         </motion.div>

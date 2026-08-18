@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
+import { useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
 import { animate } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -192,6 +192,7 @@ function TimelineItem({
   isLast,
   bookTilt,
   lifted,
+  sinking,
   onOpen,
 }: {
   instanceLabel: string
@@ -201,23 +202,12 @@ function TimelineItem({
   isLast: boolean
   bookTilt: number
   lifted: boolean
+  sinking: boolean
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
   const [bookOpen, setBookOpen] = useState(false)
   const [holding, setHolding] = useState(false)
-  const [sinking, setSinking] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!lifted) {
-      setSinking(false)
-      return
-    }
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setSinking(true))
-    })
-    return () => cancelAnimationFrame(raf)
-  }, [lifted])
   const press = useRef({
     down: false,
     value: 1,
@@ -288,7 +278,9 @@ function TimelineItem({
     const bookStyle = getComputedStyle(book)
     const originX = thumbRect.left + parseFloat(bookStyle.left)
     const originY = thumbRect.top + parseFloat(bookStyle.top)
-    const startScale = bookOpen ? 0.525 : 0.5
+    // Preserve the held frame exactly when the overlay takes ownership;
+    // otherwise releasing at 0.91 would pop straight back to full scale.
+    const startScale = (bookOpen ? 0.525 : 0.5) * press.current.value
     const rotation = bookOpen ? bookTilt : 0
 
     onOpen(caseSummary, {
@@ -401,12 +393,13 @@ export function CaseListPage() {
   const [active, setActive] = useState<{
     caseSummary: CaseSummary
     originRect: OriginRect
+    sinking: boolean
   } | null>(null)
   const navigate = useNavigate()
 
   return (
     <>
-    <div className={`co-page${active ? ' co-page--exiting' : ''}`}>
+    <div className={`co-page${active ? ' co-page--transitioning' : ''}${active?.sinking ? ' co-page--exiting' : ''}`}>
       <header className="co-appbar">
         <div className="co-appbar-inner">
           <Link to="/" className="co-appbar-logo">
@@ -484,7 +477,8 @@ export function CaseListPage() {
                 isFirst={i === 0}
                 isLast={i === TIMELINE_ENTRIES.length - 1}
                 lifted={active?.caseSummary.id === caseSummary.id}
-                onOpen={(caseSummary, originRect) => setActive({ caseSummary, originRect })}
+                sinking={active?.caseSummary.id === caseSummary.id && active.sinking}
+                onOpen={(caseSummary, originRect) => setActive({ caseSummary, originRect, sinking: false })}
               />
             ))}
           </div>
@@ -496,6 +490,9 @@ export function CaseListPage() {
       <BookOpenTransition
         caseSummary={active.caseSummary}
         originRect={active.originRect}
+        onExtracted={() => {
+          setActive((current) => current ? { ...current, sinking: true } : current)
+        }}
         onComplete={() => {
           window.scrollTo(0, 0)
           navigate(`/case/${active.caseSummary.id}`)

@@ -19,10 +19,13 @@
   transition: opacity 0.3s ease;
 }
 
+.co-page--transitioning {
+  pointer-events: none;
+}
+
 .co-page--exiting {
   opacity: 0;
-  pointer-events: none;
-  /* Hold the card through the book sink (0.4s). */
+  /* Extraction has completed; hold the card through the book sink (0.4s). */
   transition: opacity 0.35s ease 0.4s;
 }
 
@@ -403,8 +406,8 @@
   background-color: var(--pk-color-surface-body);
 }
 
-/* Above the overlay sheaf so the real cover stays on top during the lift.
-   Only works while .co-page opacity is still 1 (fade is delayed 0.4s). */
+/* Above the overlay sheaf so the real cover stays on top during extraction.
+   The page remains opaque until the centerward flight begins. */
 .co-doc-card--lifted {
   z-index: 101;
 }
