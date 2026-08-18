@@ -105,10 +105,26 @@
   font-weight: var(--pk-font-weight-medium);
   line-height: 1;
   cursor: pointer;
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(6px);
   transition:
     border-color 0.12s ease,
     background-color 0.12s ease,
-    color 0.12s ease;
+    color 0.12s ease,
+    opacity 0.5s ease
+      calc(1.12s + var(--pk-thumbnail-delay, 0ms)),
+    filter 0.65s cubic-bezier(0.16, 1, 0.3, 1)
+      calc(1.12s + var(--pk-thumbnail-delay, 0ms)),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)
+      calc(1.12s + var(--pk-thumbnail-delay, 0ms));
+}
+
+.case-document-viewer[data-content-visible='true']
+  .case-document-viewer__thumbnail-button {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
 }
 
 .case-document-viewer__thumbnail-button:hover {
@@ -217,7 +233,8 @@
   .case-detail-page__toolbar,
   .case-document-viewer__sidebar,
   .case-document-viewer__page,
-  .case-document-viewer__page-status {
+  .case-document-viewer__page-status,
+  .case-document-viewer__thumbnail-button {
     transition: none;
   }
 }

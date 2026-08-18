@@ -35,6 +35,8 @@ export interface PageStackProps {
   spread?: number
   /** Horizontal-only fan multiplier, allowing wider sheets without extra tilt/Y offset. */
   xSpread?: number
+  /** Rotation-only fan multiplier, allowing tilt to change independently of X/Y spread. */
+  rotationSpread?: number
   /** Fan spread used for the overlay's first frame, before it springs outward. */
   initialSpread?: number
   /** Horizontal-only spread used for the overlay's first frame. */
@@ -51,6 +53,8 @@ export interface PageStackProps {
   alignRotation?: boolean
   /** Normalize fan X offsets independently of rotation and Y. */
   alignX?: boolean
+  /** Scale rear fan sheets down in 2% depth steps before restacking. */
+  depthScale?: boolean
   /** Carry the final downward bounce directly into the vertical list. */
   restackFromBounce?: boolean
 }
@@ -61,6 +65,7 @@ export function PageStack({
   scale = 1,
   spread = 1,
   xSpread = spread,
+  rotationSpread = spread,
   initialSpread = spread,
   initialXSpread = initialSpread,
   springFan = false,
@@ -69,11 +74,13 @@ export function PageStack({
   bouncePhase = 'idle',
   alignRotation = false,
   alignX = false,
+  depthScale = false,
   restackFromBounce = false,
 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
   const fan = mode === 'fan' ? spread : 1
   const xFan = mode === 'fan' ? xSpread : 1
+  const rotationFan = mode === 'fan' ? rotationSpread : 1
 
   return (
     <div className="pk-page-stack__root" style={{ width: 180 * scale, height }}>
@@ -87,6 +94,10 @@ export function PageStack({
           const sheetProgress =
             pageCount <= 1 ? 0 : i / (pageCount - 1)
           const sheetBounceY = bounceY * (1 - sheetProgress * 0.25)
+          const sheetDepthScale =
+            mode === 'fan' && depthScale
+              ? Math.max(0.84, 1 - i * 0.02)
+              : 1
           const target = {
             x:
               mode === 'fan' && !alignX
@@ -99,10 +110,11 @@ export function PageStack({
                   (restackFromBounce ? sheetBounceY : 0),
             rotate:
               mode === 'fan' && !alignRotation
-                ? i * FAN_STEP_ROTATION * fan
+                ? i * FAN_STEP_ROTATION * rotationFan
                 : 0,
             width: 180 * scale,
             height: 233 * scale,
+            scale: sheetDepthScale,
           }
           const initial = {
             x: i * FAN_STEP_X * initialXSpread * scale,
@@ -110,6 +122,7 @@ export function PageStack({
             rotate: i * FAN_STEP_ROTATION * initialSpread,
             width: 180 * scale,
             height: 233 * scale,
+            scale: 1,
           }
           const sheetDelay = Math.min(i * 0.02, 0.1)
           const sheetSpring = {
@@ -166,6 +179,7 @@ export function PageStack({
                         ? bounceDownSpring
                         : sheetSpring,
                   rotate: alignRotation ? alignSpring : sheetSpring,
+                  scale: gentleFan ? spreadSpring : sheetSpring,
                   width: STACK_LAYOUT_SPRING,
                   height: STACK_LAYOUT_SPRING,
                 }
@@ -174,6 +188,7 @@ export function PageStack({
                     x: STACK_LAYOUT_SPRING,
                     y: restackBounceSpring,
                     rotate: restackBounceSpring,
+                    scale: restackBounceSpring,
                     width: STACK_LAYOUT_SPRING,
                     height: STACK_LAYOUT_SPRING,
                   }

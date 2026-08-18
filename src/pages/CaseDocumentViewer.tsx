@@ -193,6 +193,11 @@ export function CaseDocumentViewer({
                   }}
                   type="button"
                   className="case-document-viewer__thumbnail-button"
+                  style={
+                    {
+                      '--pk-thumbnail-delay': `${(pageNumber - 1) * 80}ms`,
+                    } as CSSProperties
+                  }
                   aria-label={`Go to page ${pageNumber}`}
                   aria-current={activePage === pageNumber ? 'page' : undefined}
                   onClick={() => goToPage(pageNumber)}
