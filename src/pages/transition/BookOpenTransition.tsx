@@ -35,7 +35,7 @@ const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the fli
 const EXTRACT_PAGE_SPREAD = 3 // Y-offset and rotation fan multiplier while the sheaf is extracted/in flight.
 const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually before restacking.
 const CENTER_SPREAD_MS = 900 // Time at center for horizontal spreading to slow and settle before restacking.
-const BOUNCE_Y = -16 // Per-sheet upward bounce distance (px); more negative means a higher bounce.
+const BOUNCE_Y = -32 // Per-sheet upward bounce distance (px); more negative means a higher bounce.
 const BOUNCE_UP_MS = 360 // Time between starting the staggered upward bounce and sending sheets back down.
 const BOUNCE_DOWN_MS = 420 // Time allowed for the return bounce before its state is cleared.
 const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before restacking.
@@ -55,7 +55,6 @@ type Phase =
   | 'spreading'
   | 'reorganizing'
   | 'scaling'
-  | 'settling'
 type BouncePhase = 'idle' | 'up' | 'down'
 
 /** Cubic Bézier used by both halves of the continuous flight path. */
@@ -216,19 +215,14 @@ export function BookOpenTransition({
       if (cancelled) return
 
       setPhase('scaling')
-      const scaling = animate(leftMv, stackLeftLarge, {
+      const scalingX = animate(leftMv, stackLeftLarge, {
         ...STACK_LAYOUT_SPRING,
       })
-      stops.push(scaling)
-      await scaling
-      if (cancelled) return
-
-      setPhase('settling')
-      const settling = animate(topMv, stackRestY, {
+      const scalingY = animate(topMv, stackRestY, {
         ...STACK_LAYOUT_SPRING,
       })
-      stops.push(settling)
-      await settling
+      stops.push(scalingX, scalingY)
+      await Promise.all([scalingX, scalingY])
       if (!cancelled) onComplete()
     }
 
@@ -246,8 +240,8 @@ export function BookOpenTransition({
   const isSpreading = phase === 'spreading'
   const isBouncing = bouncePhase !== 'idle'
   const isFanned = isExtracting || isFlying || isSpreading
-  const isReorganized = phase === 'reorganizing' || phase === 'scaling' || phase === 'settling'
-  const isScaled = phase === 'scaling' || phase === 'settling'
+  const isReorganized = phase === 'reorganizing' || phase === 'scaling'
+  const isScaled = phase === 'scaling'
 
   const tile = originRect.tile
 
