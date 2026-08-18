@@ -50,6 +50,7 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  gap: 0.25em;
   height: var(--pk-d9);
   margin: 0 0 var(--pk-d2);
   color: var(--pk-color-content-tertiary);
@@ -71,6 +72,13 @@
   opacity: 1;
   filter: blur(0);
   transform: translateY(0);
+}
+
+.case-document-viewer__page-status number-flow-react {
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  font-variant-numeric: tabular-nums;
 }
 
 .case-document-viewer__thumbnail-list {

@@ -4,6 +4,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react'
+import NumberFlow from '@number-flow/react'
 import { PageStack, PdfPageCanvas, DocumentPageImage } from '@/components/compounds/PageStack'
 import { getPdf } from '@/components/compounds/PageStack/PdfPageCanvas'
 import type { CaseSummary } from './case-data'
@@ -179,7 +180,13 @@ export function CaseDocumentViewer({
       <aside className="case-document-viewer__sidebar">
         <nav className="case-document-viewer__nav" aria-label="Document pages">
           <p className="case-document-viewer__page-status" aria-live="polite">
-            Page {activePage} of {pageCount}
+            <span>Page</span>
+            <NumberFlow
+              value={activePage}
+              format={{ useGrouping: false }}
+              willChange
+            />
+            <span>of {pageCount}</span>
           </p>
           <ol
             ref={thumbnailListRef}

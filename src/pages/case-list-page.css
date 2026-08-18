@@ -567,7 +567,6 @@
   position: relative;
   height: calc(var(--pk-d5) + 233px * var(--co-book-rest) + var(--pk-d4));
   overflow: visible;
-  border-bottom: 1px solid rgb(0 0 0 / 0.08);
 }
 
 .co-doc-poster .co-doc-thumb-book {

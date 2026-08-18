@@ -34,8 +34,9 @@ export interface OriginRect {
   tile?: { left: number; top: number; right: number; bottom: number }
 }
 
-const REORGANIZE_MS = 750 // Time allowed for the centered fan to spring into a vertical list.
+const REORGANIZE_MS = 900 // Includes the back-to-front restack stagger before the final settle.
 const PRESTACK_X_MS = 300 // Collapse horizontal offsets before sheets descend into the list.
+const RESTACK_LIST_GAP = 28 // Expanded list gap that compresses back to normal before scaling.
 const CENTER_X_COLLAPSE_PROGRESS = 0.72 // Begin flattening X offsets on the final approach so the sheaf lands stacked.
 const CENTER_X_SETTLE_MS = 100 // Briefly hold the zero-X landing before opening the centered fan.
 const STACK_HOLD_MS = 400 // Pause on the small vertical list before the final scale-up begins.
@@ -367,6 +368,7 @@ export function BookOpenTransition({
             alignRotation={isFlying || isCenteringX || isSpreading || isAligningX}
             alignX={isCenteringX || isAligningX}
             alignedXStep={isCenteringX ? 1 : 0}
+            listGap={isBounceRestacking ? RESTACK_LIST_GAP : undefined}
             restackFromBounce={isBounceRestacking}
           />
         </motion.div>

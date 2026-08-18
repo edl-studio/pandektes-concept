@@ -11,6 +11,7 @@ const FAN_STEP_Y = -1
 const FAN_STEP_ROTATION = 0.5
 const LIST_GAP = 16 // base units — becomes LIST_GAP * scale on screen
 const BOUNCE_STAGGER_WINDOW = 0.35 // A slower front-to-back wave, normalized for any page count.
+const RESTACK_STAGGER_WINDOW = 0.45 // Back-to-front descent window, normalized for any page count.
 export const STACK_LAYOUT_SPRING = {
   type: 'spring',
   stiffness: 65,
@@ -57,6 +58,8 @@ export interface PageStackProps {
   alignX?: boolean
   /** Per-sheet X step retained while X alignment is active. */
   alignedXStep?: number
+  /** Vertical gap between sheets in list mode, in unscaled pixels. */
+  listGap?: number
   /** Scale rear fan sheets down in 2% depth steps before restacking. */
   depthScale?: boolean
   /** Carry the final downward bounce directly into the vertical list. */
@@ -80,10 +83,11 @@ export function PageStack({
   alignRotation = false,
   alignX = false,
   alignedXStep = 0,
+  listGap = LIST_GAP,
   depthScale = false,
   restackFromBounce = false,
 }: PageStackProps) {
-  const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
+  const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * listGap : 233) * scale
   const xFan = mode === 'fan' ? xSpread : 1
   const yFan = mode === 'fan' ? ySpread : 1
   const rotationFan = mode === 'fan' ? rotationSpread : 1
@@ -112,7 +116,7 @@ export function PageStack({
             y:
               mode === 'fan'
                 ? i * FAN_STEP_Y * yFan * scale + sheetBounceY
-                : i * (233 + LIST_GAP) * scale +
+                : i * (233 + listGap) * scale +
                   (restackFromBounce ? sheetBounceY : 0),
             rotate:
               mode === 'fan' && !alignRotation
@@ -161,7 +165,7 @@ export function PageStack({
             type: 'spring' as const,
             stiffness: 130,
             damping: 18,
-            delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
+            delay: (1 - sheetProgress) * RESTACK_STAGGER_WINDOW,
           }
           const transition =
             mode === 'fan' && springFan
