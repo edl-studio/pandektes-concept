@@ -35,15 +35,16 @@ const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the fli
 const EXTRACT_PAGE_SPREAD = 3 // Y-offset and rotation fan multiplier while the sheaf is extracted/in flight.
 const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually before restacking.
 const CENTER_SPREAD_MS = 900 // Time at center for horizontal spreading to slow and settle before restacking.
-const BOUNCE_Y = -128 // Per-sheet upward bounce distance (px); more negative means a higher bounce.
+const BOUNCE_Y = -16 // Per-sheet upward bounce distance (px); more negative means a higher bounce.
 const BOUNCE_UP_MS = 360 // Time between starting the staggered upward bounce and sending sheets back down.
 const BOUNCE_DOWN_MS = 420 // Time allowed for the return bounce before its state is cleared.
+const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before restacking.
 const BACKGROUND_FADE_MS = 750 // Bounce delay after extraction: CSS background fade delay (400ms) + fade (350ms).
 const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book sink, page fade, and bounce clock.
 const APEX_PROGRESS = 0.55 // Flight progress (0–1) at which the sheaf reaches the top of its arc.
 const FLIGHT_SPRING = {
   type: 'spring',
-  stiffness: 50,
+  stiffness: 32,
   damping: 15,
   mass: 1.2,
 } as const
@@ -136,6 +137,25 @@ export function BookOpenTransition({
 
     async function run() {
       let extracted = false
+      let bounceSequence = Promise.resolve()
+
+      async function runBounceSequence() {
+        await wait(BACKGROUND_FADE_MS)
+        if (cancelled) return
+
+        for (let cycle = 0; cycle < BOUNCE_COUNT; cycle += 1) {
+          setBouncePhase('up')
+          await wait(BOUNCE_UP_MS)
+          if (cancelled) return
+
+          setBouncePhase('down')
+          await wait(BOUNCE_DOWN_MS)
+          if (cancelled) return
+        }
+
+        setBouncePhase('idle')
+      }
+
       // One progress value owns the full book-to-center journey. The first
       // cubic leaves vertically, and both cubics pass through the apex with
       // continuous velocity, so neither extraction nor the apex is a stop.
@@ -171,11 +191,7 @@ export function BookOpenTransition({
             extracted = true
             setPhase('flying')
             onExtracted()
-            timers.push(
-              setTimeout(() => setBouncePhase('up'), BACKGROUND_FADE_MS),
-              setTimeout(() => setBouncePhase('down'), BACKGROUND_FADE_MS + BOUNCE_UP_MS),
-              setTimeout(() => setBouncePhase('idle'), BACKGROUND_FADE_MS + BOUNCE_UP_MS + BOUNCE_DOWN_MS),
-            )
+            bounceSequence = runBounceSequence()
           }
 
           const flyProgress = Math.max(0, (t - EXTRACT_THRESHOLD) / (1 - EXTRACT_THRESHOLD))
@@ -189,6 +205,10 @@ export function BookOpenTransition({
 
       setPhase('spreading')
       await wait(CENTER_SPREAD_MS)
+      if (cancelled) return
+
+      // Restacking cannot interrupt the fake-loading bounce loop.
+      await bounceSequence
       if (cancelled) return
 
       setPhase('reorganizing')

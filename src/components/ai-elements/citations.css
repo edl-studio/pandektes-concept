@@ -155,11 +155,12 @@
 }
 
 .pk-citations-toggle {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
   gap: var(--pk-d1);
-  min-height: 20px;
-  padding: 0;
+  min-height: 32px;
+  padding: var(--pk-d1) var(--pk-d2) var(--pk-d1) 0;
   border: none;
   background: none;
   font-family: var(--pk-font-family-base);
@@ -187,12 +188,23 @@
   font-weight: var(--pk-font-weight-medium);
   line-height: 14px;
   color: var(--pk-color-content-tertiary);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.pk-citations-toggle:hover .pk-citations-count {
+  color: var(--pk-color-accent-base);
+  background-color: rgb(var(--pk-color-core-accent) / 0.2);
 }
 
 .pk-citations-chevron {
   display: inline-flex;
+  margin-left: auto;
   color: var(--pk-color-content-tertiary);
-  transition: transform 0.18s ease;
+  transition: color 0.15s ease, transform 0.18s ease;
+}
+
+.pk-citations-toggle:hover .pk-citations-chevron {
+  color: var(--pk-color-accent-base);
 }
 
 .pk-citations-toggle[data-panel-open] .pk-citations-chevron,
