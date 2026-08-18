@@ -86,43 +86,8 @@ export function CaseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-body p-12 flex flex-col items-center">
+    <div className="case-detail-page min-h-screen bg-surface-body">
       <BackToCasesButton />
-
-      {/* The fixed height keeps the stack aligned with BookOpenTransition's
-          DETAIL_TOP settle target while providing a document toolbar. */}
-      {/* Fixed height keeps the stack aligned with BookOpenTransition's
-          DETAIL_TOP settle target; count hint is positioned absolutely
-          below so it cannot change the toolbar height during animation. */}
-      <div
-        className="case-detail-page__toolbar w-full max-w-[600px]"
-        data-content-visible={showContent}
-        style={{ height: DETAIL_PAGE_HEADER_HEIGHT, position: 'relative' }}
-      >
-        <InputGroup className="w-full">
-          <InputField
-            index={0}
-            label="Search"
-            labelHidden
-            placeholder="Search document…"
-            icon={Search}
-            value={searchValue}
-            onChange={setSearchValue}
-            onKeyDown={handleSearchKeyDown}
-          />
-        </InputGroup>
-        {searchValue.trim() && searchResultCount !== null && (
-          <p
-            className="case-detail-page__search-count"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {searchResultCount === 0
-              ? 'No results'
-              : `${searchResultCount} result${searchResultCount !== 1 ? 's' : ''} — Enter to navigate`}
-          </p>
-        )}
-      </div>
 
       <CaseDocumentViewer
         caseSummary={caseSummary}
@@ -131,6 +96,37 @@ export function CaseDetailPage() {
         searchNavStep={searchNavStep}
         citationHighlight={citationHighlight}
         onSearchResults={setSearchResultCount}
+        searchToolbar={
+          <div
+            className="case-detail-page__toolbar"
+            data-content-visible={showContent}
+            style={{ height: DETAIL_PAGE_HEADER_HEIGHT, position: 'relative' }}
+          >
+            <InputGroup className="w-full">
+              <InputField
+                index={0}
+                label="Search"
+                labelHidden
+                placeholder="Search document…"
+                icon={Search}
+                value={searchValue}
+                onChange={setSearchValue}
+                onKeyDown={handleSearchKeyDown}
+              />
+            </InputGroup>
+            {searchValue.trim() && searchResultCount !== null && (
+              <p
+                className="case-detail-page__search-count"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {searchResultCount === 0
+                  ? 'No results'
+                  : `${searchResultCount} result${searchResultCount !== 1 ? 's' : ''} — Enter to navigate`}
+              </p>
+            )}
+          </div>
+        }
       />
     </div>
   )

@@ -14,6 +14,7 @@ import {
   BOOK_HEIGHT,
   BOOK_WIDTH,
   DETAIL_TOP,
+  getDetailDocumentLeft,
   OPEN_PAGE_NUDGE,
   OPEN_PAGE_SPREAD,
   PAGE_WIDTH,
@@ -129,7 +130,7 @@ export function BookOpenTransition({
   // The sheets and this left offset use the same spring, so their normalized
   // progress stays aligned while the real sheet boxes grow around center.
   const stackLeftSmall = window.innerWidth / 2 - PAGE_WIDTH / 2
-  const stackLeftLarge = window.innerWidth / 2 - (PAGE_WIDTH * SCALE) / 2
+  const stackLeftLarge = getDetailDocumentLeft(window.innerWidth)
 
   const startScale = originRect.width / BOOK_WIDTH
   const startRotation = originRect.rotation ?? 0

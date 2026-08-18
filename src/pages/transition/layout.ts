@@ -6,7 +6,7 @@
  */
 export const PAGE_WIDTH = 180 // matches PkCaseBook's --_cover-front-width / PageStack's sheet width
 export const PAGE_HEIGHT = 233
-export const FULL_WIDTH = 600 // reading width once scaled up
+export const FULL_WIDTH = 544 // document column width in the detail workspace
 export const SCALE = FULL_WIDTH / PAGE_WIDTH
 
 export const BOOK_WIDTH = 188
@@ -17,9 +17,25 @@ export const OPEN_PAGE_NUDGE = 4
 /** Matches `.pk-case-book__root--open` `--_spread`. */
 export const OPEN_PAGE_SPREAD = 2
 
-// CaseDetailPage's structure is: p-12 padding, then a fixed-height header
-// block (the "Back to cases" link) — deliberately a fixed height rather
-// than text-flow-derived margin, so this constant stays exactly correct.
-export const DETAIL_PAGE_PADDING = 48 // p-12
-export const DETAIL_PAGE_HEADER_HEIGHT = 44
-export const DETAIL_TOP = DETAIL_PAGE_PADDING + DETAIL_PAGE_HEADER_HEIGHT
+export const DETAIL_MAIN_PADDING = 24
+export const DETAIL_PAGE_HEADER_HEIGHT = 32
+export const DETAIL_PAGE_HEADER_GAP = 24
+export const DETAIL_SIDEBAR_WIDTH = 360
+export const DETAIL_WORKSPACE_WIDTH = 768
+export const DETAIL_NAV_COLUMN_WIDTH = 200
+export const DETAIL_COLUMN_GAP = 24
+export const DETAIL_TOP =
+  DETAIL_MAIN_PADDING + DETAIL_PAGE_HEADER_HEIGHT + DETAIL_PAGE_HEADER_GAP
+
+/** Horizontal resting position of the PDF column in the responsive detail shell. */
+export function getDetailDocumentLeft(viewportWidth: number): number {
+  if (viewportWidth < 960) return (viewportWidth - FULL_WIDTH) / 2
+
+  const sidebarWidth = viewportWidth >= 1240 ? DETAIL_SIDEBAR_WIDTH : 0
+  const mainWidth = viewportWidth - sidebarWidth
+  return (
+    (mainWidth - DETAIL_WORKSPACE_WIDTH) / 2 +
+    DETAIL_NAV_COLUMN_WIDTH +
+    DETAIL_COLUMN_GAP
+  )
+}
