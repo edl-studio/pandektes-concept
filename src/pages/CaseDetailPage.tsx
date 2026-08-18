@@ -60,7 +60,8 @@ export function CaseDetailPage() {
       {/* The fixed height keeps the stack aligned with BookOpenTransition's
           DETAIL_TOP settle target while providing a document toolbar. */}
       <div
-        className="w-full max-w-[600px] flex items-start justify-end"
+        className="case-detail-page__toolbar w-full max-w-[600px] flex items-start justify-end"
+        data-content-visible={showContent}
         style={{ height: DETAIL_PAGE_HEADER_HEIGHT }}
       >
         <InputGroup className="w-full">

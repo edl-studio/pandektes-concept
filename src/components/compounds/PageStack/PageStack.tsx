@@ -10,6 +10,7 @@ const FAN_STEP_X = 2
 const FAN_STEP_Y = -1
 const FAN_STEP_ROTATION = 0.5
 const LIST_GAP = 16 // base units — becomes LIST_GAP * scale on screen
+const BOUNCE_STAGGER_WINDOW = 0.2 // Keep the full bounce wave within 200ms regardless of page count.
 export const STACK_LAYOUT_SPRING = {
   type: 'spring',
   stiffness: 65,
@@ -106,7 +107,10 @@ export function PageStack({
             type: 'spring' as const,
             stiffness: 220,
             damping: 14,
-            delay: i * 0.035,
+            delay:
+              pageCount <= 1
+                ? 0
+                : (i / (pageCount - 1)) * BOUNCE_STAGGER_WINDOW,
           }
           const transition =
             mode === 'fan' && springFan
