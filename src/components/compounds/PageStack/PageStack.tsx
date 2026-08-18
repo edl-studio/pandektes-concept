@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { PkPageSkeleton } from '@/components/compounds/CaseBook'
 import './page-stack.css'
@@ -22,6 +22,8 @@ export const STACK_LAYOUT_SPRING = {
 export interface PageStackProps {
   pageCount: number
   mode: 'fan' | 'list'
+  /** Decorative content rendered behind the skeleton on the front sheet. */
+  frontSheetBackdrop?: ReactNode
   /**
    * Uniform growth factor from the base 180x233 unit. Sheet boxes grow via
    * real width/height (see page-stack.css) so border-radius/border stay
@@ -69,6 +71,7 @@ export interface PageStackProps {
 export function PageStack({
   pageCount,
   mode,
+  frontSheetBackdrop,
   scale = 1,
   spread = 1,
   xSpread = spread,
@@ -204,6 +207,7 @@ export function PageStack({
               animate={target}
               transition={transition}
             >
+              {i === 0 && frontSheetBackdrop}
               <motion.div
                 className="pk-page-stack__sheet-skeleton"
                 initial={{ scale }}

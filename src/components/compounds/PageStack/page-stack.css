@@ -36,6 +36,7 @@
   .pk-page-stack__sheet::before {
     content: '';
     position: absolute;
+    z-index: 2;
     inset: 0;
     border-radius: inherit;
     padding: 1px;
@@ -59,6 +60,7 @@
    */
   .pk-page-stack__sheet-skeleton {
     position: absolute;
+    z-index: 1;
     top: 0;
     left: 0;
     width: 180px;
@@ -68,6 +70,18 @@
     display: flex;
     flex-direction: column;
     gap: var(--pk-d4);
+  }
+
+  /*
+   * Keep the skeleton bars visually equivalent to black at 10% over paper,
+   * but make them opaque so decorative sheet backdrops cannot bleed through.
+   */
+  .pk-page-stack__sheet-skeleton .pk-case-book__skeleton-bar {
+    background-color: color-mix(
+      in srgb,
+      var(--pk-color-surface-body) 90%,
+      rgb(var(--pk-color-core-black))
+    );
   }
 
   /*

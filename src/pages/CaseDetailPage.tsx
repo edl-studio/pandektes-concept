@@ -30,7 +30,7 @@ function BackToCasesButton() {
   )
 }
 
-const CONTENT_REVEAL_DELAY_MS = 400
+const CONTENT_REVEAL_DELAY_MS = 600
 
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>()

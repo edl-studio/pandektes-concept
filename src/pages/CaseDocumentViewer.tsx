@@ -6,6 +6,7 @@ import {
 } from 'react'
 import NumberFlow from '@number-flow/react'
 import { PageStack, PdfPageCanvas, DocumentPageImage } from '@/components/compounds/PageStack'
+import { FlickeringGrid } from '@/components/effects/FlickeringGrid'
 import { getPdf } from '@/components/compounds/PageStack/PdfPageCanvas'
 import type { CaseSummary } from './case-data'
 import { FULL_WIDTH, PAGE_HEIGHT, SCALE } from './transition/layout'
@@ -231,7 +232,19 @@ export function CaseDocumentViewer({
         </nav>
       </aside>
 
-      <PageStack pageCount={pageCount} mode="list" scale={SCALE} />
+      <PageStack
+        pageCount={pageCount}
+        mode="list"
+        scale={SCALE}
+        frontSheetBackdrop={
+          <FlickeringGrid
+            className="case-document-viewer__flickering-grid"
+            color="#7d2334"
+            flickerChance={0.22}
+            maxOpacity={0.32}
+          />
+        }
+      />
 
       <div className="case-document-viewer__pages">
         {pages.map((pageNumber, index) => {
