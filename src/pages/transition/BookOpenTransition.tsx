@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { animate, motion, useMotionValue } from 'framer-motion'
+import { animate, motion, useMotionValue, useSpring } from 'framer-motion'
 import { PageStack, STACK_LAYOUT_SPRING } from '@/components/compounds/PageStack'
 import { CASE_BOOK_HOVER_PAGE_LIFT } from '@/components/compounds/CaseBook'
 import type { CaseSummary } from '../case-data'
@@ -47,6 +47,11 @@ const FLIGHT_SPRING = {
   stiffness: 48,
   damping: 15,
   mass: 1.2,
+} as const
+const ROTATION_SPRING = {
+  stiffness: 45,
+  damping: 14,
+  mass: 1.4,
 } as const
 
 type Phase =
@@ -120,10 +125,36 @@ export function BookOpenTransition({
   // through the apex, rather than merely pointing in the same direction.
   const apexHandleRight = apexHandleLeft * ((1 - APEX_PROGRESS) / APEX_PROGRESS)
 
+  function flightPoint(t: number) {
+    return {
+      x: continuousArc(
+        t,
+        startLeft,
+        startLeft,
+        apexX - apexHandleLeft,
+        apexX,
+        apexX + apexHandleRight,
+        stackLeftSmall,
+        stackLeftSmall,
+      ),
+      y: continuousArc(
+        t,
+        startTop,
+        extractedTop,
+        apexY,
+        apexY,
+        apexY,
+        apexY + (stackHandoffY - apexY) * 0.55,
+        stackHandoffY,
+      ),
+    }
+  }
+
   const leftMv = useMotionValue(startLeft)
   const topMv = useMotionValue(startTop)
   const scaleMv = useMotionValue(startScale)
-  const rotateMv = useMotionValue(startRotation)
+  const rotateTargetMv = useMotionValue(startRotation)
+  const rotateMv = useSpring(rotateTargetMv, ROTATION_SPRING)
 
   useEffect(() => {
     let cancelled = false
@@ -161,30 +192,11 @@ export function BookOpenTransition({
       const flight = animate(0, 1, {
         ...FLIGHT_SPRING,
         onUpdate(t) {
-          leftMv.set(
-            continuousArc(
-              t,
-              startLeft,
-              startLeft,
-              apexX - apexHandleLeft,
-              apexX,
-              apexX + apexHandleRight,
-              stackLeftSmall,
-              stackLeftSmall,
-            ),
-          )
-          topMv.set(
-            continuousArc(
-              t,
-              startTop,
-              extractedTop,
-              apexY,
-              apexY,
-              apexY,
-              apexY + (stackHandoffY - apexY) * 0.55,
-              stackHandoffY,
-            ),
-          )
+          const pathT = Math.max(0, Math.min(t, 1))
+          const point = flightPoint(pathT)
+          const nextPoint = flightPoint(Math.min(pathT + 0.002, 1))
+          leftMv.set(point.x)
+          topMv.set(point.y)
 
           if (!extracted && t >= EXTRACT_THRESHOLD) {
             extracted = true
@@ -194,8 +206,12 @@ export function BookOpenTransition({
           }
 
           const flyProgress = Math.max(0, (t - EXTRACT_THRESHOLD) / (1 - EXTRACT_THRESHOLD))
+          const heading = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI)
+          const bank = Math.max(-12, Math.min(heading * 0.15, 12))
+          const pathTaper = Math.sin(Math.PI * pathT)
+          const entranceBlend = Math.min(pathT / EXTRACT_THRESHOLD, 1)
           scaleMv.set(startScale + (1 - startScale) * flyProgress)
-          rotateMv.set(startRotation * (1 - flyProgress))
+          rotateTargetMv.set(startRotation * (1 - entranceBlend) + bank * pathTaper)
         },
       })
       stops.push(flight)
