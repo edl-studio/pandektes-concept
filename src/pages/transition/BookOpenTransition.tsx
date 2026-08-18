@@ -35,9 +35,10 @@ const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the fli
 const EXTRACT_PAGE_SPREAD = 3 // Y-offset and rotation fan multiplier while the sheaf is extracted/in flight.
 const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually before restacking.
 const CENTER_SPREAD_MS = 900 // Time at center for horizontal spreading to slow and settle before restacking.
-const BOUNCE_Y = -32 // Per-sheet upward bounce distance (px); more negative means a higher bounce.
-const BOUNCE_UP_MS = 600 // Includes the normalized stagger window so the final sheet can complete its upward travel.
-const BOUNCE_DOWN_MS = 650 // Lets the final staggered sheet settle before the next cycle or restack.
+const BOUNCE_UP_Y = -32 // Upper extent of the wave relative to each sheet's baseline.
+const BOUNCE_DOWN_Y = 12 // Lower extent; positive Y carries the wave below baseline before it rises again.
+const BOUNCE_UP_MS = 650 // Reverses the wave while its softer springs still carry upward momentum.
+const BOUNCE_DOWN_MS = 700 // Lets the un-delayed return flow through before the next wave begins.
 const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before restacking.
 const BACKGROUND_FADE_MS = 750 // Bounce delay after extraction: CSS background fade delay (400ms) + fade (350ms).
 const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book sink, page fade, and bounce clock.
@@ -178,12 +179,14 @@ export function BookOpenTransition({
           await wait(BOUNCE_UP_MS)
           if (cancelled) return
 
+          // Leave the final cycle raised. The main sequence sends it
+          // directly into list positions instead of settling the fan first.
+          if (cycle === BOUNCE_COUNT - 1) return
+
           setBouncePhase('down')
           await wait(BOUNCE_DOWN_MS)
           if (cancelled) return
         }
-
-        setBouncePhase('idle')
       }
 
       // One progress value owns the full book-to-center journey. The first
@@ -222,12 +225,18 @@ export function BookOpenTransition({
       await wait(CENTER_SPREAD_MS)
       if (cancelled) return
 
-      // Restacking cannot interrupt the fake-loading bounce loop.
+      // The first cycles return to the fan; the final cycle pauses at its
+      // apex so this phase change becomes its downward stroke.
       await bounceSequence
       if (cancelled) return
 
+      setBouncePhase('down')
       setPhase('reorganizing')
-      await wait(REORGANIZE_MS + STACK_HOLD_MS)
+      await wait(REORGANIZE_MS)
+      if (cancelled) return
+
+      setBouncePhase('idle')
+      await wait(STACK_HOLD_MS)
       if (cancelled) return
 
       setPhase('scaling')
@@ -254,9 +263,9 @@ export function BookOpenTransition({
   const isExtracting = phase === 'extracting'
   const isFlying = phase === 'flying'
   const isSpreading = phase === 'spreading'
-  const isBouncing = bouncePhase !== 'idle'
   const isFanned = isExtracting || isFlying || isSpreading
   const isReorganized = phase === 'reorganizing' || phase === 'scaling'
+  const isBounceRestacking = phase === 'reorganizing' && bouncePhase === 'down'
   const isScaled = phase === 'scaling'
 
   const tile = originRect.tile
@@ -283,8 +292,15 @@ export function BookOpenTransition({
           xSpread={isFanned ? CENTER_X_SPREAD : 1}
           springFan={isFanned}
           gentleFan={isFanned}
-          bounceY={bouncePhase === 'up' ? BOUNCE_Y : 0}
-          staggerBounce={isBouncing}
+          bounceY={
+            bouncePhase === 'up'
+              ? BOUNCE_UP_Y
+              : bouncePhase === 'down'
+                ? BOUNCE_DOWN_Y
+                : 0
+          }
+          bouncePhase={bouncePhase}
+          restackFromBounce={isBounceRestacking}
         />
       </motion.div>
 

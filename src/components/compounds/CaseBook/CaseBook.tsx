@@ -106,7 +106,7 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
     const [hovered, setHovered] = useState(false)
     const expanded = Boolean(open || hovered)
     const spread = expanded ? 2 : 1
-    const coverTilt = coverClosing ? 0 : extracting ? -28 : expanded ? -10 : 0
+    const coverTilt = coverClosing ? 0 : expanded || extracting ? -28 : 0
 
     return (
       <div

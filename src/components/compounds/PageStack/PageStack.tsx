@@ -10,7 +10,7 @@ const FAN_STEP_X = 2
 const FAN_STEP_Y = -1
 const FAN_STEP_ROTATION = 0.5
 const LIST_GAP = 16 // base units — becomes LIST_GAP * scale on screen
-const BOUNCE_STAGGER_WINDOW = 0.2 // Keep the full bounce wave within 200ms regardless of page count.
+const BOUNCE_STAGGER_WINDOW = 0.35 // A slower front-to-back wave, normalized for any page count.
 export const STACK_LAYOUT_SPRING = {
   type: 'spring',
   stiffness: 65,
@@ -45,8 +45,10 @@ export interface PageStackProps {
   gentleFan?: boolean
   /** Temporary Y offset used for the centered sheet-bounce wave. */
   bounceY?: number
-  /** Stagger the dedicated bounce spring from the front sheet backward. */
-  staggerBounce?: boolean
+  /** Selects direction-specific springs for the traveling sheet wave. */
+  bouncePhase?: 'idle' | 'up' | 'down'
+  /** Carry the final downward bounce directly into the vertical list. */
+  restackFromBounce?: boolean
 }
 
 export function PageStack({
@@ -60,7 +62,8 @@ export function PageStack({
   springFan = false,
   gentleFan = false,
   bounceY = 0,
-  staggerBounce = false,
+  bouncePhase = 'idle',
+  restackFromBounce = false,
 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
   const fan = mode === 'fan' ? spread : 1
@@ -75,9 +78,16 @@ export function PageStack({
           const style = {
             zIndex: pageCount - i,
           } as CSSProperties
+          const sheetProgress =
+            pageCount <= 1 ? 0 : i / (pageCount - 1)
+          const sheetBounceY = bounceY * (1 - sheetProgress * 0.25)
           const target = {
             x: mode === 'fan' ? i * FAN_STEP_X * xFan * scale : 0,
-            y: mode === 'fan' ? i * FAN_STEP_Y * fan * scale + bounceY : i * (233 + LIST_GAP) * scale,
+            y:
+              mode === 'fan'
+                ? i * FAN_STEP_Y * fan * scale + sheetBounceY
+                : i * (233 + LIST_GAP) * scale +
+                  (restackFromBounce ? sheetBounceY : 0),
             rotate: mode === 'fan' ? i * FAN_STEP_ROTATION * fan : 0,
             width: 180 * scale,
             height: 233 * scale,
@@ -103,24 +113,48 @@ export function PageStack({
             mass: 1.4,
             delay: sheetDelay,
           }
-          const bounceSpring = {
+          const bounceUpSpring = {
             type: 'spring' as const,
-            stiffness: 220,
-            damping: 14,
-            delay:
-              pageCount <= 1
-                ? 0
-                : (i / (pageCount - 1)) * BOUNCE_STAGGER_WINDOW,
+            stiffness: 110,
+            damping: 12,
+            mass: 1.1,
+            delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
+          }
+          const bounceDownSpring = {
+            type: 'spring' as const,
+            stiffness: 90,
+            damping: 13,
+            mass: 1.1,
+            delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
+          }
+          const restackBounceSpring = {
+            type: 'spring' as const,
+            stiffness: 130,
+            damping: 18,
+            delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
           }
           const transition =
             mode === 'fan' && springFan
               ? {
                   x: gentleFan ? spreadSpring : sheetSpring,
-                  y: staggerBounce ? bounceSpring : sheetSpring,
+                  y:
+                    bouncePhase === 'up'
+                      ? bounceUpSpring
+                      : bouncePhase === 'down'
+                        ? bounceDownSpring
+                        : sheetSpring,
                   rotate: sheetSpring,
                   width: STACK_LAYOUT_SPRING,
                   height: STACK_LAYOUT_SPRING,
                 }
+              : mode === 'list' && restackFromBounce
+                ? {
+                    x: STACK_LAYOUT_SPRING,
+                    y: restackBounceSpring,
+                    rotate: restackBounceSpring,
+                    width: STACK_LAYOUT_SPRING,
+                    height: STACK_LAYOUT_SPRING,
+                  }
               : STACK_LAYOUT_SPRING
 
           return (
