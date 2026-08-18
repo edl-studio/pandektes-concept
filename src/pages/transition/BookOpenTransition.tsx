@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import { animate, motion, useMotionValue, useSpring } from 'framer-motion'
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from 'framer-motion'
 import { PageStack, STACK_LAYOUT_SPRING } from '@/components/compounds/PageStack'
 import { CASE_BOOK_HOVER_PAGE_LIFT } from '@/components/compounds/CaseBook'
 import type { CaseSummary } from '../case-data'
@@ -33,7 +39,7 @@ const PRESTACK_X_MS = 300 // Collapse horizontal offsets before sheets descend i
 const CENTER_X_COLLAPSE_PROGRESS = 0.72 // Begin flattening X offsets on the final approach so the sheaf lands stacked.
 const CENTER_X_SETTLE_MS = 100 // Briefly hold the zero-X landing before opening the centered fan.
 const STACK_HOLD_MS = 400 // Pause on the small vertical list before the final scale-up begins.
-const APEX_TOP = 12 // Viewport Y (px) reached at the highest point of the sheaf's curved flight.
+const APEX_TOP = -128 // Viewport Y (px) reached at the highest point of the sheaf's curved flight.
 const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the flight's initial vertical tangent.
 const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually before restacking.
 const CENTER_SPREAD_MS = 150 // Brief center handoff before the loading wave begins.
@@ -45,6 +51,8 @@ const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before 
 const BACKGROUND_FADE_MS = 750 // CSS background fade delay (400ms) + fade (350ms); wave waits for completion.
 const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book sink, page fade, and bounce clock.
 const APEX_PROGRESS = 0.55 // Flight progress (0–1) at which the sheaf reaches the top of its arc.
+const MAX_FLIGHT_PITCH = 9 // Maximum whole-sheaf rotateX tilt while following the flight path.
+const FLIGHT_PERSPECTIVE = 900 // Restrained perspective depth for the airborne sheaf.
 const FLIGHT_SPRING = {
   type: 'spring',
   stiffness: 48,
@@ -55,6 +63,11 @@ const ROTATION_SPRING = {
   stiffness: 45,
   damping: 14,
   mass: 1.4,
+} as const
+const PITCH_SPRING = {
+  stiffness: 55,
+  damping: 18,
+  mass: 1.2,
 } as const
 
 type Phase =
@@ -106,6 +119,7 @@ export function BookOpenTransition({
 }) {
   const [phase, setPhase] = useState<Phase>('extracting')
   const [bouncePhase, setBouncePhase] = useState<BouncePhase>('idle')
+  const prefersReducedMotion = useReducedMotion()
 
   const stackHandoffY = window.innerHeight / 2 - BOOK_HEIGHT / 2
   const stackRestY = DETAIL_TOP
@@ -163,6 +177,8 @@ export function BookOpenTransition({
   const scaleMv = useMotionValue(startScale)
   const rotateTargetMv = useMotionValue(startRotation)
   const rotateMv = useSpring(rotateTargetMv, ROTATION_SPRING)
+  const pitchTargetMv = useMotionValue(0)
+  const pitchMv = useSpring(pitchTargetMv, PITCH_SPRING)
 
   useEffect(() => {
     let cancelled = false
@@ -202,6 +218,7 @@ export function BookOpenTransition({
         onUpdate(t) {
           const pathT = Math.max(0, Math.min(t, 1))
           const point = flightPoint(pathT)
+          const previousPoint = flightPoint(Math.max(pathT - 0.002, 0))
           const nextPoint = flightPoint(Math.min(pathT + 0.002, 1))
           leftMv.set(point.x)
           topMv.set(point.y)
@@ -223,12 +240,23 @@ export function BookOpenTransition({
           const bank = Math.max(-12, Math.min(heading * 0.15, 12))
           const pathTaper = Math.sin(Math.PI * pathT)
           const entranceBlend = Math.min(pathT / EXTRACT_THRESHOLD, 1)
+          const tangentX = nextPoint.x - previousPoint.x
+          const tangentY = nextPoint.y - previousPoint.y
+          const tangentLength = Math.max(Math.hypot(tangentX, tangentY), 0.001)
+          const verticalDirection = tangentY / tangentLength
+          const pitchEnvelope = Math.pow(pathTaper, 0.8)
           scaleMv.set(startScale + (1 - startScale) * flyProgress)
           rotateTargetMv.set(startRotation * (1 - entranceBlend) + bank * pathTaper)
+          pitchTargetMv.set(
+            prefersReducedMotion
+              ? 0
+              : verticalDirection * MAX_FLIGHT_PITCH * pitchEnvelope,
+          )
         },
       })
       stops.push(flight)
       await flight
+      pitchTargetMv.set(0)
       if (cancelled) return
 
       if (!centeringX) setPhase('centering-x')
@@ -272,6 +300,7 @@ export function BookOpenTransition({
     void run()
     return () => {
       cancelled = true
+      pitchTargetMv.set(0)
       stops.forEach((playback) => playback.stop())
       timers.forEach(clearTimeout)
     }
@@ -307,32 +336,40 @@ export function BookOpenTransition({
           scale: scaleMv,
           rotate: rotateMv,
           transformOrigin: 'top left',
+          perspective: FLIGHT_PERSPECTIVE,
         }}
       >
-        <PageStack
-          pageCount={caseSummary.pageCount}
-          mode={isReorganized ? 'list' : 'fan'}
-          scale={isScaled ? SCALE : 1}
-          initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
-          initialXSpread={flightXSpread}
-          xSpread={currentXSpread}
-          ySpread={currentYSpread}
-          rotationSpread={flightRotationSpread}
-          springFan={isFanned}
-          gentleFan={isFanned}
-          bounceY={
-            bouncePhase === 'up'
-              ? BOUNCE_UP_Y
-              : bouncePhase === 'down'
-                ? BOUNCE_DOWN_Y
-                : 0
-          }
-          bouncePhase={bouncePhase}
-          alignRotation={isFlying || isCenteringX || isSpreading || isAligningX}
-          alignX={isCenteringX || isAligningX}
-          alignedXStep={isCenteringX ? 1 : 0}
-          restackFromBounce={isBounceRestacking}
-        />
+        <motion.div
+          style={{
+            rotateX: pitchMv,
+            transformOrigin: 'center center',
+          }}
+        >
+          <PageStack
+            pageCount={caseSummary.pageCount}
+            mode={isReorganized ? 'list' : 'fan'}
+            scale={isScaled ? SCALE : 1}
+            initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
+            initialXSpread={flightXSpread}
+            xSpread={currentXSpread}
+            ySpread={currentYSpread}
+            rotationSpread={flightRotationSpread}
+            springFan={isFanned}
+            gentleFan={isFanned}
+            bounceY={
+              bouncePhase === 'up'
+                ? BOUNCE_UP_Y
+                : bouncePhase === 'down'
+                  ? BOUNCE_DOWN_Y
+                  : 0
+            }
+            bouncePhase={bouncePhase}
+            alignRotation={isFlying || isCenteringX || isSpreading || isAligningX}
+            alignX={isCenteringX || isAligningX}
+            alignedXStep={isCenteringX ? 1 : 0}
+            restackFromBounce={isBounceRestacking}
+          />
+        </motion.div>
       </motion.div>
 
       {isExtracting && tile && (
