@@ -8,6 +8,7 @@ import {
 } from 'framer-motion'
 import { PageStack, STACK_LAYOUT_SPRING } from '@/components/compounds/PageStack'
 import { CASE_BOOK_HOVER_PAGE_LIFT } from '@/components/compounds/CaseBook'
+import { Orb } from '@/components/effects/Orb'
 import type { CaseSummary } from '../case-data'
 import {
   BOOK_HEIGHT,
@@ -373,6 +374,14 @@ export function BookOpenTransition({
           />
         </motion.div>
       </motion.div>
+
+      {isSpreading && (
+        <Orb
+          className="pk-book-transition__loader"
+          label="Loading document..."
+          pill
+        />
+      )}
 
       {isExtracting && tile && (
         <div

@@ -148,6 +148,25 @@
   color: var(--pk-color-content-secondary);
 }
 
+.pk-citation-card-open {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-d1-5);
+  padding: var(--pk-d2) var(--pk-d3);
+  border-top: 1px solid rgb(0 0 0 / 0.06);
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-12);
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 1;
+  color: var(--pk-color-accent-base);
+  text-decoration: none;
+  transition: background-color 0.12s ease;
+}
+
+.pk-citation-card-open:hover {
+  background-color: var(--pk-color-accent-weak);
+}
+
 .pk-citations {
   display: flex;
   flex-direction: column;

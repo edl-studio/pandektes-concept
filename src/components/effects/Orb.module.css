@@ -1,0 +1,124 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  color: var(--pk-color-content-primary);
+}
+
+.root[data-pill] {
+  flex-direction: row;
+  gap: var(--pk-d2);
+}
+
+.glyph {
+  position: relative;
+  display: inline-block;
+  flex: none;
+}
+
+.stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%) scale(var(--orb-k));
+  transform-origin: center;
+}
+
+.lattice {
+  position: absolute;
+  inset: 0;
+}
+
+.cell {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+  will-change: transform, opacity;
+  animation: settle 2100ms cubic-bezier(0.45, 0, 0.2, 1) infinite both;
+}
+
+.label {
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-13);
+  font-weight: var(--pk-font-weight-light);
+  line-height: 18px;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    90deg,
+    #a1a1a1 0%,
+    #a1a1a1 30%,
+    rgb(161 161 161 / 0.45) 45%,
+    rgb(161 161 161 / 0.45) 55%,
+    #a1a1a1 70%,
+    #a1a1a1 100%
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: label-shine 2250ms cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+@keyframes settle {
+  0% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      translate3d(var(--orb-ax), var(--orb-ay), 0)
+      scale(0.4);
+  }
+
+  30% {
+    opacity: 0.22;
+  }
+
+  48% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1);
+  }
+
+  66% {
+    opacity: 0.28;
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      translate3d(var(--orb-bx), var(--orb-by), 0)
+      scale(0.4);
+  }
+}
+
+@keyframes label-shine {
+  0%,
+  18% {
+    background-position: 100% 0;
+  }
+
+  82%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell {
+    animation: none;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+
+  .cell[data-mid] {
+    opacity: 0.65;
+  }
+
+  .label {
+    animation: none;
+    background-position: 50% 0;
+  }
+}

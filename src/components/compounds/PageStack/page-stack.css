@@ -17,6 +17,27 @@
     position: relative;
   }
 
+  .pk-book-transition__loader {
+    position: fixed;
+    z-index: 1;
+    top: calc(50% + 172px);
+    left: 50%;
+    transform: translateX(-50%);
+    animation: pk-book-loader-in 180ms ease-out both;
+  }
+
+  @keyframes pk-book-loader-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
   /*
    * The sheet box grows via real width/height (not transform), so
    * border-radius and the 1px gradient border below stay crisp and

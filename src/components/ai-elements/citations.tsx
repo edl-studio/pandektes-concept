@@ -3,12 +3,14 @@ import {
   ArrowUpRight01Icon,
   BookOpen02Icon,
   ChevronDownIcon,
+  BookmarkAdd02Icon,
 } from '@hugeicons/core-free-icons'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   type ReactNode,
   useId,
 } from 'react'
+import { Link } from 'react-router-dom'
 import { PdfPageCanvas } from '@/components/compounds/PageStack'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/motion/popover'
 import { SharedLayoutBg } from '@/components/motion/shared-layout-bg'
@@ -30,6 +32,10 @@ export interface CitationItem {
   url?: string
   pageNumber?: number
   quote?: ReactNode
+  /** Case ID for generating "Open in document" deep-links. */
+  caseId?: string
+  /** Plain-text version of quote for PDF text matching. */
+  quoteText?: string
 }
 
 export interface CitationsProps {
@@ -94,6 +100,21 @@ function CitationCardBody({ source }: { source: CitationItem }) {
       </div>
       {source.quote ? (
         <blockquote className="pk-citation-card-quote">{source.quote}</blockquote>
+      ) : null}
+      {source.caseId ? (
+        <Link
+          to={`/case/${source.caseId}?citation=${source.id}`}
+          className="pk-citation-card-open"
+        >
+          <HugeiconsIcon
+            icon={BookmarkAdd02Icon}
+            size={ICON_SIZE}
+            color="currentColor"
+            strokeWidth={ICON_STROKE}
+            absoluteStrokeWidth
+          />
+          Open in document
+        </Link>
       ) : null}
     </div>
   )

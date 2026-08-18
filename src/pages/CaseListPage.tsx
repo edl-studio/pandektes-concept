@@ -16,36 +16,13 @@ import { PkCaseBook } from '@/components/compounds/CaseBook'
 import {
   Citation,
   Citations,
-  type CitationItem,
 } from '@/components/ai-elements/citations'
+import { CITATION_ITEMS, CITATION_PREFIX } from './citation-data'
 import { InputCopy } from '@/components/ui/input-copy'
 import { PkButton } from '@/components/primitives/Button'
 import { BookOpenTransition, type OriginRect } from './transition/BookOpenTransition'
 import { BOOK_HEIGHT, BOOK_WIDTH } from './transition/layout'
 import './case-list-page.css'
-
-const SOURCE_PDF_URL = CASES[0].documentUrl
-const CITATION_PREFIX = 'case-sources'
-
-const CITATION_ITEMS: CitationItem[] = [
-  {
-    id: 'holding-win',
-    title: 'Domsdatabasen_13870.pdf',
-    domain: 'page 2 · §3',
-    url: SOURCE_PDF_URL,
-    pageNumber: 2,
-    quote:
-      'Appellant 3 is entitled to compensation of DKK 282,338.09 under funktionærloven.',
-  },
-  {
-    id: 'holding-lose',
-    title: 'Domsdatabasen_13870.pdf',
-    domain: 'page 2 · §3',
-    url: SOURCE_PDF_URL,
-    pageNumber: 2,
-    quote: 'The claims of appellants 1 and 2 under vikarloven are dismissed.',
-  },
-]
 
 function citationMarker(id: string, index: number, text?: ReactNode) {
   const source = CITATION_ITEMS.find((item) => item.id === id)
