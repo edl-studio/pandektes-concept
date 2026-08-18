@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { animate, motion, useMotionValue } from 'framer-motion'
-import { PageStack } from '@/components/compounds/PageStack'
+import { PageStack, STACK_LAYOUT_SPRING } from '@/components/compounds/PageStack'
 import { CASE_BOOK_HOVER_PAGE_LIFT } from '@/components/compounds/CaseBook'
 import type { CaseSummary } from '../case-data'
 import {
@@ -28,19 +28,24 @@ export interface OriginRect {
   tile?: { left: number; top: number; right: number; bottom: number }
 }
 
-const CONTINUOUS_FLIGHT_MS = 1450
-const REORGANIZE_MS = 500
+const REORGANIZE_MS = 750
 const STACK_HOLD_MS = 320 // beat on the small list before it grows
-const SCALE_MS = 700 // must match page-stack.css's sheet width/height transition duration (0.7s) — see note below
-const SETTLE_MS = 400
 /** Viewport Y the sheaf actually visits at the top of the inverted-U. */
 const APEX_TOP = 48
 const EXTRACT_PAGE_LIFT = 170
 const EXTRACT_PAGE_SPREAD = 3
+const CENTER_X_SPREAD = 6
+const CENTER_SPREAD_MS = 900
 const EXTRACT_THRESHOLD = 0.2
 const APEX_PROGRESS = 0.55
+const FLIGHT_SPRING = {
+  type: 'spring',
+  stiffness: 45,
+  damping: 15,
+  mass: 1.2,
+} as const
 
-type Phase = 'extracting' | 'flying' | 'reorganizing' | 'scaling' | 'settling'
+type Phase = 'extracting' | 'flying' | 'spreading' | 'reorganizing' | 'scaling' | 'settling'
 
 /** Cubic Bézier used by both halves of the continuous flight path. */
 function cubicBezier(t: number, p0: number, p1: number, p2: number, p3: number) {
@@ -84,17 +89,8 @@ export function BookOpenTransition({
   const stackHandoffY = window.innerHeight / 2 - BOOK_HEIGHT / 2
   const stackRestY = DETAIL_TOP
 
-  // The stack's box now grows via real width (not transform), so staying
-  // centered means explicitly animating `left` between the two known
-  // widths' centers — a percentage-based translate(-50%) does NOT track a
-  // continuously CSS-transitioning width correctly (it resolves once, not
-  // every frame), which is exactly what caused the top-left-anchored growth.
-  // This only stays centered THROUGHOUT the animation (not just at the two
-  // endpoints) because `left`'s duration/easing here exactly matches
-  // page-stack.css's sheet width/height transition — same duration + same
-  // easing curve means both interpolate through the same progress at every
-  // instant, which cancels out algebraically. If either duration changes,
-  // update the other to match.
+  // The sheets and this left offset use the same spring, so their normalized
+  // progress stays aligned while the real sheet boxes grow around center.
   const stackLeftSmall = window.innerWidth / 2 - PAGE_WIDTH / 2
   const stackLeftLarge = window.innerWidth / 2 - (PAGE_WIDTH * SCALE) / 2
 
@@ -133,8 +129,7 @@ export function BookOpenTransition({
       // cubic leaves vertically, and both cubics pass through the apex with
       // continuous velocity, so neither extraction nor the apex is a stop.
       const flight = animate(0, 1, {
-        duration: CONTINUOUS_FLIGHT_MS / 1000,
-        ease: 'easeInOut',
+        ...FLIGHT_SPRING,
         onUpdate(t) {
           leftMv.set(
             continuousArc(
@@ -176,14 +171,17 @@ export function BookOpenTransition({
       await flight
       if (cancelled) return
 
+      setPhase('spreading')
+      await wait(CENTER_SPREAD_MS)
+      if (cancelled) return
+
       setPhase('reorganizing')
       await wait(REORGANIZE_MS + STACK_HOLD_MS)
       if (cancelled) return
 
       setPhase('scaling')
       const scaling = animate(leftMv, stackLeftLarge, {
-        duration: SCALE_MS / 1000,
-        ease: 'easeInOut',
+        ...STACK_LAYOUT_SPRING,
       })
       stops.push(scaling)
       await scaling
@@ -191,8 +189,7 @@ export function BookOpenTransition({
 
       setPhase('settling')
       const settling = animate(topMv, stackRestY, {
-        duration: SETTLE_MS / 1000,
-        ease: 'easeInOut',
+        ...STACK_LAYOUT_SPRING,
       })
       stops.push(settling)
       await settling
@@ -210,6 +207,7 @@ export function BookOpenTransition({
 
   const isExtracting = phase === 'extracting'
   const isFlying = phase === 'flying'
+  const isSpreading = phase === 'spreading'
   const isReorganized = phase === 'reorganizing' || phase === 'scaling' || phase === 'settling'
   const isScaled = phase === 'scaling' || phase === 'settling'
 
@@ -232,8 +230,11 @@ export function BookOpenTransition({
           mode={isReorganized ? 'list' : 'fan'}
           scale={isScaled ? SCALE : 1}
           initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
-          spread={isExtracting ? EXTRACT_PAGE_SPREAD : 1}
-          springFan={isExtracting || isFlying}
+          initialXSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
+          spread={isExtracting || isFlying || isSpreading ? EXTRACT_PAGE_SPREAD : 1}
+          xSpread={isExtracting || isFlying || isSpreading ? CENTER_X_SPREAD : 1}
+          springFan={isExtracting || isFlying || isSpreading}
+          gentleFan={isExtracting || isFlying || isSpreading}
         />
       </motion.div>
 

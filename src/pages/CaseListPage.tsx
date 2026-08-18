@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
 import { animate } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -208,6 +208,24 @@ function TimelineItem({
   const [bookOpen, setBookOpen] = useState(false)
   const [holding, setHolding] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!sinking) {
+      bookRef.current?.style.setProperty('--co-sink', '0px')
+      return
+    }
+    const sink = animate(0, 160, {
+      type: 'spring',
+      stiffness: 65,
+      damping: 17,
+      mass: 1.2,
+      onUpdate: (value) => {
+        bookRef.current?.style.setProperty('--co-sink', `${value}px`)
+      },
+    })
+    return () => sink.stop()
+  }, [sinking])
+
   const press = useRef({
     down: false,
     value: 1,

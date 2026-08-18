@@ -10,6 +10,12 @@ const FAN_STEP_X = 2
 const FAN_STEP_Y = -1
 const FAN_STEP_ROTATION = 0.5
 const LIST_GAP = 16 // base units — becomes LIST_GAP * scale on screen
+export const STACK_LAYOUT_SPRING = {
+  type: 'spring',
+  stiffness: 65,
+  damping: 17,
+  mass: 1.2,
+} as const
 
 export interface PageStackProps {
   pageCount: number
@@ -26,10 +32,16 @@ export interface PageStackProps {
    * sheaf; 1 is the resting fan PageStack uses after the cover handoff.
    */
   spread?: number
+  /** Horizontal-only fan multiplier, allowing wider sheets without extra tilt/Y offset. */
+  xSpread?: number
   /** Fan spread used for the overlay's first frame, before it springs outward. */
   initialSpread?: number
+  /** Horizontal-only spread used for the overlay's first frame. */
+  initialXSpread?: number
   /** Use the folder-like spring while the sheets are still a fan. */
   springFan?: boolean
+  /** Use a slower spring while the fan progressively opens in flight. */
+  gentleFan?: boolean
 }
 
 export function PageStack({
@@ -37,14 +49,18 @@ export function PageStack({
   mode,
   scale = 1,
   spread = 1,
+  xSpread = spread,
   initialSpread = spread,
+  initialXSpread = initialSpread,
   springFan = false,
+  gentleFan = false,
 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
   const fan = mode === 'fan' ? spread : 1
+  const xFan = mode === 'fan' ? xSpread : 1
 
   return (
-    <div className="pk-page-stack__root" style={{ height, '--_stack-scale': scale } as CSSProperties}>
+    <div className="pk-page-stack__root" style={{ width: 180 * scale, height }}>
       {Array.from({ length: pageCount }, (_, i) => i)
         .slice()
         .reverse()
@@ -53,15 +69,43 @@ export function PageStack({
             zIndex: pageCount - i,
           } as CSSProperties
           const target = {
-            x: mode === 'fan' ? i * FAN_STEP_X * fan * scale : 0,
+            x: mode === 'fan' ? i * FAN_STEP_X * xFan * scale : 0,
             y: mode === 'fan' ? i * FAN_STEP_Y * fan * scale : i * (233 + LIST_GAP) * scale,
             rotate: mode === 'fan' ? i * FAN_STEP_ROTATION * fan : 0,
+            width: 180 * scale,
+            height: 233 * scale,
           }
           const initial = {
-            x: i * FAN_STEP_X * initialSpread * scale,
+            x: i * FAN_STEP_X * initialXSpread * scale,
             y: i * FAN_STEP_Y * initialSpread * scale,
             rotate: i * FAN_STEP_ROTATION * initialSpread,
+            width: 180 * scale,
+            height: 233 * scale,
           }
+          const sheetDelay = Math.min(i * 0.02, 0.1)
+          const sheetSpring = {
+            type: 'spring' as const,
+            stiffness: 120,
+            damping: 13,
+            delay: sheetDelay,
+          }
+          const spreadSpring = {
+            type: 'spring' as const,
+            stiffness: 22,
+            damping: 10,
+            mass: 1.4,
+            delay: sheetDelay,
+          }
+          const transition =
+            mode === 'fan' && springFan
+              ? {
+                  x: gentleFan ? spreadSpring : sheetSpring,
+                  y: sheetSpring,
+                  rotate: sheetSpring,
+                  width: STACK_LAYOUT_SPRING,
+                  height: STACK_LAYOUT_SPRING,
+                }
+              : STACK_LAYOUT_SPRING
 
           return (
             <motion.div
@@ -70,20 +114,16 @@ export function PageStack({
               style={style}
               initial={initial}
               animate={target}
-              transition={
-                mode === 'fan' && springFan
-                  ? {
-                      type: 'spring',
-                      stiffness: 120,
-                      damping: 13,
-                      delay: Math.min(i * 0.02, 0.1),
-                    }
-                  : { duration: 0.5, ease: 'easeInOut' }
-              }
+              transition={transition}
             >
-              <div className="pk-page-stack__sheet-skeleton">
+              <motion.div
+                className="pk-page-stack__sheet-skeleton"
+                initial={{ scale }}
+                animate={{ scale }}
+                transition={STACK_LAYOUT_SPRING}
+              >
                 <PkPageSkeleton />
-              </div>
+              </motion.div>
             </motion.div>
           )
         })}

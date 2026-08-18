@@ -15,7 +15,6 @@
 
   .pk-page-stack__root {
     position: relative;
-    width: calc(180px * var(--_stack-scale, 1));
   }
 
   /*
@@ -28,9 +27,6 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: calc(180px * var(--_stack-scale, 1));
-    height: calc(233px * var(--_stack-scale, 1));
-    transition: width 0.7s ease-in-out, height 0.7s ease-in-out;
     border-radius: var(--pk-radius-md);
     background-color: var(--pk-color-surface-body);
     overflow: hidden;
@@ -67,13 +63,11 @@
     left: 0;
     width: 180px;
     height: 233px;
-    transform: scale(var(--_stack-scale, 1));
     transform-origin: top left;
     padding: var(--pk-d6) var(--pk-d4);
     display: flex;
     flex-direction: column;
     gap: var(--pk-d4);
-    transition: transform 0.7s ease-in-out;
   }
 
   /*
