@@ -128,31 +128,23 @@
 .co-body {
   display: grid;
   grid-template-columns: minmax(0, var(--co-column)) var(--co-sidebar);
-  grid-template-rows: auto auto;
   column-gap: var(--co-body-gap);
-  row-gap: var(--pk-d8);
-  align-items: stretch;
+  align-items: start;
 }
 
-.co-body-holding {
-  grid-column: 1;
-  grid-row: 1;
+.co-body-main {
+  min-width: 0;
 }
 
 .co-sources {
-  grid-column: 2;
-  grid-row: 1;
   min-width: 0;
   row-gap: var(--pk-d4) !important;
 }
 
-.co-body-history {
-  grid-column: 1;
-  grid-row: 2;
-}
-
+.co-body-main,
 .co-body-holding,
-.co-sources {
+.co-sources,
+.co-body-docs {
   display: flex;
   flex-direction: column;
   gap: var(--pk-d8);
@@ -191,10 +183,10 @@
 
 .co-case-header {
   width: 100%;
-  max-width: var(--co-column);
   display: flex;
   flex-direction: column;
   gap: var(--pk-d6);
+  max-width: var(--co-column);
 }
 
 .co-case-titles {
@@ -215,7 +207,7 @@
 .co-case-desc {
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-14);
-  font-weight: var(--pk-font-weight-regular);
+  font-weight: var(--pk-font-weight-light);
   line-height: 1.5;
   color: var(--pk-color-content-secondary);
 }
@@ -246,7 +238,7 @@
 .co-section-desc {
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-14);
-  font-weight: var(--pk-font-weight-regular);
+  font-weight: var(--pk-font-weight-light);
   line-height: 1.5;
   color: var(--pk-color-content-secondary);
 }
@@ -328,7 +320,7 @@
 .co-holding-detail {
   font-family: var(--pk-font-family-base);
   font-size: var(--pk-font-size-14);
-  font-weight: var(--pk-font-weight-regular);
+  font-weight: var(--pk-font-weight-light);
   line-height: 1.4;
   color: var(--pk-color-content-secondary);
 }
@@ -429,6 +421,24 @@
 
 /* ── Document card ───────────────────────────────────────────────────── */
 
+@property --co-press {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --co-book-rest {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.5;
+}
+
+@property --co-book-hover {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.525;
+}
+
 .co-doc-card {
   display: flex;
   border-radius: 12px;
@@ -448,7 +458,8 @@
 
 /* Above the overlay sheaf so the real cover stays on top during extraction.
    The page remains opaque until the centerward flight begins. */
-.co-doc-card--lifted {
+.co-doc-card--lifted,
+.co-doc-poster--lifted {
   z-index: 101;
 }
 
@@ -459,22 +470,18 @@
   overflow: hidden;
 }
 
-/* Scale the case book down 0.5× to create the thumbnail.
+/* Scale the case book down to create the thumbnail.
    transform doesn't affect layout, so we absolute-position the book
    and let overflow: hidden on the parent provide the clip.
    --co-press is the click-to-hold squash (1 at rest, ~0.91 while held). */
-@property --co-press {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 1;
-}
-
 .co-doc-thumb-book {
   --co-press: 1;
+  --co-book-rest: 0.5;
+  --co-book-hover: 0.525;
   position: absolute;
   top: 12px;
   left: 20px;
-  transform: scale(calc(0.5 * var(--co-press)));
+  transform: scale(calc(var(--co-book-rest) * var(--co-press)));
   transform-origin: top left;
   pointer-events: none;
   transition: transform 0.25s ease;
@@ -484,19 +491,21 @@
   transition: none;
 }
 
-.co-doc-card:hover .co-doc-thumb-book {
-  transform: scale(calc(0.525 * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
+.co-doc-card:hover .co-doc-thumb-book,
+.co-doc-poster:hover .co-doc-thumb-book {
+  transform: scale(calc(var(--co-book-hover) * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
 }
 
 /* Slide the real book down through the thumb clip so the tile goes empty
    as the overlay sheaf leaves. translateY is in screen px (before scale). */
 .co-doc-thumb-book--sinking {
-  transform: translateY(var(--co-sink, 0px)) scale(calc(0.5 * var(--co-press)));
+  transform: translateY(var(--co-sink, 0px)) scale(calc(var(--co-book-rest) * var(--co-press)));
   transition: none;
 }
 
-.co-doc-card:hover .co-doc-thumb-book--sinking {
-  transform: translateY(var(--co-sink, 0px)) scale(calc(0.525 * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
+.co-doc-card:hover .co-doc-thumb-book--sinking,
+.co-doc-poster:hover .co-doc-thumb-book--sinking {
+  transform: translateY(var(--co-sink, 0px)) scale(calc(var(--co-book-hover) * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
 }
 
 .co-doc-info {
@@ -526,6 +535,63 @@
   color: var(--pk-color-content-primary);
 }
 
+/* ── Case documents (poster cards) ───────────────────────────────────── */
+
+.co-docs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--pk-d2);
+}
+
+.co-doc-poster {
+  --co-book-rest: 0.8;
+  --co-book-hover: 0.84;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: 12px;
+  background-color: var(--pk-color-surface-raised);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  border-bottom-width: 2px;
+  cursor: pointer;
+}
+
+.co-doc-poster:focus-visible {
+  outline: 2px solid var(--pk-color-accent-base);
+  outline-offset: 2px;
+}
+
+.co-doc-poster-thumb {
+  position: relative;
+  height: calc(var(--pk-d5) + 233px * var(--co-book-rest) + var(--pk-d4));
+  overflow: hidden;
+  background-color: var(--pk-color-surface-body);
+  border-bottom: 1px solid rgb(0 0 0 / 0.08);
+}
+
+.co-doc-poster .co-doc-thumb-book {
+  --co-book-rest: 0.8;
+  --co-book-hover: 0.84;
+  top: var(--pk-d5);
+  left: calc((100% - 188px * var(--co-book-rest)) / 2);
+}
+
+.co-doc-poster-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pk-d2);
+  padding: var(--pk-d4);
+  min-width: 0;
+}
+
+.co-doc-poster .co-doc-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Responsive: narrow screens ──────────────────────────────────────── */
 
 @media (max-width: 960px) {
@@ -541,25 +607,6 @@
 
   .co-body {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto;
-  }
-
-  .co-sources {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .co-body-holding {
-    grid-row: 2;
-  }
-
-  .co-body-history {
-    grid-column: 1;
-    grid-row: 3;
-  }
-
-  .co-body-holding > .co-divider:first-child {
-    display: none;
   }
 
   .co-holding-grid {
@@ -581,5 +628,9 @@
 
   .co-doc-info {
     padding: var(--pk-d3);
+  }
+
+  .co-docs-grid {
+    grid-template-columns: 1fr;
   }
 }

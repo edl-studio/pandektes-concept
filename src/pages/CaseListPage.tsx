@@ -9,6 +9,7 @@ import {
   ThumbsDownIcon,
   ArrowUp02Icon,
   Tick02Icon,
+  File02Icon,
 } from '@hugeicons/core-free-icons'
 import { CASES, type CaseSummary } from './case-data'
 import { PkCaseBook } from '@/components/compounds/CaseBook'
@@ -88,6 +89,10 @@ const ICheck: FC = () => (
   <HugeiconsIcon icon={Tick02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
+const IFile: FC = () => (
+  <HugeiconsIcon icon={File02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+)
+
 function PkMark() {
   return (
     <svg width={16} height={20} viewBox="0 0 16 20" fill="currentColor" aria-hidden>
@@ -160,11 +165,19 @@ const HOLDING_WIN =
 const HOLDING_LOSE =
   'The joined vikarloven claims were dismissed. The court found no basis for agency-work compensation once the relationship was classified as salaried employment, and the remaining appellants were left without a separate remedy.'
 
-function SectionHeader({ title, citation }: { title: string; citation?: ReactNode }) {
+function SectionHeader({
+  title,
+  citation,
+  description = true,
+}: {
+  title: string
+  citation?: ReactNode
+  description?: boolean
+}) {
   return (
     <div className="co-section-header">
       <h2 className="co-section-title">{title}</h2>
-      <p className="co-section-desc">{citation ?? PLACEHOLDER}</p>
+      {description && <p className="co-section-desc">{citation ?? PLACEHOLDER}</p>}
     </div>
   )
 }
@@ -184,24 +197,14 @@ function randomBookTilt(): number {
   return Math.random() < 0.5 ? -deg : deg
 }
 
-function TimelineItem({
-  instanceLabel,
-  date,
+function useBookThumb({
   caseSummary,
-  isFirst,
-  isLast,
   bookTilt,
-  lifted,
   sinking,
   onOpen,
 }: {
-  instanceLabel: string
-  date: string
   caseSummary: CaseSummary
-  isFirst: boolean
-  isLast: boolean
   bookTilt: number
-  lifted: boolean
   sinking: boolean
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
@@ -232,9 +235,6 @@ function TimelineItem({
     shouldOpen: false,
     playback: null as { stop: () => void } | null,
   })
-  const Logo = caseSummary.Logo
-  const filename = docFilename(caseSummary)
-  const caseNumberDisplay = caseSummary.caseNumber.replace('/', ' · ')
 
   function setPress(value: number) {
     press.current.value = value
@@ -294,11 +294,13 @@ function TimelineItem({
     // so the overlay starts on the same point the CSS thumb is anchored to.
     const thumbRect = thumb.getBoundingClientRect()
     const bookStyle = getComputedStyle(book)
-    const originX = thumbRect.left + parseFloat(bookStyle.left)
-    const originY = thumbRect.top + parseFloat(bookStyle.top)
+    const originX = thumbRect.left + book.offsetLeft
+    const originY = thumbRect.top + book.offsetTop
+    const restScale = Number(bookStyle.getPropertyValue('--co-book-rest')) || 0.5
+    const hoverScale = Number(bookStyle.getPropertyValue('--co-book-hover')) || 0.525
     // Preserve the held frame exactly when the overlay takes ownership;
     // otherwise releasing at 0.91 would pop straight back to full scale.
-    const startScale = (bookOpen ? 0.525 : 0.5) * press.current.value
+    const startScale = (bookOpen ? hoverScale : restScale) * press.current.value
     const rotation = bookOpen ? bookTilt : 0
 
     onOpen(caseSummary, {
@@ -322,6 +324,59 @@ function TimelineItem({
       },
     })
   }
+
+  const Logo = caseSummary.Logo
+  const filename = docFilename(caseSummary)
+  const bookClassName = `co-doc-thumb-book${holding ? ' co-doc-thumb-book--holding' : ''}${sinking ? ' co-doc-thumb-book--sinking' : ''}`
+
+  return {
+    bookRef,
+    bookOpen,
+    setBookOpen,
+    filename,
+    Logo,
+    handlePointerDown,
+    handlePointerUp,
+    handlePointerCancel,
+    handleOpen,
+    bookClassName,
+  }
+}
+
+function TimelineItem({
+  instanceLabel,
+  date,
+  caseSummary,
+  isFirst,
+  isLast,
+  bookTilt,
+  lifted,
+  sinking,
+  onOpen,
+}: {
+  instanceLabel: string
+  date: string
+  caseSummary: CaseSummary
+  isFirst: boolean
+  isLast: boolean
+  bookTilt: number
+  lifted: boolean
+  sinking: boolean
+  onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
+}) {
+  const {
+    bookRef,
+    bookOpen,
+    setBookOpen,
+    filename,
+    Logo,
+    handlePointerDown,
+    handlePointerUp,
+    handlePointerCancel,
+    handleOpen,
+    bookClassName,
+  } = useBookThumb({ caseSummary, bookTilt, sinking, onOpen })
+  const caseNumberDisplay = caseSummary.caseNumber.replace('/', ' · ')
 
   return (
     <div className="co-timeline-item">
@@ -364,7 +419,7 @@ function TimelineItem({
               open={bookOpen}
               hidePages={lifted}
               extracting={sinking}
-              className={`co-doc-thumb-book${holding ? ' co-doc-thumb-book--holding' : ''}${sinking ? ' co-doc-thumb-book--sinking' : ''}`}
+              className={bookClassName}
             />
           </div>
           <div className="co-doc-info">
@@ -393,6 +448,74 @@ function TimelineItem({
   )
 }
 
+function DocumentCard({
+  caseSummary,
+  bookTilt,
+  lifted,
+  sinking,
+  onOpen,
+}: {
+  caseSummary: CaseSummary
+  bookTilt: number
+  lifted: boolean
+  sinking: boolean
+  onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
+}) {
+  const {
+    bookRef,
+    bookOpen,
+    setBookOpen,
+    filename,
+    Logo,
+    handlePointerDown,
+    handlePointerUp,
+    handlePointerCancel,
+    handleOpen,
+    bookClassName,
+  } = useBookThumb({ caseSummary, bookTilt, sinking, onOpen })
+
+  return (
+    <div
+      className={`co-doc-poster${lifted ? ' co-doc-poster--lifted' : ''}`}
+      style={{ '--co-book-tilt': `${bookTilt}deg` } as CSSProperties}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${filename}`}
+      onMouseEnter={() => setBookOpen(true)}
+      onMouseLeave={() => setBookOpen(false)}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          handleOpen()
+        }
+      }}
+    >
+      <div className="co-doc-poster-thumb" aria-hidden="true">
+        <PkCaseBook
+          ref={bookRef}
+          caseNumber={caseSummary.caseNumber}
+          title={caseSummary.title}
+          pageCount={caseSummary.pageCount}
+          logo={Logo ? <Logo /> : undefined}
+          open={bookOpen}
+          hidePages={lifted}
+          extracting={sinking}
+          className={bookClassName}
+        />
+      </div>
+      <div className="co-doc-poster-info">
+        <p className="co-doc-name">{filename}</p>
+        <div className="co-meta-row">
+          <Chip icon={<IFile />} label={`${caseSummary.pageCount} pages`} muted />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── CaseListPage ──────────────────────────────────────────────────────
 
 const CASE_NUMBER_DISPLAY = CASES[0].caseNumber.replace('/', ' · ')
@@ -407,11 +530,17 @@ const TIMELINE_ENTRIES = CASES.map((cs, i) => ({
   bookTilt: randomBookTilt(),
 }))
 
+const DOCUMENT_ENTRIES = CASES.map((caseSummary) => ({
+  caseSummary,
+  bookTilt: randomBookTilt(),
+}))
+
 export function CaseListPage() {
   const [active, setActive] = useState<{
     caseSummary: CaseSummary
     originRect: OriginRect
     sinking: boolean
+    originKey: string
   } | null>(null)
   const navigate = useNavigate()
 
@@ -446,31 +575,79 @@ export function CaseListPage() {
         </header>
 
         <div className="co-body">
-          <div className="co-body-holding">
-            <Divider />
-            <section className="co-section" aria-label="Case holding">
+          <div className="co-body-main">
+            <div className="co-body-docs">
+              <Divider />
+              <section className="co-section" aria-label="Case documents">
+                <SectionHeader title="Case documents" description={false} />
+                <div className="co-docs-grid">
+                  {DOCUMENT_ENTRIES.map(({ caseSummary, bookTilt }) => (
+                    <DocumentCard
+                      key={caseSummary.id}
+                      caseSummary={caseSummary}
+                      bookTilt={bookTilt}
+                      lifted={active?.originKey === `docs:${caseSummary.id}`}
+                      sinking={active?.originKey === `docs:${caseSummary.id}` && active.sinking}
+                      onOpen={(caseSummary, originRect) =>
+                        setActive({ caseSummary, originRect, sinking: false, originKey: `docs:${caseSummary.id}` })
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="co-body-holding">
+              <Divider />
+              <section className="co-section" aria-label="Case holding">
+                <SectionHeader
+                  title="Case holding"
+                  citation={citationMarker('holding-win', 1, PLACEHOLDER)}
+                />
+                <div className="co-holding-grid">
+                  <HoldingCard
+                    icon={<IThumbsUp />}
+                    verdict="Appellant 3 won."
+                    detail={HOLDING_WIN}
+                    citation={citationMarker('holding-win', 1, HOLDING_WIN)}
+                    variant="win"
+                  />
+                  <HoldingCard
+                    icon={<IThumbsDown />}
+                    verdict="Appellant 1 and 2 lost."
+                    detail={HOLDING_LOSE}
+                    citation={citationMarker('holding-lose', 2, HOLDING_LOSE)}
+                    variant="lose"
+                  />
+                </div>
+              </section>
+              <Divider />
+            </div>
+
+            <section className="co-section co-body-history" aria-label="Procedural history">
               <SectionHeader
-                title="Case holding"
+                title="Procedural history"
                 citation={citationMarker('holding-win', 1, PLACEHOLDER)}
               />
-              <div className="co-holding-grid">
-                <HoldingCard
-                  icon={<IThumbsUp />}
-                  verdict="Appellant 3 won."
-                  detail={HOLDING_WIN}
-                  citation={citationMarker('holding-win', 1, HOLDING_WIN)}
-                  variant="win"
-                />
-                <HoldingCard
-                  icon={<IThumbsDown />}
-                  verdict="Appellant 1 and 2 lost."
-                  detail={HOLDING_LOSE}
-                  citation={citationMarker('holding-lose', 2, HOLDING_LOSE)}
-                  variant="lose"
-                />
+              <div className="co-timeline" role="list">
+                {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (
+                  <TimelineItem
+                    key={caseSummary.id}
+                    instanceLabel={instanceLabel}
+                    date={date}
+                    caseSummary={caseSummary}
+                    bookTilt={bookTilt}
+                    isFirst={i === 0}
+                    isLast={i === TIMELINE_ENTRIES.length - 1}
+                    lifted={active?.originKey === `history:${caseSummary.id}`}
+                    sinking={active?.originKey === `history:${caseSummary.id}` && active.sinking}
+                    onOpen={(caseSummary, originRect) =>
+                      setActive({ caseSummary, originRect, sinking: false, originKey: `history:${caseSummary.id}` })
+                    }
+                  />
+                ))}
               </div>
             </section>
-            <Divider />
           </div>
 
           <aside className="co-sources">
@@ -482,29 +659,6 @@ export function CaseListPage() {
             />
             <Divider />
           </aside>
-
-          <section className="co-section co-body-history" aria-label="Procedural history">
-            <SectionHeader
-              title="Procedural history"
-              citation={citationMarker('holding-win', 1, PLACEHOLDER)}
-            />
-            <div className="co-timeline" role="list">
-              {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (
-                <TimelineItem
-                  key={caseSummary.id}
-                  instanceLabel={instanceLabel}
-                  date={date}
-                  caseSummary={caseSummary}
-                  bookTilt={bookTilt}
-                  isFirst={i === 0}
-                  isLast={i === TIMELINE_ENTRIES.length - 1}
-                  lifted={active?.caseSummary.id === caseSummary.id}
-                  sinking={active?.caseSummary.id === caseSummary.id && active.sinking}
-                  onOpen={(caseSummary, originRect) => setActive({ caseSummary, originRect, sinking: false })}
-                />
-              ))}
-            </div>
-          </section>
         </div>
       </main>
     </div>
