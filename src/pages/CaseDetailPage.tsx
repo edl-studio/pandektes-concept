@@ -1,8 +1,29 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowLeft02Icon } from '@hugeicons/core-free-icons'
 import { PageStack, DocumentPageImage, PdfPageCanvas } from '@/components/compounds/PageStack'
+import { PkButton, type PkButtonIcon } from '@/components/primitives/Button'
 import { getCaseById } from './case-data'
 import { DETAIL_PAGE_HEADER_HEIGHT, FULL_WIDTH, PAGE_HEIGHT, SCALE } from './transition/layout'
+
+const BackArrowIcon: PkButtonIcon = ({ size, strokeWidth, className }) => (
+  <HugeiconsIcon
+    icon={ArrowLeft02Icon}
+    size={size}
+    strokeWidth={strokeWidth}
+    className={className}
+    color="currentColor"
+  />
+)
+
+function BackToCasesButton({ className }: { className?: string }) {
+  return (
+    <PkButton variant="secondary" size="sm" leadingIcon={BackArrowIcon} className={className} asChild>
+      <Link to="/">Back to cases</Link>
+    </PkButton>
+  )
+}
 
 const CONTENT_REVEAL_DELAY_MS = 400
 
@@ -24,9 +45,7 @@ export function CaseDetailPage() {
     return (
       <div className="min-h-screen bg-surface-body p-12">
         <p className="text-body-14 text-content-secondary">Case not found.</p>
-        <Link to="/" className="text-body-14 text-accent mt-2 inline-block">
-          Back to cases
-        </Link>
+        <BackToCasesButton className="mt-2" />
       </div>
     )
   }
@@ -36,9 +55,7 @@ export function CaseDetailPage() {
       {/* Fixed height (not text-flow margin) so this lines up pixel-for-pixel
           with BookOpenTransition's DETAIL_TOP settle target. */}
       <div className="w-full max-w-[600px] flex items-center" style={{ height: DETAIL_PAGE_HEADER_HEIGHT }}>
-        <Link to="/" className="text-body-14 text-content-secondary">
-          ← Back to cases
-        </Link>
+        <BackToCasesButton />
       </div>
 
       <div className="relative" style={{ width: FULL_WIDTH }}>

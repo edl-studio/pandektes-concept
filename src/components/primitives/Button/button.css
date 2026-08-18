@@ -1,92 +1,353 @@
 @layer pk {
+  /*
+   * Press effect: the surface layer sits 1px inside the button and a
+   * same-color box-shadow spread fills it back out to the full bounds.
+   * Pressing collapses the spread, shrinking the surface by exactly 1px per
+   * side at any width — a scale would warp (2% of a 400px button is 8px
+   * sideways but under 1px vertically). Fill colors are opaque color-mix()es
+   * rather than alpha so the fill and its spread ring never seam.
+   */
   .pk-button__root {
-    --_bg: transparent;
-    --_bg-hover: rgb(var(--pk-color-core-black) / 0.04);
-    --_color: var(--pk-color-content-primary);
+    --pk-button-hover: rgb(var(--pk-color-core-black) / 0.04);
+    --pk-button-active: rgb(var(--pk-color-core-black) / 0.07);
+    --pk-button-border: color-mix(in oklab, var(--pk-color-content-primary) 12%, transparent);
+    --pk-button-focus-ring: #6b97ff;
+    --pk-button-secondary-bg: color-mix(
+      in oklab,
+      var(--pk-color-content-primary) 5%,
+      var(--pk-color-surface-body)
+    );
 
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    border: none;
+    outline: none;
+    appearance: none;
+    background: transparent;
+    border-radius: var(--pk-radius-xl);
+    font-family: var(--pk-font-family-base);
+    font-weight: var(--pk-font-weight-medium);
+    line-height: 1;
+    color: var(--pk-color-content-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 80ms ease;
+  }
+
+  .pk-button__root:focus-visible {
+    box-shadow: 0 0 0 1px var(--pk-button-focus-ring);
+  }
+
+  .pk-button__root:is(:disabled, [data-disabled]) {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .pk-button__surface {
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    transition-property: box-shadow, background-color;
+    transition-duration: 180ms, 80ms;
+    transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1), ease;
+  }
+
+  .pk-button__root:active:not(:disabled) .pk-button__surface {
+    transition-duration: 80ms, 80ms;
+  }
+
+  .pk-button__content {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--pk-d1-5);
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    text-decoration: none;
-    border: none;
-    outline: none;
-    border-radius: 999px;
-    background-color: var(--_bg);
-    color: var(--_color);
-    font-family: var(--pk-font-family-base);
-    font-size: var(--pk-font-size-14);
-    font-weight: var(--pk-font-weight-medium);
-    transition: background-color 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 0 0 0 var(--pk-color-surface-body), 0 0 0 0 var(--pk-color-accent-weak);
+    gap: inherit;
   }
 
-  /* Inset gradient border ring — mirrors DsButton's ::before mask technique */
-  .pk-button__root::before {
-    content: '';
+  .pk-button__cluster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: inherit;
+  }
+
+  .pk-button__cluster--hidden {
+    opacity: 0;
+  }
+
+  .pk-button__label {
+    text-box: trim-both cap alphabetic;
+  }
+
+  .pk-button__icon {
+    flex-shrink: 0;
+    transition: stroke-width 80ms ease;
+    stroke-width: 1.5;
+  }
+
+  .pk-button__root:hover:not(:disabled) .pk-button__icon {
+    stroke-width: 2;
+  }
+
+  .pk-button__glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pk-button__glyph svg {
+    transition: stroke-width 80ms ease;
+    stroke-width: 1.5;
+  }
+
+  .pk-button__root:hover:not(:disabled) .pk-button__glyph svg {
+    stroke-width: 2;
+  }
+
+  .pk-button__spinner {
     position: absolute;
     inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(0deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  @media (hover: hover) {
-    .pk-button__root:hover:not([data-disabled]) {
-      background-color: var(--_bg-hover);
+  .pk-button__spinner-svg {
+    display: block;
+    fill: none;
+  }
+
+  /* ── Sizes ── */
+
+  .pk-button--default {
+    height: var(--pk-d9);
+    padding: 0 var(--pk-d4);
+    gap: var(--pk-d1-5);
+    font-size: var(--pk-font-size-13);
+  }
+
+  .pk-button--compact {
+    height: var(--pk-d7);
+    padding: 0 var(--pk-d3);
+    gap: var(--pk-d1);
+    font-size: var(--pk-font-size-12);
+  }
+
+  .pk-button--icon {
+    width: var(--pk-d9);
+    height: var(--pk-d9);
+    padding: 0;
+    gap: 0;
+  }
+
+  .pk-button--icon-compact {
+    width: var(--pk-d7);
+    height: var(--pk-d7);
+    padding: 0;
+    gap: 0;
+  }
+
+  .pk-button--default.pk-button--icon-left {
+    padding-left: var(--pk-d2-5);
+  }
+
+  .pk-button--default.pk-button--icon-right {
+    padding-right: var(--pk-d2-5);
+  }
+
+  .pk-button--compact.pk-button--icon-left {
+    padding-left: var(--pk-d1-5);
+  }
+
+  .pk-button--compact.pk-button--icon-right {
+    padding-right: var(--pk-d1-5);
+  }
+
+  .pk-button--default .pk-button__spinner-svg,
+  .pk-button--icon .pk-button__spinner-svg {
+    width: var(--pk-d9);
+    height: var(--pk-d9);
+  }
+
+  .pk-button--compact .pk-button__spinner-svg,
+  .pk-button--icon-compact .pk-button__spinner-svg {
+    width: var(--pk-d7);
+    height: var(--pk-d7);
+  }
+
+  .pk-button--icon .pk-button__glyph svg {
+    width: var(--pk-d4);
+    height: var(--pk-d4);
+  }
+
+  .pk-button--icon-compact .pk-button__glyph svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* ── Primary: accent fill ── */
+
+  .pk-button--primary {
+    color: var(--pk-color-static-white);
+  }
+
+  .pk-button--primary .pk-button__surface {
+    --pk-button-bg: var(--pk-color-accent-base);
+    background-color: var(--pk-button-bg);
+    box-shadow: 0 0 0 1px var(--pk-button-bg);
+  }
+
+  .pk-button--primary:hover:not(:disabled) .pk-button__surface {
+    --pk-button-bg: color-mix(
+      in oklab,
+      var(--pk-color-accent-base) 90%,
+      var(--pk-color-surface-body)
+    );
+  }
+
+  .pk-button--primary:active:not(:disabled) .pk-button__surface {
+    --pk-button-bg: color-mix(
+      in oklab,
+      var(--pk-color-accent-base) 80%,
+      var(--pk-color-surface-body)
+    );
+    box-shadow: 0 0 0 0 var(--pk-button-bg);
+  }
+
+  .pk-button--primary.pk-button--active .pk-button__surface {
+    --pk-button-bg: color-mix(
+      in oklab,
+      var(--pk-color-accent-base) 80%,
+      var(--pk-color-surface-body)
+    );
+    background-color: var(--pk-button-bg);
+    box-shadow: 0 0 0 1px var(--pk-button-bg);
+  }
+
+  .pk-button--primary.pk-button--active:active:not(:disabled) .pk-button__surface {
+    box-shadow: 0 0 0 0 var(--pk-button-bg);
+  }
+
+  /* ── Secondary: opaque muted fill ── */
+
+  .pk-button--secondary .pk-button__surface {
+    --pk-button-bg: var(--pk-button-secondary-bg);
+    background-color: var(--pk-button-bg);
+    box-shadow: 0 0 0 1px var(--pk-button-bg);
+  }
+
+  .pk-button--secondary:hover:not(:disabled) .pk-button__surface {
+    --pk-button-bg: color-mix(in oklab, var(--pk-button-secondary-bg) 80%, var(--pk-color-surface-body));
+  }
+
+  .pk-button--secondary:active:not(:disabled) .pk-button__surface {
+    --pk-button-bg: var(--pk-button-secondary-bg);
+    box-shadow: 0 0 0 0 var(--pk-button-bg);
+  }
+
+  .pk-button--secondary.pk-button--active .pk-button__surface {
+    --pk-button-bg: var(--pk-button-secondary-bg);
+    background-color: var(--pk-button-bg);
+    box-shadow: 0 0 0 1px var(--pk-button-bg);
+  }
+
+  .pk-button--secondary.pk-button--active:active:not(:disabled) .pk-button__surface {
+    box-shadow: 0 0 0 0 var(--pk-button-bg);
+  }
+
+  /*
+   * Tertiary: the border ring is an outer 1px shadow at rest that hands off
+   * to an inset 1px shadow when pressed, so the ring moves inward with the
+   * surface. The translucent fill only ever reaches the ring's inner edge
+   * (exactly the surface box), so it needs no spread of its own.
+   */
+  .pk-button--tertiary .pk-button__surface {
+    background-color: transparent;
+    box-shadow: 0 0 0 1px var(--pk-button-border), inset 0 0 0 0 var(--pk-button-border);
+  }
+
+  .pk-button--tertiary:hover:not(:disabled) .pk-button__surface {
+    background-color: var(--pk-button-hover);
+  }
+
+  .pk-button--tertiary:active:not(:disabled) .pk-button__surface {
+    background-color: var(--pk-button-active);
+    box-shadow: 0 0 0 0 var(--pk-button-border), inset 0 0 0 1px var(--pk-button-border);
+  }
+
+  .pk-button--tertiary.pk-button--active .pk-button__surface {
+    background-color: var(--pk-button-active);
+    box-shadow: 0 0 0 1px var(--pk-button-border), inset 0 0 0 0 var(--pk-button-border);
+  }
+
+  .pk-button--tertiary.pk-button--active:active:not(:disabled) .pk-button__surface {
+    box-shadow: 0 0 0 0 var(--pk-button-border), inset 0 0 0 1px var(--pk-button-border);
+  }
+
+  /*
+   * Ghost: translucent fill + same-color spread never double up — outer
+   * shadows render only outside the surface box.
+   */
+  .pk-button--ghost {
+    color: var(--pk-color-content-tertiary);
+  }
+
+  .pk-button--ghost:hover:not(:disabled) {
+    color: var(--pk-color-content-primary);
+  }
+
+  .pk-button--ghost .pk-button__surface {
+    background-color: transparent;
+    box-shadow: 0 0 0 1px transparent;
+  }
+
+  .pk-button--ghost:hover:not(:disabled) .pk-button__surface {
+    background-color: var(--pk-button-hover);
+    box-shadow: 0 0 0 1px var(--pk-button-hover);
+  }
+
+  .pk-button--ghost:active:not(:disabled) .pk-button__surface {
+    background-color: var(--pk-button-active);
+    box-shadow: 0 0 0 0 var(--pk-button-active);
+  }
+
+  .pk-button--ghost.pk-button--active .pk-button__surface {
+    background-color: var(--pk-button-active);
+    box-shadow: 0 0 0 1px var(--pk-button-active);
+  }
+
+  .pk-button--ghost.pk-button--active:active:not(:disabled) .pk-button__surface {
+    box-shadow: 0 0 0 0 var(--pk-button-active);
+  }
+
+  @keyframes pk-button-spinner-move {
+    to {
+      stroke-dashoffset: -100;
     }
   }
 
-  .pk-button__root:active:not([data-disabled]) {
-    opacity: 0.85;
+  @keyframes pk-button-spinner-dash {
+    0%,
+    100% {
+      stroke-dasharray: 15 85;
+    }
+    50% {
+      stroke-dasharray: 40 60;
+    }
   }
 
-  .pk-button__root:focus-visible {
-    box-shadow:
-      0 0 0 1px var(--pk-color-surface-body),
-      0 0 0 3px var(--pk-color-accent-weak);
-  }
-
-  .pk-button--primary {
-    --_bg: var(--pk-color-accent-base);
-    --_bg-hover: var(--pk-color-accent-mid);
-    --_color: var(--pk-color-static-white);
-  }
-
-  .pk-button--primary::before {
-    display: none;
-  }
-
-  .pk-button--ghost::before {
-    display: none;
-  }
-
-  .pk-button--sm {
-    height: var(--pk-d7);
-    padding: 0 var(--pk-d3);
-  }
-
-  .pk-button--md {
-    height: var(--pk-d8);
-    padding: 0 var(--pk-d4);
-  }
-
-  .pk-button--lg {
-    height: var(--pk-d9);
-    padding: 0 var(--pk-d5);
-  }
-
-  .pk-button__root[data-disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
+  .pk-button__spinner-path {
+    stroke: currentColor;
+    stroke-width: 1.125;
+    stroke-linecap: round;
+    stroke-dasharray: 15 85;
+    animation:
+      pk-button-spinner-move 2s linear infinite,
+      pk-button-spinner-dash 4s ease-in-out infinite;
   }
 }

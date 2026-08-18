@@ -430,7 +430,7 @@ function TimelineItem({
               </div>
             </div>
             <PkButton
-              variant="outline"
+              variant="secondary"
               size="sm"
               type="button"
               onPointerDown={(event) => event.stopPropagation()}

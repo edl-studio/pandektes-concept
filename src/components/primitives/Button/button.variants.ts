@@ -5,18 +5,33 @@ export const button = tv({
   variants: {
     variant: {
       primary: 'pk-button--primary',
-      outline: 'pk-button--outline',
+      secondary: 'pk-button--secondary',
+      tertiary: 'pk-button--tertiary',
+      outline: 'pk-button--tertiary',
       ghost: 'pk-button--ghost',
     },
     size: {
-      sm: 'pk-button--sm',
-      md: 'pk-button--md',
-      lg: 'pk-button--lg',
+      default: 'pk-button--default',
+      compact: 'pk-button--compact',
+      icon: 'pk-button--icon',
+      'icon-compact': 'pk-button--icon-compact',
+    },
+    iconLeft: {
+      true: 'pk-button--icon-left',
+    },
+    iconRight: {
+      true: 'pk-button--icon-right',
+    },
+    active: {
+      true: 'pk-button--active',
+    },
+    loading: {
+      true: 'pk-button--loading',
     },
   },
   defaultVariants: {
-    variant: 'outline',
-    size: 'md',
+    variant: 'primary',
+    size: 'default',
   },
 })
 

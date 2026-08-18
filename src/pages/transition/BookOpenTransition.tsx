@@ -44,7 +44,7 @@ const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book si
 const APEX_PROGRESS = 0.55 // Flight progress (0–1) at which the sheaf reaches the top of its arc.
 const FLIGHT_SPRING = {
   type: 'spring',
-  stiffness: 32,
+  stiffness: 48,
   damping: 15,
   mass: 1.2,
 } as const
