@@ -30,16 +30,17 @@ export interface OriginRect {
 
 const REORGANIZE_MS = 750 // Time allowed for the centered fan to spring into a vertical list.
 const PRESTACK_X_MS = 300 // Collapse horizontal offsets before sheets descend into the list.
+const CENTER_X_COLLAPSE_PROGRESS = 0.72 // Begin flattening X offsets on the final approach so the sheaf lands stacked.
+const CENTER_X_SETTLE_MS = 100 // Briefly hold the zero-X landing before opening the centered fan.
 const STACK_HOLD_MS = 400 // Pause on the small vertical list before the final scale-up begins.
 const APEX_TOP = 12 // Viewport Y (px) reached at the highest point of the sheaf's curved flight.
 const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the flight's initial vertical tangent.
-const EXTRACT_PAGE_SPREAD = 3 // Y-offset and rotation fan multiplier while the sheaf is extracted/in flight.
 const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually before restacking.
-const CENTER_SPREAD_MS = 900 // Time at center for horizontal spreading to slow and settle before restacking.
+const CENTER_SPREAD_MS = 150 // Brief center handoff before the loading wave begins.
 const BOUNCE_UP_Y = -32 // Upper extent of the wave relative to each sheet's baseline.
 const BOUNCE_DOWN_Y = 32 // Lower extent; positive Y carries the wave below baseline before it rises again.
 const BOUNCE_UP_MS = 650 // Reverses the wave while its softer springs still carry upward momentum.
-const BOUNCE_DOWN_MS = 700 // Lets the un-delayed return flow through before the next wave begins.
+const BOUNCE_DOWN_MS = 650 // Matches the upward phase so the wave is temporally symmetrical.
 const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before restacking.
 const BACKGROUND_FADE_MS = 750 // CSS background fade delay (400ms) + fade (350ms); wave waits for completion.
 const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book sink, page fade, and bounce clock.
@@ -59,6 +60,7 @@ const ROTATION_SPRING = {
 type Phase =
   | 'extracting'
   | 'flying'
+  | 'centering-x'
   | 'spreading'
   | 'aligning-x'
   | 'reorganizing'
@@ -117,6 +119,7 @@ export function BookOpenTransition({
   const startRotation = originRect.rotation ?? 0
   const wasOpen = originRect.open ?? false
   const flightXSpread = wasOpen ? OPEN_PAGE_SPREAD : 1
+  const flightYSpread = wasOpen ? OPEN_PAGE_SPREAD : 1
   const flightRotationSpread = wasOpen ? OPEN_PAGE_SPREAD : 1
   const startLeft = originRect.x + (wasOpen ? OPEN_PAGE_NUDGE * startScale : 0)
   const startTop = originRect.y - (wasOpen ? CASE_BOOK_HOVER_PAGE_LIFT * startScale : 0)
@@ -172,6 +175,7 @@ export function BookOpenTransition({
 
     async function run() {
       let extracted = false
+      let centeringX = false
       let backgroundReady = Promise.resolve()
 
       async function runBounceSequence() {
@@ -209,6 +213,11 @@ export function BookOpenTransition({
             backgroundReady = wait(BACKGROUND_FADE_MS)
           }
 
+          if (!centeringX && t >= CENTER_X_COLLAPSE_PROGRESS) {
+            centeringX = true
+            setPhase('centering-x')
+          }
+
           const flyProgress = Math.max(0, (t - EXTRACT_THRESHOLD) / (1 - EXTRACT_THRESHOLD))
           const heading = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI)
           const bank = Math.max(-12, Math.min(heading * 0.15, 12))
@@ -220,6 +229,10 @@ export function BookOpenTransition({
       })
       stops.push(flight)
       await flight
+      if (cancelled) return
+
+      if (!centeringX) setPhase('centering-x')
+      await wait(CENTER_X_SETTLE_MS)
       if (cancelled) return
 
       setPhase('spreading')
@@ -267,18 +280,20 @@ export function BookOpenTransition({
 
   const isExtracting = phase === 'extracting'
   const isFlying = phase === 'flying'
+  const isCenteringX = phase === 'centering-x'
   const isSpreading = phase === 'spreading'
   const isAligningX = phase === 'aligning-x'
   const isFanned =
-    isExtracting || isFlying || isSpreading || isAligningX
+    isExtracting || isFlying || isCenteringX || isSpreading || isAligningX
   const isReorganized = phase === 'reorganizing' || phase === 'scaling'
   const isBounceRestacking = phase === 'reorganizing' && bouncePhase === 'down'
   const isScaled = phase === 'scaling'
-  const currentXSpread = isFlying || isSpreading
+  const currentXSpread = isSpreading
     ? CENTER_X_SPREAD
-    : isExtracting
+    : isExtracting || isFlying
       ? flightXSpread
-      : 1
+      : 0
+  const currentYSpread = isExtracting ? flightYSpread : 0
 
   const tile = originRect.tile
 
@@ -300,8 +315,8 @@ export function BookOpenTransition({
           scale={isScaled ? SCALE : 1}
           initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
           initialXSpread={flightXSpread}
-          spread={isFanned ? EXTRACT_PAGE_SPREAD : 1}
           xSpread={currentXSpread}
+          ySpread={currentYSpread}
           rotationSpread={flightRotationSpread}
           springFan={isFanned}
           gentleFan={isFanned}
@@ -314,7 +329,7 @@ export function BookOpenTransition({
           }
           bouncePhase={bouncePhase}
           alignRotation={isFlying || isSpreading || isAligningX}
-          alignX={isAligningX}
+          alignX={isCenteringX || isAligningX}
           restackFromBounce={isBounceRestacking}
         />
       </motion.div>

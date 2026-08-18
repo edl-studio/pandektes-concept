@@ -35,6 +35,8 @@ export interface PageStackProps {
   spread?: number
   /** Horizontal-only fan multiplier, allowing wider sheets without extra tilt/Y offset. */
   xSpread?: number
+  /** Vertical-only fan multiplier, allowing Y alignment independently of X/rotation. */
+  ySpread?: number
   /** Rotation-only fan multiplier, allowing tilt to change independently of X/Y spread. */
   rotationSpread?: number
   /** Fan spread used for the overlay's first frame, before it springs outward. */
@@ -65,6 +67,7 @@ export function PageStack({
   scale = 1,
   spread = 1,
   xSpread = spread,
+  ySpread = spread,
   rotationSpread = spread,
   initialSpread = spread,
   initialXSpread = initialSpread,
@@ -78,8 +81,8 @@ export function PageStack({
   restackFromBounce = false,
 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
-  const fan = mode === 'fan' ? spread : 1
   const xFan = mode === 'fan' ? xSpread : 1
+  const yFan = mode === 'fan' ? ySpread : 1
   const rotationFan = mode === 'fan' ? rotationSpread : 1
 
   return (
@@ -105,7 +108,7 @@ export function PageStack({
                 : 0,
             y:
               mode === 'fan'
-                ? i * FAN_STEP_Y * fan * scale + sheetBounceY
+                ? i * FAN_STEP_Y * yFan * scale + sheetBounceY
                 : i * (233 + LIST_GAP) * scale +
                   (restackFromBounce ? sheetBounceY : 0),
             rotate:
@@ -138,17 +141,10 @@ export function PageStack({
             mass: 1.4,
             delay: sheetDelay,
           }
-          const bounceUpSpring = {
+          const bounceSpring = {
             type: 'spring' as const,
             stiffness: 110,
             damping: 12,
-            mass: 1.1,
-            delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
-          }
-          const bounceDownSpring = {
-            type: 'spring' as const,
-            stiffness: 90,
-            damping: 13,
             mass: 1.1,
             delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
           }
@@ -173,11 +169,9 @@ export function PageStack({
                       ? spreadSpring
                       : sheetSpring,
                   y:
-                    bouncePhase === 'up'
-                      ? bounceUpSpring
-                      : bouncePhase === 'down'
-                        ? bounceDownSpring
-                        : sheetSpring,
+                    bouncePhase === 'up' || bouncePhase === 'down'
+                      ? bounceSpring
+                      : sheetSpring,
                   rotate: alignRotation ? alignSpring : sheetSpring,
                   scale: gentleFan ? spreadSpring : sheetSpring,
                   width: STACK_LAYOUT_SPRING,
