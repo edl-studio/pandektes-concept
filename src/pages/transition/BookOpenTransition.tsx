@@ -29,6 +29,7 @@ export interface OriginRect {
 }
 
 const REORGANIZE_MS = 750 // Time allowed for the centered fan to spring into a vertical list.
+const PRESTACK_X_MS = 300 // Collapse horizontal offsets before sheets descend into the list.
 const STACK_HOLD_MS = 400 // Pause on the small vertical list before the final scale-up begins.
 const APEX_TOP = 12 // Viewport Y (px) reached at the highest point of the sheaf's curved flight.
 const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the flight's initial vertical tangent.
@@ -59,6 +60,7 @@ type Phase =
   | 'extracting'
   | 'flying'
   | 'spreading'
+  | 'aligning-x'
   | 'reorganizing'
   | 'scaling'
 type BouncePhase = 'idle' | 'up' | 'down'
@@ -225,12 +227,16 @@ export function BookOpenTransition({
       await wait(CENTER_SPREAD_MS)
       if (cancelled) return
 
-      // The first cycles return to the fan; the final cycle pauses at its
-      // apex so this phase change becomes its downward stroke.
+      // Rotation has already normalized during flight. The final downward
+      // stroke collapses the remaining X fan before the vertical restack.
       await bounceSequence
       if (cancelled) return
 
       setBouncePhase('down')
+      setPhase('aligning-x')
+      await wait(PRESTACK_X_MS)
+      if (cancelled) return
+
       setPhase('reorganizing')
       await wait(REORGANIZE_MS)
       if (cancelled) return
@@ -263,7 +269,9 @@ export function BookOpenTransition({
   const isExtracting = phase === 'extracting'
   const isFlying = phase === 'flying'
   const isSpreading = phase === 'spreading'
-  const isFanned = isExtracting || isFlying || isSpreading
+  const isAligningX = phase === 'aligning-x'
+  const isFanned =
+    isExtracting || isFlying || isSpreading || isAligningX
   const isReorganized = phase === 'reorganizing' || phase === 'scaling'
   const isBounceRestacking = phase === 'reorganizing' && bouncePhase === 'down'
   const isScaled = phase === 'scaling'
@@ -300,6 +308,8 @@ export function BookOpenTransition({
                 : 0
           }
           bouncePhase={bouncePhase}
+          alignRotation
+          alignX={isAligningX}
           restackFromBounce={isBounceRestacking}
         />
       </motion.div>

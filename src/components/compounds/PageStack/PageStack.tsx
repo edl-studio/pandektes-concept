@@ -47,6 +47,10 @@ export interface PageStackProps {
   bounceY?: number
   /** Selects direction-specific springs for the traveling sheet wave. */
   bouncePhase?: 'idle' | 'up' | 'down'
+  /** Normalize fan rotation while preserving its X and Y offsets. */
+  alignRotation?: boolean
+  /** Normalize fan X offsets independently of rotation and Y. */
+  alignX?: boolean
   /** Carry the final downward bounce directly into the vertical list. */
   restackFromBounce?: boolean
 }
@@ -63,6 +67,8 @@ export function PageStack({
   gentleFan = false,
   bounceY = 0,
   bouncePhase = 'idle',
+  alignRotation = false,
+  alignX = false,
   restackFromBounce = false,
 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
@@ -82,13 +88,19 @@ export function PageStack({
             pageCount <= 1 ? 0 : i / (pageCount - 1)
           const sheetBounceY = bounceY * (1 - sheetProgress * 0.25)
           const target = {
-            x: mode === 'fan' ? i * FAN_STEP_X * xFan * scale : 0,
+            x:
+              mode === 'fan' && !alignX
+                ? i * FAN_STEP_X * xFan * scale
+                : 0,
             y:
               mode === 'fan'
                 ? i * FAN_STEP_Y * fan * scale + sheetBounceY
                 : i * (233 + LIST_GAP) * scale +
                   (restackFromBounce ? sheetBounceY : 0),
-            rotate: mode === 'fan' ? i * FAN_STEP_ROTATION * fan : 0,
+            rotate:
+              mode === 'fan' && !alignRotation
+                ? i * FAN_STEP_ROTATION * fan
+                : 0,
             width: 180 * scale,
             height: 233 * scale,
           }
@@ -127,6 +139,12 @@ export function PageStack({
             mass: 1.1,
             delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
           }
+          const alignSpring = {
+            type: 'spring' as const,
+            stiffness: 90,
+            damping: 15,
+            mass: 1.1,
+          }
           const restackBounceSpring = {
             type: 'spring' as const,
             stiffness: 130,
@@ -136,14 +154,18 @@ export function PageStack({
           const transition =
             mode === 'fan' && springFan
               ? {
-                  x: gentleFan ? spreadSpring : sheetSpring,
+                  x: alignX
+                    ? alignSpring
+                    : gentleFan
+                      ? spreadSpring
+                      : sheetSpring,
                   y:
                     bouncePhase === 'up'
                       ? bounceUpSpring
                       : bouncePhase === 'down'
                         ? bounceDownSpring
                         : sheetSpring,
-                  rotate: sheetSpring,
+                  rotate: alignRotation ? alignSpring : sheetSpring,
                   width: STACK_LAYOUT_SPRING,
                   height: STACK_LAYOUT_SPRING,
                 }
