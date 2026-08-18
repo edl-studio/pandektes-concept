@@ -42,6 +42,10 @@ export interface PageStackProps {
   springFan?: boolean
   /** Use a slower spring while the fan progressively opens in flight. */
   gentleFan?: boolean
+  /** Temporary Y offset used for the centered sheet-bounce wave. */
+  bounceY?: number
+  /** Stagger the dedicated bounce spring from the front sheet backward. */
+  staggerBounce?: boolean
 }
 
 export function PageStack({
@@ -54,6 +58,8 @@ export function PageStack({
   initialXSpread = initialSpread,
   springFan = false,
   gentleFan = false,
+  bounceY = 0,
+  staggerBounce = false,
 }: PageStackProps) {
   const height = (mode === 'list' ? pageCount * 233 + (pageCount - 1) * LIST_GAP : 233) * scale
   const fan = mode === 'fan' ? spread : 1
@@ -70,7 +76,7 @@ export function PageStack({
           } as CSSProperties
           const target = {
             x: mode === 'fan' ? i * FAN_STEP_X * xFan * scale : 0,
-            y: mode === 'fan' ? i * FAN_STEP_Y * fan * scale : i * (233 + LIST_GAP) * scale,
+            y: mode === 'fan' ? i * FAN_STEP_Y * fan * scale + bounceY : i * (233 + LIST_GAP) * scale,
             rotate: mode === 'fan' ? i * FAN_STEP_ROTATION * fan : 0,
             width: 180 * scale,
             height: 233 * scale,
@@ -96,11 +102,17 @@ export function PageStack({
             mass: 1.4,
             delay: sheetDelay,
           }
+          const bounceSpring = {
+            type: 'spring' as const,
+            stiffness: 220,
+            damping: 14,
+            delay: i * 0.035,
+          }
           const transition =
             mode === 'fan' && springFan
               ? {
                   x: gentleFan ? spreadSpring : sheetSpring,
-                  y: sheetSpring,
+                  y: staggerBounce ? bounceSpring : sheetSpring,
                   rotate: sheetSpring,
                   width: STACK_LAYOUT_SPRING,
                   height: STACK_LAYOUT_SPRING,

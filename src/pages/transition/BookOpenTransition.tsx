@@ -28,24 +28,34 @@ export interface OriginRect {
   tile?: { left: number; top: number; right: number; bottom: number }
 }
 
-const REORGANIZE_MS = 750
-const STACK_HOLD_MS = 320 // beat on the small list before it grows
-/** Viewport Y the sheaf actually visits at the top of the inverted-U. */
-const APEX_TOP = 48
-const EXTRACT_PAGE_LIFT = 170
-const EXTRACT_PAGE_SPREAD = 3
-const CENTER_X_SPREAD = 6
-const CENTER_SPREAD_MS = 900
-const EXTRACT_THRESHOLD = 0.2
-const APEX_PROGRESS = 0.55
+const REORGANIZE_MS = 750 // Time allowed for the centered fan to spring into a vertical list.
+const STACK_HOLD_MS = 400 // Pause on the small vertical list before the final scale-up begins.
+const APEX_TOP = 12 // Viewport Y (px) reached at the highest point of the sheaf's curved flight.
+const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the flight's initial vertical tangent.
+const EXTRACT_PAGE_SPREAD = 3 // Y-offset and rotation fan multiplier while the sheaf is extracted/in flight.
+const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually before restacking.
+const CENTER_SPREAD_MS = 900 // Time at center for horizontal spreading to slow and settle before restacking.
+const BOUNCE_Y = -128 // Per-sheet upward bounce distance (px); more negative means a higher bounce.
+const BOUNCE_UP_MS = 360 // Time between starting the staggered upward bounce and sending sheets back down.
+const BOUNCE_DOWN_MS = 420 // Time allowed for the return bounce before its state is cleared.
+const BACKGROUND_FADE_MS = 750 // Bounce delay after extraction: CSS background fade delay (400ms) + fade (350ms).
+const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book sink, page fade, and bounce clock.
+const APEX_PROGRESS = 0.55 // Flight progress (0–1) at which the sheaf reaches the top of its arc.
 const FLIGHT_SPRING = {
   type: 'spring',
-  stiffness: 45,
+  stiffness: 50,
   damping: 15,
   mass: 1.2,
 } as const
 
-type Phase = 'extracting' | 'flying' | 'spreading' | 'reorganizing' | 'scaling' | 'settling'
+type Phase =
+  | 'extracting'
+  | 'flying'
+  | 'spreading'
+  | 'reorganizing'
+  | 'scaling'
+  | 'settling'
+type BouncePhase = 'idle' | 'up' | 'down'
 
 /** Cubic Bézier used by both halves of the continuous flight path. */
 function cubicBezier(t: number, p0: number, p1: number, p2: number, p3: number) {
@@ -85,6 +95,7 @@ export function BookOpenTransition({
   onComplete: () => void
 }) {
   const [phase, setPhase] = useState<Phase>('extracting')
+  const [bouncePhase, setBouncePhase] = useState<BouncePhase>('idle')
 
   const stackHandoffY = window.innerHeight / 2 - BOOK_HEIGHT / 2
   const stackRestY = DETAIL_TOP
@@ -160,6 +171,11 @@ export function BookOpenTransition({
             extracted = true
             setPhase('flying')
             onExtracted()
+            timers.push(
+              setTimeout(() => setBouncePhase('up'), BACKGROUND_FADE_MS),
+              setTimeout(() => setBouncePhase('down'), BACKGROUND_FADE_MS + BOUNCE_UP_MS),
+              setTimeout(() => setBouncePhase('idle'), BACKGROUND_FADE_MS + BOUNCE_UP_MS + BOUNCE_DOWN_MS),
+            )
           }
 
           const flyProgress = Math.max(0, (t - EXTRACT_THRESHOLD) / (1 - EXTRACT_THRESHOLD))
@@ -208,6 +224,8 @@ export function BookOpenTransition({
   const isExtracting = phase === 'extracting'
   const isFlying = phase === 'flying'
   const isSpreading = phase === 'spreading'
+  const isBouncing = bouncePhase !== 'idle'
+  const isFanned = isExtracting || isFlying || isSpreading
   const isReorganized = phase === 'reorganizing' || phase === 'scaling' || phase === 'settling'
   const isScaled = phase === 'scaling' || phase === 'settling'
 
@@ -231,10 +249,12 @@ export function BookOpenTransition({
           scale={isScaled ? SCALE : 1}
           initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
           initialXSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
-          spread={isExtracting || isFlying || isSpreading ? EXTRACT_PAGE_SPREAD : 1}
-          xSpread={isExtracting || isFlying || isSpreading ? CENTER_X_SPREAD : 1}
-          springFan={isExtracting || isFlying || isSpreading}
-          gentleFan={isExtracting || isFlying || isSpreading}
+          spread={isFanned ? EXTRACT_PAGE_SPREAD : 1}
+          xSpread={isFanned ? CENTER_X_SPREAD : 1}
+          springFan={isFanned}
+          gentleFan={isFanned}
+          bounceY={bouncePhase === 'up' ? BOUNCE_Y : 0}
+          staggerBounce={isBouncing}
         />
       </motion.div>
 
