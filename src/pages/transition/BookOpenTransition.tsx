@@ -328,8 +328,9 @@ export function BookOpenTransition({
                 : 0
           }
           bouncePhase={bouncePhase}
-          alignRotation={isFlying || isSpreading || isAligningX}
+          alignRotation={isFlying || isCenteringX || isSpreading || isAligningX}
           alignX={isCenteringX || isAligningX}
+          alignedXStep={isCenteringX ? 1 : 0}
           restackFromBounce={isBounceRestacking}
         />
       </motion.div>

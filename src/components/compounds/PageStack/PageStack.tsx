@@ -55,6 +55,8 @@ export interface PageStackProps {
   alignRotation?: boolean
   /** Normalize fan X offsets independently of rotation and Y. */
   alignX?: boolean
+  /** Per-sheet X step retained while X alignment is active. */
+  alignedXStep?: number
   /** Scale rear fan sheets down in 2% depth steps before restacking. */
   depthScale?: boolean
   /** Carry the final downward bounce directly into the vertical list. */
@@ -77,6 +79,7 @@ export function PageStack({
   bouncePhase = 'idle',
   alignRotation = false,
   alignX = false,
+  alignedXStep = 0,
   depthScale = false,
   restackFromBounce = false,
 }: PageStackProps) {
@@ -103,8 +106,8 @@ export function PageStack({
               : 1
           const target = {
             x:
-              mode === 'fan' && !alignX
-                ? i * FAN_STEP_X * xFan * scale
+              mode === 'fan'
+                ? i * (alignX ? alignedXStep : FAN_STEP_X * xFan) * scale
                 : 0,
             y:
               mode === 'fan'
