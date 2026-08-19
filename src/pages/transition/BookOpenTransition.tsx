@@ -54,8 +54,8 @@ const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually be
 const CENTER_SPREAD_MS = 150 // Brief center handoff before the loading wave begins.
 const BOUNCE_UP_Y = -32 // Upper extent of the wave relative to each sheet's baseline.
 const BOUNCE_DOWN_Y = 0 // Return every sheet to the same neutral baseline.
-const BOUNCE_UP_MS = 600 // Includes the normalized stagger window for the final sheet.
-const BOUNCE_DOWN_MS = 650 // Lets the final staggered sheet settle at baseline.
+const BOUNCE_UP_MS = 750 // Includes the normalized stagger window for the final sheet.
+const BOUNCE_DOWN_MS = 813 // Lets the final staggered sheet settle at baseline.
 const PRESTACK_X_MS = BOUNCE_DOWN_MS // Complete the baseline return while X collapses before list restacking.
 const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before restacking.
 const LOADING_LABELS = [
@@ -64,7 +64,7 @@ const LOADING_LABELS = [
   'Tracing citations…',
 ] as const
 // Leave enough time for each shimmer-sweep exit and entrance within the loading wave.
-const LOADING_LABEL_SWAP_DELAYS_MS = [950, 2050] as const
+const LOADING_LABEL_SWAP_DELAYS_MS = [1188, 2563] as const
 const BACKGROUND_FADE_MS = 750 // CSS background fade delay (400ms) + fade (350ms); wave waits for completion.
 const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book sink, page fade, and bounce clock.
 const APEX_PROGRESS = 0.55 // Flight progress (0–1) at which the sheaf reaches the top of its arc.
