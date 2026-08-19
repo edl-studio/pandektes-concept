@@ -22,6 +22,7 @@ import {
   getDetailDocumentLeft,
   OPEN_PAGE_NUDGE,
   OPEN_PAGE_SPREAD,
+  PAGE_HEIGHT,
   PAGE_WIDTH,
   SCALE,
 } from './layout'
@@ -410,6 +411,7 @@ export function BookOpenTransition({
   const isReorganized = phase === 'reorganizing' || phase === 'scaling'
   const isBounceRestacking = phase === 'reorganizing' && bouncePhase === 'down'
   const isScaled = phase === 'scaling'
+  const showFlickeringGrid = isSpreading || isAligningX || isReorganized
   const currentXSpread = isSpreading
     ? CENTER_X_SPREAD
     : isExtracting || isFlying
@@ -441,9 +443,9 @@ export function BookOpenTransition({
           mode={isReorganized ? 'list' : 'fan'}
           frontSheetBackdrop={
             <AnimatePresence>
-              {isSpreading && (
+              {showFlickeringGrid && (
                 <motion.div
-                  className="pk-book-transition__flickering-grid"
+                  className="pk-book-transition__flickering-grid-shell"
                   initial={{ opacity: 0 }}
                   animate={{
                     opacity: 0.25,
@@ -460,11 +462,24 @@ export function BookOpenTransition({
                     },
                   }}
                 >
-                  <FlickeringGrid
-                    color="#7d2334"
-                    flickerChance={0.22}
-                    maxOpacity={0.32}
-                  />
+                  <motion.div
+                    className="pk-book-transition__flickering-grid"
+                    initial={{ scale: 1 / SCALE }}
+                    animate={{ scale: isScaled ? 1 : 1 / SCALE }}
+                    transition={STACK_LAYOUT_SPRING}
+                    style={{
+                      width: PAGE_WIDTH * SCALE,
+                      height: PAGE_HEIGHT * SCALE,
+                      x: '-50%',
+                      y: '-50%',
+                    }}
+                  >
+                    <FlickeringGrid
+                      color="#7d2334"
+                      flickerChance={0.22}
+                      maxOpacity={0.32}
+                    />
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>

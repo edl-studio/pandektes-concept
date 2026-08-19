@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { PanelRightClose, PanelRightOpen, Search, X } from 'lucide-react'
 import { PkButton } from '@/components/primitives/Button'
 import { InputField, InputGroup } from '@/components/ui/input-group'
@@ -41,8 +41,13 @@ const EXIT_DURATION_MS = 240
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
   const navigate = useNavigate()
   const caseSummary = id ? getCaseById(id) : undefined
+  const gridInitiallyVisible = Boolean(
+    (location.state as { fromBookTransition?: boolean } | null)
+      ?.fromBookTransition,
+  )
   const [showContent, setShowContent] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
@@ -133,6 +138,7 @@ export function CaseDetailPage() {
       <CaseDocumentViewer
         caseSummary={caseSummary}
         contentVisible={showContent}
+        gridInitiallyVisible={gridInitiallyVisible}
         sidebarOpen={sidebarOpen}
         searchQuery={searchValue}
         searchNavStep={searchNavStep}

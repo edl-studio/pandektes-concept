@@ -50,6 +50,39 @@
     will-change: transform, opacity, filter;
   }
 
+  .pk-book-transition__flickering-grid-shell {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .pk-book-transition__flickering-grid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+  }
+
+  .pk-book-transition__flickering-grid::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background: radial-gradient(
+      circle,
+      transparent 55%,
+      color-mix(in srgb, var(--pk-color-surface-body) 60%, transparent) 78%,
+      var(--pk-color-surface-body) 100%
+    );
+  }
+
+  .pk-book-transition__flickering-grid canvas {
+    position: relative;
+    z-index: 0;
+  }
+
   /*
    * The sheet box grows via real width/height (not transform), so
    * border-radius and the 1px gradient border below stay crisp and

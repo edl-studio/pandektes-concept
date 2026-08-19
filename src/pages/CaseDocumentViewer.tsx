@@ -155,6 +155,8 @@ export interface CitationHighlight {
 export interface CaseDocumentViewerProps {
   caseSummary: CaseSummary
   contentVisible: boolean
+  /** Skip the grid entrance when continuing from the book-opening transition. */
+  gridInitiallyVisible?: boolean
   sidebarOpen?: boolean
   searchQuery?: string
   /**
@@ -235,6 +237,7 @@ function LazyPdfPage({
 export function CaseDocumentViewer({
   caseSummary,
   contentVisible,
+  gridInitiallyVisible = false,
   sidebarOpen = true,
   searchQuery = '',
   searchNavStep = 0,
@@ -554,6 +557,7 @@ export function CaseDocumentViewer({
     <div
       className="case-document-viewer"
       data-content-visible={contentVisible}
+      data-grid-initially-visible={gridInitiallyVisible}
       data-sidebar-open={sidebarOpen}
       data-thumbnail-nav-visible={thumbnailNavVisible}
     >

@@ -656,7 +656,9 @@ export function CaseListPage() {
         }}
         onComplete={() => {
           window.scrollTo(0, 0)
-          navigate(`/case/${active.caseSummary.id}`)
+          navigate(`/case/${active.caseSummary.id}`, {
+            state: { fromBookTransition: true },
+          })
         }}
       />
     )}

@@ -167,6 +167,12 @@
     60ms forwards;
 }
 
+.case-document-viewer[data-grid-initially-visible='true']
+  .case-document-viewer__flickering-grid {
+  opacity: 0.25;
+  animation: none;
+}
+
 .case-document-viewer__flickering-grid::after {
   content: '';
   position: absolute;
