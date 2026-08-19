@@ -553,7 +553,7 @@ export function CaseListPage() {
           </div>
           <div className="co-case-titles">
             <h1 className="co-case-title">Flair Group v. HK Danmark</h1>
-            <p className="co-case-desc">{MATTER_DESCRIPTION}</p>
+            <p className="co-case-desc">{citationMarker('hjr-result', 1, MATTER_DESCRIPTION)}</p>
           </div>
         </header>
 
@@ -585,7 +585,7 @@ export function CaseListPage() {
               <section className="co-section" aria-label="Case holding">
                 <SectionHeader
                   title="Case holding"
-                  citation={citationMarker('hjr-result', 1, MATTER_DESCRIPTION)}
+                  description={false}
                 />
                 <div className="co-holding-grid">
                   <HoldingCard
@@ -599,7 +599,7 @@ export function CaseListPage() {
                     icon={<IThumbsDown />}
                     verdict="First instance — Adecco acquitted 2–1."
                     detail={HOLDING_LOSE}
-                    citation={citationMarker('shr-majority', 2, HOLDING_LOSE)}
+                    citation={citationMarker('shr-majority', 3, HOLDING_LOSE)}
                     variant="lose"
                   />
                 </div>
@@ -610,7 +610,9 @@ export function CaseListPage() {
               <section className="co-section co-body-history" aria-label="Procedural history">
               <SectionHeader
                 title="Procedural history"
-                citation={citationMarker('hjr-result', 1, MATTER_DESCRIPTION)}
+                citation={citationMarker('hjr-result', 1,
+                  `The dispute ran through three courts. Sø- og Handelsretten acquitted Adecco 2\u20131 (2021). Østre Landsret reversed and awarded DKK 282,338.09 (2024). Højesteret affirmed the appellate judgment in full (2026).`
+                )}
               />
               <div className="co-timeline" role="list">
                 {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (

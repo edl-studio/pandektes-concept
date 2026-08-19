@@ -15,6 +15,7 @@
   font-weight: var(--pk-font-weight-medium);
   line-height: 16px;
   text-decoration: none;
+  gap: 3px;
   color: var(--pk-color-content-tertiary);
   background-color: var(--pk-color-surface-raised);
   cursor: pointer;
@@ -36,6 +37,10 @@
 
 .pk-citation:hover {
   color: var(--pk-color-content-secondary);
+}
+
+.pk-citation-sep {
+  color: var(--pk-color-content-tertiary);
 }
 
 .pk-citation:focus {
@@ -142,9 +147,9 @@
   padding: var(--pk-d3);
   border-top: 1px solid rgb(0 0 0 / 0.06);
   font-family: var(--pk-font-family-base);
-  font-size: var(--pk-font-size-12);
-  font-style: italic;
-  line-height: 1.45;
+  font-size: var(--pk-font-size-13);
+  font-weight: var(--pk-font-weight-light);
+  line-height: 1.5;
   color: var(--pk-color-content-secondary);
 }
 
@@ -179,7 +184,7 @@
   align-items: center;
   gap: var(--pk-d1);
   min-height: 32px;
-  padding: var(--pk-d1) var(--pk-d2) var(--pk-d1) 0;
+  padding: var(--pk-d1) 0;
   border: none;
   background: none;
   font-family: var(--pk-font-family-base);
@@ -399,19 +404,51 @@
   transition: color 0.15s ease;
 }
 
+/* Numbered chip that mirrors the inline citation badge */
+.pk-citation-group-index {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background-color: var(--pk-color-surface-raised);
+  font-family: var(--pk-font-family-base);
+  font-size: 10px;
+  font-weight: var(--pk-font-weight-medium);
+  line-height: 16px;
+  color: var(--pk-color-content-tertiary);
+}
+
+.pk-citation-group-index::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, var(--pk-color-border-gradient-start), var(--pk-color-border-gradient-end));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 .pk-citation-subitems {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  /* indent to align with the group title text */
-  padding-left: calc(20px + var(--pk-d2));
+  /* No left padding — indent lives on the title so the trailing slot
+     stays at full width and aligns with the group-index chip. */
 }
 
 .pk-citation-subrow {
   display: flex;
   align-items: center;
   gap: var(--pk-d2);
-  padding: 3px var(--pk-d1-5) 3px 0;
+  padding: 3px 0;
   border-radius: 4px;
   text-decoration: none;
   color: inherit;
@@ -425,6 +462,22 @@
 
 .pk-citation-subrow:focus-visible {
   background-color: var(--pk-color-accent-weak);
+}
+
+.pk-citation-subrow-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Align title text with the group header title (thumbnail + gap) */
+  padding-left: calc(20px + var(--pk-d2));
+  font-family: var(--pk-font-family-base);
+  font-size: var(--pk-font-size-12);
+  font-weight: var(--pk-font-weight-regular);
+  line-height: 1.3;
+  color: var(--pk-color-content-secondary);
+  transition: color 0.15s ease;
 }
 
 .pk-citation-subrow-page {
@@ -456,31 +509,5 @@
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
-}
-
-.pk-citation-subrow-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: var(--pk-font-family-base);
-  font-size: var(--pk-font-size-12);
-  font-weight: var(--pk-font-weight-regular);
-  line-height: 1.3;
-  color: var(--pk-color-content-secondary);
-  transition: color 0.15s ease;
-}
-
-.pk-citation-subrow-icon {
-  flex-shrink: 0;
-  color: var(--pk-color-content-quaternary);
-  opacity: 0;
-  transition: opacity 0.15s ease, color 0.15s ease;
-}
-
-.pk-citation-subrow:is(a):hover .pk-citation-subrow-icon {
-  opacity: 1;
-  color: var(--pk-color-accent-base);
 }
 

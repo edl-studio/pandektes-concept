@@ -215,6 +215,16 @@
     transform-style: preserve-3d;
   }
 
+  .pk-case-book__cover-front::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('../../../assets/case-book-texture.png') center / cover;
+    mix-blend-mode: multiply;
+    opacity: 1;
+    pointer-events: none;
+  }
+
   .pk-case-book__cover-front-edge {
     position: absolute;
     inset: 0 auto 0 0;

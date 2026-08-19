@@ -1,5 +1,4 @@
 import {
-  ArrowUpRight,
   BookOpen,
   BookmarkPlus,
   ChevronDown,
@@ -135,13 +134,17 @@ export function Citation({
     ? `/case/${source.caseId}?citation=${citationId}`
     : `#${citationTargetId(idPrefix, citationId)}`
 
+  const label = source?.pageNumber != null
+    ? <><span>{index}</span><span className="pk-citation-sep">· p{source.pageNumber}</span></>
+    : index
+
   const marker = source?.caseId ? (
     <Link to={docHref} aria-label={`View citation ${index}`} className={cn('pk-citation', className)}>
-      {index}
+      {label}
     </Link>
   ) : (
     <a href={docHref} aria-label={`View citation ${index}`} className={cn('pk-citation', className)}>
-      {index}
+      {label}
     </a>
   )
 
@@ -289,9 +292,6 @@ function CitationSubRow({
     <>
       <span className="pk-citation-subrow-title">{citation.title}</span>
       {pageLabel && <span className="pk-citation-subrow-page">{pageLabel}</span>}
-      <span className="pk-citation-subrow-icon" aria-hidden="true">
-        <ArrowUpRight size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth />
-      </span>
     </>
   )
 
@@ -317,12 +317,13 @@ function CitationGroupedList({
 
   return (
     <div className={cn('pk-citation-grouped-list', className)}>
-      {groups.map((group) => {
+      {groups.map((group, i) => {
         const headerHref = group.caseId ? `/case/${group.caseId}` : undefined
         const headerInner = (
           <>
             <CitationFavicon url={group.url} pageNumber={group.items[0]?.pageNumber} />
             <span className="pk-citation-group-title">{group.sourceTitle}</span>
+            <span className="pk-citation-group-index" aria-label={`Source ${i + 1}`}>{i + 1}</span>
           </>
         )
         return (
