@@ -8,7 +8,10 @@ import {
   useSpring,
 } from 'framer-motion'
 import { PageStack, STACK_LAYOUT_SPRING } from '@/components/compounds/PageStack'
-import { CASE_BOOK_HOVER_PAGE_LIFT } from '@/components/compounds/CaseBook'
+import {
+  CASE_BOOK_HOVER_PAGE_LIFT,
+  MAX_CASE_BOOK_SHEETS,
+} from '@/components/compounds/CaseBook'
 import { Orb } from '@/components/effects/Orb'
 import type { CaseSummary } from '../case-data'
 import {
@@ -350,7 +353,7 @@ export function BookOpenTransition({
           }}
         >
           <PageStack
-            pageCount={caseSummary.pageCount}
+            pageCount={Math.min(caseSummary.pageCount, MAX_CASE_BOOK_SHEETS)}
             mode={isReorganized ? 'list' : 'fan'}
             scale={isScaled ? SCALE : 1}
             initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}

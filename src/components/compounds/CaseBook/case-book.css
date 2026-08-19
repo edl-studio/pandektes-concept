@@ -11,6 +11,7 @@
     --_width: 188px;
     --_height: 233px;
     --_cover-front-width: 180px;
+    --_cover-color: var(--pk-color-accent-base);
     --_spread: 1;
     --_cover-tilt: 0deg;
 
@@ -33,7 +34,7 @@
     gap: var(--pk-d3);
     padding: var(--pk-d4);
     border-radius: var(--pk-radius-md);
-    background-color: var(--pk-color-accent-base);
+    background-color: var(--_cover-color);
     box-shadow: inset 0 0 0 0.5px rgb(var(--pk-color-core-black) / 0.2);
     overflow: hidden;
     transition: transform 0.4s ease-in;
@@ -206,7 +207,7 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--pk-radius-md);
-    background-color: var(--pk-color-accent-base);
+    background-color: var(--_cover-color);
     background-image: linear-gradient(100deg, transparent, rgb(var(--pk-color-core-black) / 0.15));
     box-shadow: inset 0 0 0 0.5px rgb(var(--pk-color-core-black) / 0.2);
     overflow: hidden;
@@ -243,7 +244,7 @@
 
   .pk-case-book__icon-mark {
     width: 100%;
-    color: #872639;
+    color: color-mix(in srgb, var(--_cover-color) 75%, white 25%);
   }
 
   .pk-case-book__icon-mark svg,

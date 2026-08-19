@@ -5,6 +5,8 @@ export interface CaseSummary {
   id: string
   caseNumber: string
   title: string
+  /** Hex color used for the case-book's front and back covers. */
+  coverColor: string
   /** Actual page count of the underlying document — drives how many sheets PkCaseBook/PageStack render. */
   pageCount: number
   /** URL to the real judgment PDF, when we have one. Falls back to the abstract placeholder image otherwise. */
@@ -33,6 +35,7 @@ export const CASES: CaseSummary[] = [
     caseNumber: 'BS-60017/2024-HJR',
     title:
       'Højesteret affirms — Boeing posting was not temporary; quality controller entitled to salaried-employee rights under funktionærloven',
+    coverColor: '#C31230',
     pageCount: 12,
     documentUrl: '/documents/bs-60017-2024-hjr.pdf',
     Logo: HojesteretLogo,
@@ -45,6 +48,7 @@ export const CASES: CaseSummary[] = [
     caseNumber: 'BS-8528/2023-OLR',
     title:
       'Østre Landsret reverses — No objective explanation for four extensions; Flair Group ordered to pay DKK 282,338.09',
+    coverColor: '#E1232D',
     pageCount: 32,
     documentUrl: '/documents/bs-8528-2023-olr.pdf',
     Logo: OstreLandsretLogo,
@@ -57,6 +61,7 @@ export const CASES: CaseSummary[] = [
     caseNumber: 'BS-13671/2021-SHR',
     title:
       'Sø- og Handelsretten acquits — 2-1 majority holds posting covered by vikarloven; DKK 419,770.90 claim dismissed',
+    coverColor: '#E1232D',
     pageCount: 29,
     documentUrl: '/documents/bs-13671-2021-shr.pdf',
     Logo: SoHandelsrettenLogo,

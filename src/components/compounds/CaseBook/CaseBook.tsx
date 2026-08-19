@@ -7,6 +7,7 @@ import { PAGE_SKELETON_GROUPS } from './skeleton-layouts'
 import './case-book.css'
 
 const DEFAULT_PAGE_COUNT = 6
+export const MAX_CASE_BOOK_SHEETS = 8
 
 const PAGE_BASE_OFFSET = 0 // px, first page starts flush with the cover (--_page-x: 0px)
 const PAGE_STEP_OFFSET = 2 // px, added per subsequent page (x-axis)
@@ -31,6 +32,8 @@ export interface PkCaseBookProps extends HTMLAttributes<HTMLDivElement> {
   caseNumber?: string
   /** Full case title shown on the back cover. Omit to render no back-cover text at all. */
   title?: string
+  /** CSS color used for both cover boards. Defaults to the accent color token. */
+  coverColor?: string
   /** Number of pages fanned out behind the cover. Defaults to 6. */
   pageCount?: number
   /** Forces the hover-open choreography (cover tilt + page spread) on programmatically. */
@@ -86,6 +89,7 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
     {
       caseNumber,
       title,
+      coverColor,
       pageCount = DEFAULT_PAGE_COUNT,
       open,
       extracting,
@@ -96,6 +100,7 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
       hideFrontCover,
       logo,
       className,
+      style,
       testId,
       onMouseEnter,
       onMouseLeave,
@@ -104,6 +109,7 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
     ref,
   ) => {
     const [hovered, setHovered] = useState(false)
+    const sheetCount = Math.min(pageCount, MAX_CASE_BOOK_SHEETS)
     const expanded = Boolean(open || hovered)
     const spread = expanded ? 2 : 1
     const coverTilt = coverClosing ? 0 : expanded || extracting ? -28 : 0
@@ -119,6 +125,11 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
           coverExiting && 'pk-case-book__root--cover-exiting',
           className,
         )}
+        style={
+          coverColor
+            ? ({ ...style, '--_cover-color': coverColor } as CSSProperties)
+            : style
+        }
         data-testid={testId}
         onMouseEnter={(event) => {
           setHovered(true)
@@ -143,7 +154,7 @@ export const PkCaseBook = forwardRef<HTMLDivElement, PkCaseBookProps>(
           <div className="pk-case-book__pages">
             {/* Drawn back-to-front (highest offset first) so page 0 — the one
                 closest to the cover — paints last and sits on top. */}
-            {Array.from({ length: pageCount }, (_, pageIndex) => pageCount - 1 - pageIndex).map((pageIndex) => {
+            {Array.from({ length: sheetCount }, (_, pageIndex) => sheetCount - 1 - pageIndex).map((pageIndex) => {
               const style = {
                 '--_page-x': `${PAGE_BASE_OFFSET + pageIndex * PAGE_STEP_OFFSET}px`,
                 '--_page-y': `${pageIndex * PAGE_STEP_Y_OFFSET}px`,

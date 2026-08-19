@@ -33,6 +33,7 @@ export function CaseBookCard({
       <PkCaseBook
         caseNumber={caseSummary.caseNumber}
         title={caseSummary.title}
+        coverColor={caseSummary.coverColor}
         pageCount={caseSummary.pageCount}
         logo={Logo ? <Logo /> : undefined}
       />

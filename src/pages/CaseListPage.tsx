@@ -391,6 +391,7 @@ function TimelineItem({
               ref={bookRef}
               caseNumber={caseSummary.caseNumber}
               title={caseSummary.title}
+              coverColor={caseSummary.coverColor}
               pageCount={caseSummary.pageCount}
               logo={Logo ? <Logo /> : undefined}
               open={bookOpen}
@@ -475,6 +476,7 @@ function DocumentCard({
           ref={bookRef}
           caseNumber={caseSummary.caseNumber}
           title={caseSummary.title}
+          coverColor={caseSummary.coverColor}
           pageCount={caseSummary.pageCount}
           logo={Logo ? <Logo /> : undefined}
           open={bookOpen}
