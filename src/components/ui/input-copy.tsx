@@ -1,7 +1,6 @@
 import { forwardRef, useCallback, useEffect, useRef, useState, type HTMLAttributes } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { Copy01Icon, LegalDocument01Icon, Tick02Icon } from '@hugeicons/core-free-icons'
+import { Check, Copy, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import './input-copy.css'
 
@@ -62,7 +61,7 @@ export const InputCopy = forwardRef<HTMLDivElement, InputCopyProps>(
     }, [])
 
     const iconKey = copied ? 'check' : hovered ? 'copy' : 'doc'
-    const icon = copied ? Tick02Icon : hovered ? Copy01Icon : LegalDocument01Icon
+    const Icon = copied ? Check : hovered ? Copy : FileText
 
     return (
       <div
@@ -89,10 +88,8 @@ export const InputCopy = forwardRef<HTMLDivElement, InputCopyProps>(
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={iconTransition}
               >
-                <HugeiconsIcon
-                  icon={icon}
+                <Icon
                   size={ICON_SIZE}
-                  color="currentColor"
                   strokeWidth={ICON_STROKE}
                   absoluteStrokeWidth
                 />

@@ -1,10 +1,9 @@
-import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  ArrowUpRight01Icon,
-  BookOpen02Icon,
-  ChevronDownIcon,
-  BookmarkAdd02Icon,
-} from '@hugeicons/core-free-icons'
+  BookOpen,
+  BookmarkPlus,
+  ChevronDown,
+  ExternalLink,
+} from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   type ReactNode,
@@ -106,10 +105,8 @@ function CitationCardBody({ source }: { source: CitationItem }) {
           to={`/case/${source.caseId}?citation=${source.id}`}
           className="pk-citation-card-open"
         >
-          <HugeiconsIcon
-            icon={BookmarkAdd02Icon}
+          <BookmarkPlus
             size={ICON_SIZE}
-            color="currentColor"
             strokeWidth={ICON_STROKE}
             absoluteStrokeWidth
           />
@@ -206,10 +203,8 @@ function CitationRow({
       </span>
       <span className="pk-citation-row-meta">
         {citation.url ? (
-          <HugeiconsIcon
-            icon={ArrowUpRight01Icon}
+          <ExternalLink
             size={ICON_SIZE}
-            color="currentColor"
             strokeWidth={ICON_STROKE}
             absoluteStrokeWidth
           />
@@ -294,20 +289,16 @@ export function Citations({
       onOpenChange={(next) => onOpenChange?.(next)}
     >
       <CollapsibleTrigger className="pk-citations-toggle" aria-controls={contentId}>
-        <HugeiconsIcon
-          icon={BookOpen02Icon}
+        <BookOpen
           size={ICON_SIZE}
-          color="currentColor"
           strokeWidth={ICON_STROKE}
           absoluteStrokeWidth
         />
         <span>{title}</span>
         <span className="pk-citations-count">{citations.length}</span>
         <span className="pk-citations-chevron" aria-hidden="true">
-          <HugeiconsIcon
-            icon={ChevronDownIcon}
+          <ChevronDown
             size={ICON_SIZE}
-            color="currentColor"
             strokeWidth={ICON_STROKE}
             absoluteStrokeWidth
           />

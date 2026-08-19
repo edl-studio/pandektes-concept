@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { Cancel01Icon } from '@hugeicons/core-free-icons'
-import { Search } from 'lucide-react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { PanelRightClose, PanelRightOpen, Search, X } from 'lucide-react'
 import { PkButton } from '@/components/primitives/Button'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { getCaseById } from './case-data'
@@ -11,34 +9,43 @@ import { CaseDocumentViewer } from './CaseDocumentViewer'
 import type { CitationHighlight } from './CaseDocumentViewer'
 import { DETAIL_PAGE_HEADER_HEIGHT } from './transition/layout'
 
-function BackToCasesButton() {
+function BackToCasesButton({
+  disabled,
+  onClick,
+}: {
+  disabled?: boolean
+  onClick: () => void
+}) {
   return (
     <PkButton
       variant="secondary"
       size="icon"
-      className="fixed top-6 left-6 z-20"
-      asChild
+      className="fixed top-5 left-5 z-20"
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      aria-label="Back to cases"
     >
-      <Link to="/" aria-label="Back to cases">
-        <HugeiconsIcon
-          icon={Cancel01Icon}
-          size={16}
-          strokeWidth={1.5}
-          color="currentColor"
-          absoluteStrokeWidth
-        />
-      </Link>
+      <X
+        size={16}
+        strokeWidth={1.5}
+        aria-hidden="true"
+      />
     </PkButton>
   )
 }
 
 const CONTENT_REVEAL_DELAY_MS = 600
+const EXIT_DURATION_MS = 240
 
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const caseSummary = id ? getCaseById(id) : undefined
   const [showContent, setShowContent] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
   const [searchValue, setSearchValue] = useState('')
   const [searchResultCount, setSearchResultCount] = useState<number | null>(null)
 
@@ -47,9 +54,21 @@ export function CaseDetailPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    const timer = setTimeout(() => setShowContent(true), CONTENT_REVEAL_DELAY_MS)
+    const timer = setTimeout(() => {
+      setShowContent(true)
+    }, CONTENT_REVEAL_DELAY_MS)
     return () => clearTimeout(timer)
   }, [])
+
+  useEffect(() => {
+    if (!isExiting) return
+
+    const timer = window.setTimeout(() => {
+      navigate('/', { state: { fromCaseDetail: true } })
+    }, EXIT_DURATION_MS)
+
+    return () => window.clearTimeout(timer)
+  }, [isExiting, navigate])
 
   // Resolve citation deep-link from ?citation=id query param.
   const citationId = searchParams.get('citation') ?? undefined
@@ -80,22 +99,48 @@ export function CaseDetailPage() {
     return (
       <div className="min-h-screen bg-surface-body p-12">
         <p className="text-body-14 text-content-secondary">Case not found.</p>
-        <BackToCasesButton />
+        <BackToCasesButton onClick={() => navigate('/')} />
       </div>
     )
   }
 
   return (
-    <div className="case-detail-page min-h-screen bg-surface-body">
-      <BackToCasesButton />
+    <div
+      className="case-detail-page min-h-screen bg-surface-body"
+      data-exiting={isExiting}
+    >
+      <BackToCasesButton
+        disabled={isExiting}
+        onClick={() => setIsExiting(true)}
+      />
+      <PkButton
+        variant="secondary"
+        size="icon"
+        className="case-detail-page__sidebar-toggle fixed top-6 z-20"
+        type="button"
+        data-sidebar-open={sidebarOpen}
+        aria-label={sidebarOpen ? 'Hide summary sidebar' : 'Show summary sidebar'}
+        aria-expanded={sidebarOpen}
+        onClick={() => setSidebarOpen((open) => !open)}
+      >
+        {sidebarOpen ? (
+          <PanelRightClose size={16} strokeWidth={1.5} aria-hidden="true" />
+        ) : (
+          <PanelRightOpen size={16} strokeWidth={1.5} aria-hidden="true" />
+        )}
+      </PkButton>
 
       <CaseDocumentViewer
         caseSummary={caseSummary}
         contentVisible={showContent}
+        sidebarOpen={sidebarOpen}
         searchQuery={searchValue}
         searchNavStep={searchNavStep}
         citationHighlight={citationHighlight}
         onSearchResults={setSearchResultCount}
+        onThumbnailRevealComplete={() => {
+          if (!isExiting) setSidebarOpen(true)
+        }}
         searchToolbar={
           <div
             className="case-detail-page__toolbar"

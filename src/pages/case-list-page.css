@@ -26,6 +26,24 @@
   pointer-events: none;
 }
 
+.co-page--returning {
+  animation: co-page-return-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes co-page-return-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(0.992);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
 .co-page--exiting {
   opacity: 0;
   /* Extraction has completed; hold the card through the book sink (0.4s). */
@@ -630,5 +648,21 @@
 
   .co-docs-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes co-page-return-in-reduced {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .co-page--returning {
+    animation: co-page-return-in-reduced 0.12s linear backwards;
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  AnimatePresence,
   animate,
   motion,
   useMotionValue,
@@ -46,8 +47,8 @@ const APEX_TOP = -128 // Viewport Y (px) reached at the highest point of the she
 const EXTRACT_PAGE_LIFT = 170 // Unscaled upward pull (px) used to shape the flight's initial vertical tangent.
 const CENTER_X_SPREAD = 6 // Horizontal-only fan multiplier reached gradually before restacking.
 const CENTER_SPREAD_MS = 150 // Brief center handoff before the loading wave begins.
-const BOUNCE_UP_Y = -32 // Upper extent of the wave relative to each sheet's baseline.
-const BOUNCE_DOWN_Y = 32 // Lower extent; positive Y carries the wave below baseline before it rises again.
+const BOUNCE_UP_Y = -20 // Upper extent of the wave relative to each sheet's baseline.
+const BOUNCE_DOWN_Y = 20 // Lower extent; positive Y carries the wave below baseline before it rises again.
 const BOUNCE_UP_MS = 650 // Reverses the wave while its softer springs still carry upward momentum.
 const BOUNCE_DOWN_MS = 650 // Matches the upward phase so the wave is temporally symmetrical.
 const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before restacking.
@@ -376,13 +377,31 @@ export function BookOpenTransition({
         </motion.div>
       </motion.div>
 
-      {isSpreading && (
-        <Orb
-          className="pk-book-transition__loader"
-          label="Loading document..."
-          pill
-        />
-      )}
+      <AnimatePresence>
+        {isSpreading && (
+          <motion.div
+            className="pk-book-transition__loader"
+            initial={
+              prefersReducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, filter: 'blur(6px)' }
+            }
+            animate={
+              prefersReducedMotion
+                ? { opacity: 1 }
+                : { opacity: 1, filter: 'blur(0px)' }
+            }
+            exit={
+              prefersReducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, filter: 'blur(6px)' }
+            }
+            transition={{ duration: prefersReducedMotion ? 0.12 : 0.22, ease: 'easeOut' }}
+          >
+            <Orb label="Loading document..." pill variant="S3" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isExtracting && tile && (
         <div

@@ -6,31 +6,28 @@ const SIZE = 20
 const N = 3
 const PITCH = 6
 const MID = (N - 1) / 2
-const SWIRL = 1.05
-const SPREAD = 1.6
 
-export type OrbVariant = 'S1'
+export type OrbVariant = 'S3'
 
 export const ORB_TASKS: Record<OrbVariant, string> = {
-  S1: 'Thinking',
+  S3: 'Working',
 }
+
+const RING: [number, number][] = (() => {
+  const ring: [number, number][] = []
+  for (let x = 0; x < N; x += 1) ring.push([x, 0])
+  for (let y = 1; y < N; y += 1) ring.push([N - 1, y])
+  for (let x = N - 2; x >= 0; x -= 1) ring.push([x, N - 1])
+  for (let y = N - 2; y >= 1; y -= 1) ring.push([0, y])
+  return ring
+})()
+
+const RING_INDEX = new Map(RING.map(([x, y], index) => [`${x},${y}`, index]))
 
 function cellDelay(x: number, y: number) {
-  const dx = x - MID
-  const dy = y - MID
-  return Math.hypot(dx, dy) * 700 - (dx === 0 && dy === 0 ? 180 : 0)
-}
-
-function swirl(x: number, y: number, angle: number): [number, number] {
-  const dx = x - MID
-  const dy = y - MID
-  const cos = Math.cos(angle)
-  const sin = Math.sin(angle)
-
-  return [
-    ((dx * cos - dy * sin) * SPREAD - dx) * PITCH,
-    ((dx * sin + dy * cos) * SPREAD - dy) * PITCH,
-  ]
+  const index = RING_INDEX.get(`${x},${y}`)
+  if (index === undefined) return 0
+  return -(((RING.length - index) % RING.length) / RING.length) * 1700
 }
 
 interface Cell {
@@ -38,10 +35,7 @@ interface Cell {
   left: number
   top: number
   delay: number
-  ax: number
-  ay: number
-  bx: number
-  by: number
+  still: boolean
   mid: boolean
 }
 
@@ -50,17 +44,12 @@ function latticeCells(): Cell[] {
 
   for (let y = 0; y < N; y += 1) {
     for (let x = 0; x < N; x += 1) {
-      const [ax, ay] = swirl(x, y, -SWIRL)
-      const [bx, by] = swirl(x, y, SWIRL)
       cells.push({
         key: `${x},${y}`,
         left: STAGE / 2 + (x - MID) * PITCH,
         top: STAGE / 2 + (y - MID) * PITCH,
         delay: cellDelay(x, y),
-        ax,
-        ay,
-        bx,
-        by,
+        still: !RING_INDEX.has(`${x},${y}`),
         mid: x === MID && y === MID,
       })
     }
@@ -81,7 +70,7 @@ export interface OrbProps {
 }
 
 export function Orb({
-  variant = 'S1',
+  variant = 'S3',
   size = SIZE,
   label,
   pill = false,
@@ -117,16 +106,13 @@ export function Orb({
               <span
                 key={cell.key}
                 className={styles.cell}
+                data-still={cell.still ? '' : undefined}
                 data-mid={cell.mid ? '' : undefined}
                 style={
                   {
                     left: cell.left,
                     top: cell.top,
                     animationDelay: `${cell.delay}ms`,
-                    '--orb-ax': `${cell.ax}px`,
-                    '--orb-ay': `${cell.ay}px`,
-                    '--orb-bx': `${cell.bx}px`,
-                    '--orb-by': `${cell.by}px`,
                   } as CSSProperties
                 }
               />

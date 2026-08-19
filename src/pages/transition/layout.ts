@@ -27,15 +27,7 @@ export const DETAIL_COLUMN_GAP = 24
 export const DETAIL_TOP =
   DETAIL_MAIN_PADDING + DETAIL_PAGE_HEADER_HEIGHT + DETAIL_PAGE_HEADER_GAP
 
-/** Horizontal resting position of the PDF column in the responsive detail shell. */
+/** Horizontal handoff position before the summary sidebar expands. */
 export function getDetailDocumentLeft(viewportWidth: number): number {
-  if (viewportWidth < 960) return (viewportWidth - FULL_WIDTH) / 2
-
-  const sidebarWidth = viewportWidth >= 1240 ? DETAIL_SIDEBAR_WIDTH : 0
-  const mainWidth = viewportWidth - sidebarWidth
-  return (
-    (mainWidth - DETAIL_WORKSPACE_WIDTH) / 2 +
-    DETAIL_NAV_COLUMN_WIDTH +
-    DETAIL_COLUMN_GAP
-  )
+  return (viewportWidth - FULL_WIDTH) / 2
 }

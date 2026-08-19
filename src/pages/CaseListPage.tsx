@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
 import { animate } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
-import { HugeiconsIcon } from '@hugeicons/react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Calendar04Icon,
-  TaskDone02Icon,
-  ThumbsUpIcon,
-  ThumbsDownIcon,
-  ArrowUp02Icon,
-  Tick02Icon,
-  File02Icon,
-} from '@hugeicons/core-free-icons'
+  ArrowUp,
+  BadgeCheck,
+  Calendar,
+  Check,
+  FileText,
+  ThumbsDown,
+  ThumbsUp,
+} from 'lucide-react'
 import { CASES, type CaseSummary } from './case-data'
 import { PkCaseBook } from '@/components/compounds/CaseBook'
 import {
@@ -43,31 +42,31 @@ const ICON_SIZE = 12
 const ICON_STROKE = 1
 
 const ICalendar: FC = () => (
-  <HugeiconsIcon icon={Calendar04Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+  <Calendar size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const ITaskDone: FC = () => (
-  <HugeiconsIcon icon={TaskDone02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+  <BadgeCheck size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const IThumbsUp: FC = () => (
-  <HugeiconsIcon icon={ThumbsUpIcon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+  <ThumbsUp size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const IThumbsDown: FC = () => (
-  <HugeiconsIcon icon={ThumbsDownIcon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+  <ThumbsDown size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const IArrowUp: FC = () => (
-  <HugeiconsIcon icon={ArrowUp02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+  <ArrowUp size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const ICheck: FC = () => (
-  <HugeiconsIcon icon={Tick02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+  <Check size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 const IFile: FC = () => (
-  <HugeiconsIcon icon={File02Icon} size={ICON_SIZE} color="currentColor" strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
+  <FileText size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth className="co-icon" />
 )
 
 function PkMark() {
@@ -133,14 +132,14 @@ function HoldingCard({
 
 // ── SectionHeader ─────────────────────────────────────────────────────
 
-const PLACEHOLDER =
-  'Short summary below the title so the title above could be shorter. Think of it as a full official title of this entity. While the title above is short, quick entity identifier.'
+const MATTER_DESCRIPTION =
+  `A quality controller recruited by Boeing and placed via Adecco A/S (now Flair Group A/S) worked without interruption at Boeing's Kastrup facility for 3\u00bd years under four successive fixed-term contracts. The central question across all three instances was whether that posting was "temporary" under the Temporary Agency Work Act (vikarloven) \u2014 and whether the worker was therefore entitled to salaried-employee protections under funktionærloven.`
 
 const HOLDING_WIN =
-  'A long-term posting to Boeing brought the worker within funktionærloven. The court awarded DKK 282,338.09 in salary and holiday pay, treating the assignment as ordinary salaried employment rather than a temporary agency placement.'
+  `Højesteret confirmed that the four successive extensions lacked any objective explanation, bringing the posting outside vikarloven. The worker was therefore a salaried employee (funktionær) entitled to sick pay and a four-month notice period. Østre Landsret's award of DKK 282,338.09 \u2014 comprising salary in the notice period, sick-pay arrears, and a DKK 25,000 Fixed-Term Employment Act compensation \u2014 was affirmed in full.`
 
 const HOLDING_LOSE =
-  'The joined vikarloven claims were dismissed. The court found no basis for agency-work compensation once the relationship was classified as salaried employment, and the remaining appellants were left without a separate remedy.'
+  `Sø- og Handelsretten acquitted Adecco by a 2\u20131 majority, holding that the posting fell within vikarloven and that the collective agreement (Funktionæroverenskomsten) displaced the successive-extension prohibition in \u00a7 3, stk. 4. The dissenting judge would have awarded three months' salary, sick-pay, and one month's compensation.`
 
 function SectionHeader({
   title,
@@ -154,7 +153,7 @@ function SectionHeader({
   return (
     <div className="co-section-header">
       <h2 className="co-section-title">{title}</h2>
-      {description && <p className="co-section-desc">{citation ?? PLACEHOLDER}</p>}
+      {description && <p className="co-section-desc">{citation ?? MATTER_DESCRIPTION}</p>}
     </div>
   )
 }
@@ -341,6 +340,7 @@ function TimelineItem({
   sinking: boolean
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
+  const statusLabel = caseSummary.status
   const {
     bookRef,
     bookOpen,
@@ -367,14 +367,14 @@ function TimelineItem({
 
       {/* Content */}
       <div className="co-timeline-body">
-        <div className="co-timeline-header">
-          <p className="co-timeline-label">{instanceLabel}</p>
-          <div className="co-meta-row">
-            <InputCopy value={caseNumberDisplay} />
-            <Chip icon={<ICalendar />} label={date} muted />
-            <Chip icon={<ITaskDone />} label="Final" muted />
+          <div className="co-timeline-header">
+            <p className="co-timeline-label">{instanceLabel}</p>
+            <div className="co-meta-row">
+              <InputCopy value={caseNumberDisplay} />
+              <Chip icon={<ICalendar />} label={date} muted />
+              <Chip icon={<ITaskDone />} label={statusLabel} muted />
+            </div>
           </div>
-        </div>
 
         {/* Document card */}
         <div
@@ -502,8 +502,8 @@ const CASE_NUMBER_DISPLAY = CASES[0].caseNumber.replace('/', ' · ')
 // CASES[2] = SHR (First instance)→ Instance 1
 const TIMELINE_ENTRIES = CASES.map((cs, i) => ({
   caseSummary: cs,
-  instanceLabel: `Instance ${CASES.length - i} · Final`,
-  date: '18 Jun 2026',
+  instanceLabel: `Instance ${CASES.length - i} · ${cs.courtLabel}`,
+  date: cs.judgmentDate,
   bookTilt: randomBookTilt(),
 }))
 
@@ -520,10 +520,14 @@ export function CaseListPage() {
     originKey: string
   } | null>(null)
   const navigate = useNavigate()
+  const location = useLocation()
+  const returningFromCaseDetail = Boolean(
+    (location.state as { fromCaseDetail?: boolean } | null)?.fromCaseDetail,
+  )
 
   return (
     <>
-    <div className={`co-page${active ? ' co-page--transitioning' : ''}${active?.sinking ? ' co-page--exiting' : ''}`}>
+    <div className={`co-page${returningFromCaseDetail ? ' co-page--returning' : ''}${active ? ' co-page--transitioning' : ''}${active?.sinking ? ' co-page--exiting' : ''}`}>
       <header className="co-appbar">
         <div className="co-appbar-inner">
           <Link to="/" className="co-appbar-logo">
@@ -547,7 +551,7 @@ export function CaseListPage() {
           </div>
           <div className="co-case-titles">
             <h1 className="co-case-title">Flair Group v. HK Danmark</h1>
-            <p className="co-case-desc">{PLACEHOLDER}</p>
+            <p className="co-case-desc">{MATTER_DESCRIPTION}</p>
           </div>
         </header>
 
@@ -579,21 +583,21 @@ export function CaseListPage() {
               <section className="co-section" aria-label="Case holding">
                 <SectionHeader
                   title="Case holding"
-                  citation={citationMarker('holding-win', 1, PLACEHOLDER)}
+                  citation={citationMarker('hjr-result', 1, MATTER_DESCRIPTION)}
                 />
                 <div className="co-holding-grid">
                   <HoldingCard
                     icon={<IThumbsUp />}
-                    verdict="Appellant 3 won."
+                    verdict="Worker won — DKK 282,338.09 awarded."
                     detail={HOLDING_WIN}
-                    citation={citationMarker('holding-win', 1, HOLDING_WIN)}
+                    citation={citationMarker('hjr-result', 1, HOLDING_WIN)}
                     variant="win"
                   />
                   <HoldingCard
                     icon={<IThumbsDown />}
-                    verdict="Appellant 1 and 2 lost."
+                    verdict="First instance — Adecco acquitted 2–1."
                     detail={HOLDING_LOSE}
-                    citation={citationMarker('holding-lose', 2, HOLDING_LOSE)}
+                    citation={citationMarker('shr-majority', 2, HOLDING_LOSE)}
                     variant="lose"
                   />
                 </div>
@@ -601,10 +605,10 @@ export function CaseListPage() {
               <Divider />
             </div>
 
-            <section className="co-section co-body-history" aria-label="Procedural history">
+              <section className="co-section co-body-history" aria-label="Procedural history">
               <SectionHeader
                 title="Procedural history"
-                citation={citationMarker('holding-win', 1, PLACEHOLDER)}
+                citation={citationMarker('hjr-result', 1, MATTER_DESCRIPTION)}
               />
               <div className="co-timeline" role="list">
                 {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (

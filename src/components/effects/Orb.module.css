@@ -1,7 +1,6 @@
 .root {
   display: inline-flex;
   align-items: center;
-  color: var(--pk-color-content-primary);
 }
 
 .root[data-pill] {
@@ -37,7 +36,11 @@
   border-radius: 999px;
   background: currentColor;
   will-change: transform, opacity;
-  animation: settle 2100ms cubic-bezier(0.45, 0, 0.2, 1) infinite both;
+  animation: orbit 1700ms linear infinite both;
+}
+
+.cell[data-still] {
+  display: none;
 }
 
 .label {
@@ -63,34 +66,26 @@
   animation: label-shine 2250ms cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
 }
 
-@keyframes settle {
+@keyframes orbit {
   0% {
-    opacity: 0;
-    transform:
-      translate(-50%, -50%)
-      translate3d(var(--orb-ax), var(--orb-ay), 0)
-      scale(0.4);
-  }
-
-  30% {
-    opacity: 0.22;
-  }
-
-  48% {
     opacity: 1;
-    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
 
-  66% {
-    opacity: 0.28;
+  18% {
+    opacity: 0.58;
+    transform: translate(-50%, -50%) scale(0.82);
   }
 
+  42% {
+    opacity: 0.18;
+    transform: translate(-50%, -50%) scale(0.62);
+  }
+
+  72%,
   100% {
     opacity: 0;
-    transform:
-      translate(-50%, -50%)
-      translate3d(var(--orb-bx), var(--orb-by), 0)
-      scale(0.4);
+    transform: translate(-50%, -50%) scale(0.5);
   }
 }
 

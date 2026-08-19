@@ -12,6 +12,7 @@ import { FlickeringGrid } from '@/components/effects/FlickeringGrid'
 import { getPdf } from '@/components/compounds/PageStack/PdfPageCanvas'
 import { getTextIndex, searchIndex } from '@/components/compounds/PageStack/pdf-text-index'
 import type { SearchMatch } from '@/components/compounds/PageStack/pdf-text-index'
+import { SharedLayoutBg } from '@/components/motion/shared-layout-bg'
 import type { CaseSummary } from './case-data'
 import {
   DocumentSummarySidebar,
@@ -29,30 +30,115 @@ import './case-document-viewer.css'
 const PAGE_GAP = 16 * SCALE
 const PAGE_DISPLAY_HEIGHT = PAGE_HEIGHT * SCALE
 const DOCUMENT_TOP_INSET = DETAIL_PAGE_HEADER_HEIGHT + DETAIL_PAGE_HEADER_GAP
+const DOCUMENT_BOTTOM_INSET = 112
 const THUMBNAIL_WIDTH = 96
+const THUMBNAIL_FADE_HEIGHT = 112
 const WIPE_EDGE_WIDTH = 48
 
 const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
+  // ── Højesteret (12 pages) ──────────────────────────────────────────────
   'bs-60017-2024-hjr': [
     {
-      id: 'appellant-3-compensation',
-      title: 'Compensation confirmed',
-      body:
-        'The Supreme Court confirmed compensation of DKK 25,000 for Appellant 3 under the Fixed-Term Employment Act.',
-      pageNumber: 9,
+      id: 'hjr-two-questions',
+      title: 'Two legal questions',
+      body: 'The case raised two main questions: (1) Can a worker covered by vikarloven also be a salaried employee under funktionærloven? (2) When is a posting "temporary"?',
+      pageNumber: 5,
       quoteText:
-        'Appelindstævnte, tidligere Appellant 3 er herefter berettiget til godtgørelse efter §8, stk. 1, i lov om tidsbegrænset ansættelse. Af de grunde, som er anført aflandsretten, tiltræder Højesteret, at godtgørelsen er fastsat til 25.000 kr.',
-      source: 'Domsdatabasen_13870.pdf',
+        'Sagen rejser to hovedspørgsmål, som har betydning for Højesterets stillingtagen til de fremsatte krav. For det første er spørgsmålet navnlig, om vikarer, der er omfattet af vikarloven, samtidig kan være funktionærer omfattet af funktionærloven. For det andet er spørgsmålet, hvornår udsendelse af en lønmodtager må anses for midlertidig og dermed omfattet af vikarloven.',
     },
     {
-      id: 'appellants-1-2-dismissed',
-      title: 'Employee Act claims rejected',
-      body:
-        'Appellants 1 and 2 were not entitled to notice-period or sick pay under the Salaried Employees Act.',
-      pageNumber: 10,
+      id: 'hjr-vikarloven-not-applicable',
+      title: 'vikarloven does not apply — Appellant 3',
+      body: 'No objective explanation was given for any of the four extensions to Boeing. The posting therefore fell outside vikarloven; as a salaried employee the worker was entitled to sick pay and a four-month notice period.',
+      pageNumber: 9,
       quoteText:
-        'Herefter tiltræder Højesteret, at de ikke har krav på løn i en opsigelsesperiode ellerløn under sygdom efter funktionærlovens regler. De har heller ikke har krav pågodtgørelse efter lov om tidsbegrænset ansættelse, jf. lovens § 8.',
-      source: 'Domsdatabasen_13870.pdf',
+        'På denne baggrund tiltræder Højesteret, at vikarloven ikke finder anvendelse på hans udsendelser. Han er efter det ovenfor anførte om samspillet mellem vikarloven og funktionærloven omfattet af funktionærloven og er derfor berettiget til løn under sygdom under hele sin ansættelse, jf. funktionærlovens § 5, stk. 1.',
+    },
+    {
+      id: 'hjr-compensation-25000',
+      title: 'DKK 25,000 compensation confirmed',
+      body: 'The Supreme Court upheld the Fixed-Term Employment Act compensation of DKK 25,000 set by Østre Landsret, on the same grounds given by the appellate court.',
+      pageNumber: 9,
+      quoteText:
+        'Appelindstævnte, tidligere Appellant 3 er herefter berettiget til godtgørelse efter § 8, stk. 1, i lov om tidsbegrænset ansættelse. Af de grunde, som er anført af landsretten, tiltræder Højesteret, at godtgørelsen er fastsat til 25.000 kr.',
+    },
+    {
+      id: 'hjr-stadfaestes',
+      title: 'Appellate judgment affirmed',
+      body: 'Højesteret affirmed the full Østre Landsret judgment. No costs were ordered for the Supreme Court proceedings.',
+      pageNumber: 11,
+      quoteText: 'Landsrettens dom stadfæstes.',
+    },
+  ],
+
+  // ── Østre Landsret (32 pages) ──────────────────────────────────────────
+  'bs-8528-2023-olr': [
+    {
+      id: 'olr-legal-standard',
+      title: 'Standard for "temporary" posting',
+      body: 'The duration and number of extensions do not in themselves remove a posting from vikarloven. The decisive question is whether there is an objective explanation for the successive extensions.',
+      pageNumber: 24,
+      quoteText:
+        'Landsretten finder, at det ikke i sig selv er i strid med vikarlovens eller vikardirektivets regler om "midlertidig" udsendelse successivt at udsende en vikar tidsbegrænset, hvad enten udsendelse sker til forskellige eller samme brugervirksomhed, jf. herved også vikarlovens § 3, stk. 4.',
+    },
+    {
+      id: 'olr-no-objective-explanation',
+      title: 'No objective explanation — Appellant 3',
+      body: "The alleged Boeing shutdown was not supported by any documents and was not explored through witnesses. No objective explanation was given for why Boeing originally engaged the worker or why the 2017 and 2018 extensions occurred.",
+      pageNumber: 28,
+      quoteText:
+        'Adecco A/S har gjort gældende, at udsendelsen og forlængelserne skete som følge af brugervirksomhedens forventede forestående nedlukning i Danmark. Denne forklaring ses imidlertid ikke understøttet af sagens skriftlige materiale, og baggrunden for Appellant 3\'s, tidligere Sagsøger i BS-13671/2021-SHR udsendelse og forlængelser er heller ikke søgt belyst gennem vidneforklaringer fra brugervirksomheden eller medarbejdere hos Adecco A/S, der forestod kontakten med brugervirksomheden i 2016, 2017 eller 2018.',
+    },
+    {
+      id: 'olr-misbrug-conclusion',
+      title: 'Abuse finding — posting outside vikarloven',
+      body: "Given the total duration and the absence of any objective explanation, the court found the posting and extensions constituted abuse and circumvention of funktionærloven and the Fixed-Term Employment Act.",
+      pageNumber: 28,
+      quoteText:
+        'sammenholdt med varigheden af Appellant 3\'s, tidligere Sagsøger i BS-13671/2021-SHR samlede udsendelse til brugervirksomheden, finder landsretten det godtgjort, at udsendelsen og forlængelserne udgør misbrug og er en omgåelse af funktionærloven og lov om tidsbegrænset ansættelse.',
+    },
+    {
+      id: 'olr-award-282338',
+      title: 'DKK 282,338.09 awarded',
+      body: 'Østre Landsret awarded the full claim: DKK 257,338.09 in salary for the notice period and sick-pay arrears, plus DKK 25,000 in Fixed-Term Employment Act compensation.',
+      pageNumber: 29,
+      quoteText:
+        'Herefter tager landsretten Appellant 3\'s, tidligere Sagsøger i BS-13671/2021-SHR påstand til følge med 282.338,09 kr.',
+    },
+  ],
+
+  // ── Sø- og Handelsretten (29 pages) ───────────────────────────────────
+  'bs-13671-2021-shr': [
+    {
+      id: 'shr-facts',
+      title: 'Four extensions over 3½ years',
+      body: `The worker was posted to Boeing from 1 December 2016 to 31 July 2020 \u2014 3 years and 8 months \u2014 under an initial one-year contract extended four times. Each extension cited ongoing demand for the worker's skills.`,
+      pageNumber: 2,
+      quoteText:
+        'Ansættelseskontrakten blev herefter forlænget i alt fire gange (fra 2. december 2017 til 30. november 2018, fra 1. december 2018 til 30. november 2019, fra 1. december 2019 til 27. marts 2020 og fra 28. marts 2020 til 31. juli 2020).',
+    },
+    {
+      id: 'shr-majority-collective',
+      title: 'Majority: Funktionæroverenskomsten displaces § 3, stk. 4',
+      body: 'The two-judge majority held that the protection against successive extensions resided in the collective agreement (Funktionæroverenskomsten), not in vikarloven § 3, stk. 4. As the agreement was uncontested, the posting stayed within vikarloven.',
+      pageNumber: 26,
+      quoteText:
+        'finder vi, at Sagsøgers ansættelse i Adecco A/S var omfattet af vikarloven.',
+    },
+    {
+      id: 'shr-dissent',
+      title: 'Dissent: 3 yrs 8 months cannot be "temporary"',
+      body: `The dissenting judge held that a posting of 3 years and 8 months is simply not temporary, regardless of whether each extension was individually justified. The worker would have received three months' salary, sick pay, and one month's compensation.`,
+      pageNumber: 27,
+      quoteText:
+        'Sagsøgers ansættelse varede 3 år og 8 måneder. Uanset om de 4 forlængelser var objektivt begrundede eller ej, så er en så langvarig ansættelse ikke midlertidig.',
+    },
+    {
+      id: 'shr-ruling',
+      title: 'Majority ruling — Adecco acquitted',
+      body: 'Decision by majority vote. Adecco A/S is acquitted. HK Danmark is ordered to pay DKK 50,000 in costs.',
+      pageNumber: 28,
+      quoteText: 'Adecco A/S frifindes.',
     },
   ],
 }
@@ -65,6 +151,7 @@ export interface CitationHighlight {
 export interface CaseDocumentViewerProps {
   caseSummary: CaseSummary
   contentVisible: boolean
+  sidebarOpen?: boolean
   searchQuery?: string
   /**
    * Single step counter from the search toolbar. Positive = forward,
@@ -76,6 +163,8 @@ export interface CaseDocumentViewerProps {
   citationHighlight?: CitationHighlight
   /** Called after search index is built, with total match count. */
   onSearchResults?: (count: number) => void
+  /** Called after the final thumbnail has completed its entrance transition. */
+  onThumbnailRevealComplete?: () => void
   /** Search controls rendered in the document column header. */
   searchToolbar?: ReactNode
 }
@@ -142,10 +231,12 @@ function LazyPdfPage({
 export function CaseDocumentViewer({
   caseSummary,
   contentVisible,
+  sidebarOpen = true,
   searchQuery = '',
   searchNavStep = 0,
   citationHighlight,
   onSearchResults,
+  onThumbnailRevealComplete,
   searchToolbar,
 }: CaseDocumentViewerProps) {
   const [pageCount, setPageCount] = useState(caseSummary.pageCount)
@@ -155,23 +246,91 @@ export function CaseDocumentViewer({
   const documentScrollRef = useRef<HTMLDivElement>(null)
   const thumbnailListRef = useRef<HTMLOListElement>(null)
   const thumbnailRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const programmaticPageRef = useRef<number | null>(null)
+  const programmaticScrollTimerRef = useRef<number>()
+  const thumbnailRevealReportedRef = useRef(false)
 
   // Search state
   const [searchMatches, setSearchMatches] = useState<SearchMatch[]>([])
   const [activeMatchIndex, setActiveMatchIndex] = useState(0)
   const prevNavStepRef = useRef(searchNavStep)
 
-  const goToPage = useCallback((pageNumber: number) => {
-    setActivePage(pageNumber)
-    const page = pageRefs.current[pageNumber - 1]
-    const scrollArea = documentScrollRef.current
-    if (!page || !scrollArea) return
-
-    scrollArea.scrollTo({
-      top: page.offsetTop,
-      behavior: 'smooth',
-    })
+  const releaseProgrammaticNavigation = useCallback(() => {
+    programmaticPageRef.current = null
+    window.clearTimeout(programmaticScrollTimerRef.current)
+    programmaticScrollTimerRef.current = undefined
   }, [])
+
+  const reportThumbnailRevealComplete = useCallback(() => {
+    if (thumbnailRevealReportedRef.current) return
+    thumbnailRevealReportedRef.current = true
+    onThumbnailRevealComplete?.()
+  }, [onThumbnailRevealComplete])
+
+  useEffect(() => {
+    thumbnailRevealReportedRef.current = false
+  }, [caseSummary.id])
+
+  useEffect(() => {
+    if (
+      contentVisible &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      reportThumbnailRevealComplete()
+    }
+  }, [contentVisible, reportThumbnailRevealComplete])
+
+  const goToPage = useCallback(
+    (pageNumber: number) => {
+      setActivePage(pageNumber)
+      const page = pageRefs.current[pageNumber - 1]
+      const scrollArea = documentScrollRef.current
+      if (!page || !scrollArea) return
+
+      const targetTop = page.offsetTop
+      if (Math.abs(scrollArea.scrollTop - targetTop) > 1) {
+        programmaticPageRef.current = pageNumber
+        window.clearTimeout(programmaticScrollTimerRef.current)
+        programmaticScrollTimerRef.current = window.setTimeout(
+          releaseProgrammaticNavigation,
+          1000,
+        )
+      }
+
+      scrollArea.scrollTo({
+        top: targetTop,
+        behavior: 'smooth',
+      })
+    },
+    [releaseProgrammaticNavigation],
+  )
+
+  useEffect(() => {
+    const scrollArea = documentScrollRef.current
+    if (!scrollArea) return
+
+    const handleScroll = () => {
+      if (programmaticPageRef.current === null) return
+      window.clearTimeout(programmaticScrollTimerRef.current)
+      programmaticScrollTimerRef.current = window.setTimeout(
+        releaseProgrammaticNavigation,
+        120,
+      )
+    }
+
+    scrollArea.addEventListener('scroll', handleScroll, { passive: true })
+    scrollArea.addEventListener('scrollend', releaseProgrammaticNavigation)
+    scrollArea.addEventListener('wheel', releaseProgrammaticNavigation, { passive: true })
+    scrollArea.addEventListener('touchstart', releaseProgrammaticNavigation, { passive: true })
+
+    return () => {
+      scrollArea.removeEventListener('scroll', handleScroll)
+      scrollArea.removeEventListener('scrollend', releaseProgrammaticNavigation)
+      scrollArea.removeEventListener('wheel', releaseProgrammaticNavigation)
+      scrollArea.removeEventListener('touchstart', releaseProgrammaticNavigation)
+      releaseProgrammaticNavigation()
+    }
+  }, [releaseProgrammaticNavigation])
 
   const summaryBlocks = SUMMARY_BLOCKS_BY_CASE[caseSummary.id] ?? []
   const activeSummary = summaryBlocks.find((block) => block.id === activeSummaryId)
@@ -288,7 +447,9 @@ export function CaseDocumentViewer({
           }
         })
 
-        if (largestRatio > 0) setActivePage(mostVisiblePage)
+        if (largestRatio > 0 && programmaticPageRef.current === null) {
+          setActivePage(mostVisiblePage)
+        }
       },
       {
         root: documentScrollRef.current,
@@ -311,14 +472,25 @@ export function CaseDocumentViewer({
     if (!list || !thumbnail) return
 
     const listRect = list.getBoundingClientRect()
+    const sidebarRect = list
+      .closest<HTMLElement>('.case-document-viewer__sidebar')
+      ?.getBoundingClientRect()
     const thumbnailRect = thumbnail.getBoundingClientRect()
     const edgePadding = 8
+    const visibleTop =
+      Math.max(listRect.top, (sidebarRect?.top ?? listRect.top) + THUMBNAIL_FADE_HEIGHT) +
+      edgePadding
+    const visibleBottom =
+      Math.min(
+        listRect.bottom,
+        (sidebarRect?.bottom ?? listRect.bottom) - THUMBNAIL_FADE_HEIGHT,
+      ) - edgePadding
     let scrollDelta = 0
 
-    if (thumbnailRect.top < listRect.top + edgePadding) {
-      scrollDelta = thumbnailRect.top - listRect.top - edgePadding
-    } else if (thumbnailRect.bottom > listRect.bottom - edgePadding) {
-      scrollDelta = thumbnailRect.bottom - listRect.bottom + edgePadding
+    if (thumbnailRect.top < visibleTop) {
+      scrollDelta = thumbnailRect.top - visibleTop
+    } else if (thumbnailRect.bottom > visibleBottom) {
+      scrollDelta = thumbnailRect.bottom - visibleBottom
     }
 
     if (scrollDelta !== 0) {
@@ -337,6 +509,7 @@ export function CaseDocumentViewer({
     <div
       className="case-document-viewer"
       data-content-visible={contentVisible}
+      data-sidebar-open={sidebarOpen}
     >
       <main className="case-document-viewer__main">
         <div className="case-document-viewer__workspace">
@@ -351,9 +524,13 @@ export function CaseDocumentViewer({
               <span>of {pageCount}</span>
             </p>
             <nav className="case-document-viewer__nav" aria-label="Document pages">
-              <ol
+              <SharedLayoutBg
+                as="ul"
                 ref={thumbnailListRef}
                 className="case-document-viewer__thumbnail-list"
+                activeIndex={activePage - 1}
+                inset={0}
+                pillClassName="case-document-viewer__thumbnail-pill"
               >
                 {pages.map((pageNumber) => (
                   <li key={pageNumber}>
@@ -371,6 +548,18 @@ export function CaseDocumentViewer({
                       aria-label={`Go to page ${pageNumber}`}
                       aria-current={activePage === pageNumber ? 'page' : undefined}
                       onClick={() => goToPage(pageNumber)}
+                      onTransitionEnd={
+                        pageNumber === pageCount
+                          ? (event) => {
+                              if (
+                                event.target === event.currentTarget &&
+                                event.propertyName === 'transform'
+                              ) {
+                                reportThumbnailRevealComplete()
+                              }
+                            }
+                          : undefined
+                      }
                     >
                       <span className="case-document-viewer__thumbnail-preview">
                         {caseSummary.documentUrl ? (
@@ -390,7 +579,7 @@ export function CaseDocumentViewer({
                     </button>
                   </li>
                 ))}
-              </ol>
+              </SharedLayoutBg>
             </nav>
           </aside>
 
@@ -409,8 +598,10 @@ export function CaseDocumentViewer({
                 className="case-document-viewer__scroll-content"
                 style={{
                   width: FULL_WIDTH,
-                  height: totalHeight + DOCUMENT_TOP_INSET,
+                  height:
+                    totalHeight + DOCUMENT_TOP_INSET + DOCUMENT_BOTTOM_INSET,
                   paddingTop: DOCUMENT_TOP_INSET,
+                  paddingBottom: DOCUMENT_BOTTOM_INSET,
                 }}
               >
                 <div

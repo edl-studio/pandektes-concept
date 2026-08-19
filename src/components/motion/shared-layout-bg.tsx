@@ -34,6 +34,8 @@ export interface SharedLayoutBgProps
   inset?: number
   /** Optional positioning override for the pill wrapper inside each item. */
   pillContainerClassName?: string
+  /** Item index where the pill rests when no item is hovered. */
+  activeIndex?: number
 }
 
 const SPRING_LAYOUT = { type: 'spring' as const, stiffness: 360, damping: 32, mass: 0.6 }
@@ -60,63 +62,68 @@ export const SharedLayoutBg = forwardRef<HTMLElement, SharedLayoutBgProps>(
       onMouseLeave,
       pillClassName,
       pillContainerClassName,
+      activeIndex,
       inset = 20,
       ...props
     },
     forwardedRef,
   ) {
-    const [activeId, setActiveId] = useState<string | null>(null)
+    const [hoveredId, setHoveredId] = useState<string | null>(null)
     const uid = useId()
     const reduce = useReducedMotion()
+    const items = Children.toArray(children).filter(isValidElement)
+    const selectedId =
+      activeIndex !== undefined && activeIndex >= 0 && activeIndex < items.length
+        ? String(items[activeIndex].key ?? `item-${activeIndex}`)
+        : null
+    const activeId = hoveredId ?? selectedId
 
-    const renderedChildren = Children.toArray(children)
-      .filter(isValidElement)
-      .map((child, index) => {
-        const el = child as ReactElement<{
-          className?: string
-          onMouseEnter?: (event: MouseEvent<HTMLElement>) => void
-          children?: ReactNode
-        }>
-        const childKey = el.key ? String(el.key) : `item-${index}`
-        return cloneElement(
-          el,
-          {
-            key: childKey,
-            className: cn('pk-shared-layout-bg-item', el.props.className),
-            onMouseEnter: (event: MouseEvent<HTMLElement>) => {
-              el.props.onMouseEnter?.(event)
-              setActiveId(childKey)
-            },
+    const renderedChildren = items.map((child, index) => {
+      const el = child as ReactElement<{
+        className?: string
+        onMouseEnter?: (event: MouseEvent<HTMLElement>) => void
+        children?: ReactNode
+      }>
+      const childKey = el.key ? String(el.key) : `item-${index}`
+      return cloneElement(
+        el,
+        {
+          key: childKey,
+          className: cn('pk-shared-layout-bg-item', el.props.className),
+          onMouseEnter: (event: MouseEvent<HTMLElement>) => {
+            el.props.onMouseEnter?.(event)
+            setHoveredId(childKey)
           },
-          <>
-            <AnimatePresence custom={activeId !== null}>
-              {activeId !== null ? (
-                <motion.div
-                  variants={reduce ? reducedVariants : variants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  custom={activeId !== null}
-                  className={cn('pk-shared-layout-bg-pill-wrap', pillContainerClassName)}
-                  style={{ left: -inset, right: -inset }}
-                >
-                  {activeId === childKey ? (
-                    <motion.div
-                      layoutId={`shared-bg-${uid}`}
-                      transition={reduce ? { duration: 0 } : SPRING_LAYOUT}
-                      className={cn('pk-shared-layout-bg-pill', pillClassName)}
-                    />
-                  ) : null}
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-            <div className="pk-shared-layout-bg-content">{el.props.children}</div>
-          </>,
-        )
-      })
+        },
+        <>
+          <AnimatePresence custom={activeId !== null}>
+            {activeId !== null ? (
+              <motion.div
+                variants={reduce ? reducedVariants : variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                custom={activeId !== null}
+                className={cn('pk-shared-layout-bg-pill-wrap', pillContainerClassName)}
+                style={{ left: -inset, right: -inset }}
+              >
+                {activeId === childKey ? (
+                  <motion.div
+                    layoutId={`shared-bg-${uid}`}
+                    transition={reduce ? { duration: 0 } : SPRING_LAYOUT}
+                    className={cn('pk-shared-layout-bg-pill', pillClassName)}
+                  />
+                ) : null}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+          <div className="pk-shared-layout-bg-content">{el.props.children}</div>
+        </>,
+      )
+    })
 
     const handleMouseLeave = (event: MouseEvent<HTMLElement>) => {
-      setActiveId(null)
+      setHoveredId(null)
       onMouseLeave?.(event)
     }
 

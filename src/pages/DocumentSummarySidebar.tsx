@@ -1,4 +1,4 @@
-import { AlignLeft, FileText } from 'lucide-react'
+import { AlignLeft } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 export interface DocumentSummaryBlock {
@@ -7,8 +7,6 @@ export interface DocumentSummaryBlock {
   body: string
   pageNumber: number
   quoteText: string
-  source: string
-  badge?: string
 }
 
 interface DocumentSummarySidebarProps {
@@ -51,20 +49,13 @@ export function DocumentSummarySidebar({
                   <AlignLeft size={12} strokeWidth={2} aria-hidden="true" />
                   <span>{block.title}</span>
                 </span>
-                <span className="case-document-summary__page">
-                  Page {block.pageNumber}
-                </span>
               </span>
 
               <span className="case-document-summary__body">{block.body}</span>
 
-              <span className="case-document-summary__source">
-                <span className="case-document-summary__badge">
-                  <FileText size={11} strokeWidth={2} aria-hidden="true" />
-                  {block.badge ?? 'PDF'}
-                </span>
-                <span className="case-document-summary__source-name">
-                  {block.source}
+              <span className="case-document-summary__source co-meta-row">
+                <span className="co-chip co-chip--muted">
+                  Page {block.pageNumber}
                 </span>
               </span>
             </button>
