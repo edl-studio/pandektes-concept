@@ -34,7 +34,7 @@ const DOCUMENT_BOTTOM_INSET = 112
 const THUMBNAIL_WIDTH = 96
 const THUMBNAIL_FADE_HEIGHT = 112
 const WIPE_EDGE_WIDTH = 48
-const DOCUMENT_REVEAL_FALLBACK_MS = 2700
+const THUMBNAIL_REVEAL_DELAY_MS = 1500
 const THUMBNAIL_STAGGER_MS = 80
 const THUMBNAIL_REVEAL_DURATION_MS = 650
 const SIDEBAR_REVEAL_LEAD_MS = 500
@@ -290,13 +290,13 @@ export function CaseDocumentViewer({
       return
     }
 
-    // Transition events for registered custom properties are supported by
-    // current browsers; this timeout keeps the nav available if one is lost.
-    const fallback = window.setTimeout(
+    // Begin the thumbnail choreography one second before the 2.5s document
+    // wipe completes; the summary sidebar follows the same shifted timeline.
+    const revealTimer = window.setTimeout(
       () => setDocumentRevealComplete(true),
-      DOCUMENT_REVEAL_FALLBACK_MS,
+      THUMBNAIL_REVEAL_DELAY_MS,
     )
-    return () => window.clearTimeout(fallback)
+    return () => window.clearTimeout(revealTimer)
   }, [caseSummary.id, contentVisible])
 
   useEffect(() => {

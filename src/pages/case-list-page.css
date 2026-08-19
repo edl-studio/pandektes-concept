@@ -492,18 +492,6 @@
   transform: scale(calc(var(--co-book-hover) * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
 }
 
-/* Slide the real book down through the thumb clip so the tile goes empty
-   as the overlay sheaf leaves. translateY is in screen px (before scale). */
-.co-doc-thumb-book--sinking {
-  transform: translateY(var(--co-sink, 0px)) scale(calc(var(--co-book-rest) * var(--co-press)));
-  transition: none;
-}
-
-.co-doc-card:hover .co-doc-thumb-book--sinking,
-.co-doc-poster:hover .co-doc-thumb-book--sinking {
-  transform: translateY(var(--co-sink, 0px)) scale(calc(var(--co-book-hover) * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
-}
-
 .co-doc-info {
   flex: 1;
   padding: var(--pk-d3) var(--pk-d5);

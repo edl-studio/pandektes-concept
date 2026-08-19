@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
+import { useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
 import { animate } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -168,34 +168,15 @@ function randomBookTilt(): number {
 function useBookThumb({
   caseSummary,
   bookTilt,
-  sinking,
   onOpen,
 }: {
   caseSummary: CaseSummary
   bookTilt: number
-  sinking: boolean
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
   const [bookOpen, setBookOpen] = useState(false)
   const [holding, setHolding] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!sinking) {
-      bookRef.current?.style.setProperty('--co-sink', '0px')
-      return
-    }
-    const sink = animate(0, 160, {
-      type: 'spring',
-      stiffness: 65,
-      damping: 17,
-      mass: 1.2,
-      onUpdate: (value) => {
-        bookRef.current?.style.setProperty('--co-sink', `${value}px`)
-      },
-    })
-    return () => sink.stop()
-  }, [sinking])
 
   const press = useRef({
     down: false,
@@ -295,7 +276,7 @@ function useBookThumb({
 
   const Logo = caseSummary.Logo
   const filename = caseSummary.documentTitle
-  const bookClassName = `co-doc-thumb-book${holding ? ' co-doc-thumb-book--holding' : ''}${sinking ? ' co-doc-thumb-book--sinking' : ''}`
+  const bookClassName = `co-doc-thumb-book${holding ? ' co-doc-thumb-book--holding' : ''}`
 
   return {
     bookRef,
@@ -344,7 +325,7 @@ function TimelineItem({
     handlePointerCancel,
     handleOpen,
     bookClassName,
-  } = useBookThumb({ caseSummary, bookTilt, sinking, onOpen })
+  } = useBookThumb({ caseSummary, bookTilt, onOpen })
   const caseNumberDisplay = caseSummary.caseNumber.replace('/', ' · ')
 
   return (
@@ -442,7 +423,7 @@ function DocumentCard({
     handlePointerCancel,
     handleOpen,
     bookClassName,
-  } = useBookThumb({ caseSummary, bookTilt, sinking, onOpen })
+  } = useBookThumb({ caseSummary, bookTilt, onOpen })
 
   return (
     <div

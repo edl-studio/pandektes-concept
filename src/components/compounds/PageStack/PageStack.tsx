@@ -10,7 +10,7 @@ const FAN_STEP_X = 2
 const FAN_STEP_Y = -1
 const FAN_STEP_ROTATION = 0.5
 const LIST_GAP = 16 // base units — becomes LIST_GAP * scale on screen
-const BOUNCE_STAGGER_WINDOW = 0.35 // A slower front-to-back wave, normalized for any page count.
+const BOUNCE_STAGGER_WINDOW = 0.25 // Keep the full wave within 200ms regardless of page count.
 const RESTACK_STAGGER_WINDOW = 0.45 // Back-to-front descent window, normalized for any page count.
 export const STACK_LAYOUT_SPRING = {
   type: 'spring',
@@ -112,7 +112,7 @@ export function PageStack({
           } as CSSProperties
           const sheetProgress =
             pageCount <= 1 ? 0 : i / (pageCount - 1)
-          const sheetBounceY = bounceY * (1 - sheetProgress * 0.25)
+          const sheetBounceY = bounceY
           const sheetDepthScale =
             mode === 'fan' && depthScale
               ? Math.max(0.84, 1 - i * 0.02)
@@ -159,9 +159,8 @@ export function PageStack({
           }
           const bounceSpring = {
             type: 'spring' as const,
-            stiffness: 110,
-            damping: 12,
-            mass: 1.1,
+            stiffness: 220,
+            damping: 14,
             delay: sheetProgress * BOUNCE_STAGGER_WINDOW,
           }
           const alignSpring = {
