@@ -620,7 +620,6 @@ export function CaseListPage() {
               citations={CITATION_ITEMS}
               idPrefix={CITATION_PREFIX}
               grouped
-              defaultOpen
             />
             <Divider />
           </aside>

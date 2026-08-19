@@ -1,0 +1,56 @@
+.pk-accordion {
+  width: 100%;
+}
+
+.pk-accordion-header {
+  margin: 0;
+}
+
+.pk-accordion-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.pk-accordion-trigger:focus-visible {
+  outline: 2px solid var(--pk-color-accent-weak);
+  outline-offset: 2px;
+}
+
+.pk-accordion-chevron {
+  flex-shrink: 0;
+  color: var(--pk-color-content-tertiary);
+  transition:
+    color 150ms ease,
+    transform 180ms ease;
+}
+
+.pk-accordion-trigger[data-panel-open] .pk-accordion-chevron,
+.pk-accordion-trigger[data-open] .pk-accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.pk-accordion-content {
+  height: var(--accordion-panel-height);
+  overflow: hidden;
+  transition: height 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  padding-bottom: var(--pk-d2);
+}
+
+.pk-accordion-content[data-starting-style],
+.pk-accordion-content[data-ending-style] {
+  height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-accordion-chevron,
+  .pk-accordion-content {
+    transition-duration: 0ms;
+  }
+}

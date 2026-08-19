@@ -1,7 +1,6 @@
 import {
   BookOpen,
   BookmarkPlus,
-  ChevronDown,
   ExternalLink,
 } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
@@ -13,7 +12,12 @@ import { Link } from 'react-router-dom'
 import { PdfPageCanvas } from '@/components/compounds/PageStack'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/motion/popover'
 import { SharedLayoutBg } from '@/components/motion/shared-layout-bg'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import {
+  AccordionContent,
+  AccordionGroup,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { cn } from '@/lib/utils'
 import './citations.css'
 
@@ -43,9 +47,6 @@ export interface CitationItem {
 export interface CitationsProps {
   citations: CitationItem[]
   title?: ReactNode
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
   idPrefix?: string
   /** When true, citations are grouped by source document. */
   grouped?: boolean
@@ -316,34 +317,34 @@ function CitationGroupedList({
   const groups = groupCitations(citations)
 
   return (
-    <div className={cn('pk-citation-grouped-list', className)}>
+    <AccordionGroup
+      type="multiple"
+      className={cn('pk-citation-grouped-list', className)}
+    >
       {groups.map((group, i) => {
-        const headerHref = group.caseId ? `/case/${group.caseId}` : undefined
-        const headerInner = (
-          <>
-            <CitationFavicon url={group.url} pageNumber={group.items[0]?.pageNumber} />
-            <span className="pk-citation-group-title">{group.sourceTitle}</span>
-            <span className="pk-citation-group-index" aria-label={`Source ${i + 1}`}>{i + 1}</span>
-          </>
-        )
         return (
-          <div key={group.key} className="pk-citation-group">
-            {headerHref ? (
-              <Link to={headerHref} className="pk-citation-group-header">
-                {headerInner}
-              </Link>
-            ) : (
-              <div className="pk-citation-group-header">{headerInner}</div>
-            )}
-            <div className="pk-citation-subitems">
-              {group.items.map((citation) => (
-                <CitationSubRow key={citation.id} citation={citation} idPrefix={resolvedPrefix} />
-              ))}
-            </div>
-          </div>
+          <AccordionItem
+            key={group.key}
+            value={group.key}
+            index={i}
+            className="pk-citation-group"
+          >
+            <AccordionTrigger className="pk-citation-group-header">
+              <CitationFavicon url={group.url} pageNumber={group.items[0]?.pageNumber} />
+              <span className="pk-citation-group-title">{group.sourceTitle}</span>
+              <span className="pk-citation-group-index" aria-label={`Source ${i + 1}`}>{i + 1}</span>
+            </AccordionTrigger>
+            <AccordionContent className="pk-citation-group-content">
+              <div className="pk-citation-subitems">
+                {group.items.map((citation) => (
+                  <CitationSubRow key={citation.id} citation={citation} idPrefix={resolvedPrefix} />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         )
       })}
-    </div>
+    </AccordionGroup>
   )
 }
 
@@ -387,59 +388,36 @@ export function CitationList({
 export function Citations({
   citations,
   title = 'Sources',
-  open,
-  defaultOpen = false,
-  onOpenChange,
   idPrefix,
   grouped = false,
   className,
 }: CitationsProps) {
   const baseId = useId()
-  const contentId = `${baseId}-content`
   const resolvedPrefix = idPrefix ?? `citation-${baseId.replace(/:/g, '')}`
 
-  const count = grouped
-    ? new Set(citations.map((c) => c.url ?? c.id)).size
-    : citations.length
-
   return (
-    <Collapsible
-      className={cn('pk-citations', className)}
-      defaultOpen={defaultOpen}
-      open={open}
-      onOpenChange={(next) => onOpenChange?.(next)}
-    >
-      <CollapsibleTrigger className="pk-citations-toggle" aria-controls={contentId}>
+    <div className={cn('pk-citations', className)}>
+      <div className="pk-citations-heading">
         <BookOpen
           size={ICON_SIZE}
           strokeWidth={ICON_STROKE}
           absoluteStrokeWidth
         />
         <span>{title}</span>
-        <span className="pk-citations-count">{count}</span>
-        <span className="pk-citations-chevron" aria-hidden="true">
-          <ChevronDown
-            size={ICON_SIZE}
-            strokeWidth={ICON_STROKE}
-            absoluteStrokeWidth
-          />
-        </span>
-      </CollapsibleTrigger>
-      <CollapsibleContent id={contentId} className="pk-citations-panel-wrap">
-        {grouped ? (
-          <CitationGroupedList
-            citations={citations}
-            idPrefix={resolvedPrefix}
-            className="pk-citations-panel"
-          />
-        ) : (
-          <CitationList
-            citations={citations}
-            idPrefix={resolvedPrefix}
-            className="pk-citations-panel"
-          />
-        )}
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+      {grouped ? (
+        <CitationGroupedList
+          citations={citations}
+          idPrefix={resolvedPrefix}
+          className="pk-citations-panel"
+        />
+      ) : (
+        <CitationList
+          citations={citations}
+          idPrefix={resolvedPrefix}
+          className="pk-citations-panel"
+        />
+      )}
+    </div>
   )
 }

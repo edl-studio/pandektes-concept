@@ -133,8 +133,10 @@
 }
 
 .co-sources {
+  position: sticky;
+  top: 72px;
   min-width: 0;
-  row-gap: var(--pk-d4) !important;
+  row-gap: var(--pk-d2) !important;
 }
 
 .co-body-main,
@@ -589,6 +591,10 @@
 
   .co-body {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .co-sources {
+    position: static;
   }
 
   .co-holding-grid {
