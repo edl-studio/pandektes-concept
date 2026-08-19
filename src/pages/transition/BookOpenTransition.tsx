@@ -35,8 +35,6 @@ export interface OriginRect {
   y: number
   width: number
   height: number
-  /** Hover tilt of the tile book, in degrees. Eased to 0 on the sheets. */
-  rotation?: number
   /** Whether the tile book was in its hover-open state (cover ajar, pages spread). */
   open?: boolean
   /** Tile overflow, in unscaled book pixels. `bottom` drives how far the lift rises. */
@@ -234,7 +232,6 @@ export function BookOpenTransition({
   const stackLeftLarge = getDetailDocumentLeft(window.innerWidth)
 
   const startScale = originRect.width / BOOK_WIDTH
-  const startRotation = originRect.rotation ?? 0
   const wasOpen = originRect.open ?? false
   const flightXSpread = wasOpen ? OPEN_PAGE_SPREAD : 1
   const flightYSpread = wasOpen ? OPEN_PAGE_SPREAD : 1
@@ -279,7 +276,7 @@ export function BookOpenTransition({
   const xMv = useMotionValue(startLeft)
   const yMv = useMotionValue(startTop)
   const scaleMv = useMotionValue(startScale)
-  const rotateTargetMv = useMotionValue(startRotation)
+  const rotateTargetMv = useMotionValue(0)
   const rotateMv = useSpring(rotateTargetMv, ROTATION_SPRING)
 
   useEffect(() => {
@@ -340,9 +337,8 @@ export function BookOpenTransition({
           const heading = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI)
           const bank = Math.max(-12, Math.min(heading * 0.15, 12))
           const pathTaper = Math.sin(Math.PI * pathT)
-          const entranceBlend = Math.min(pathT / EXTRACT_THRESHOLD, 1)
           scaleMv.set(startScale + (1 - startScale) * flyProgress)
-          rotateTargetMv.set(startRotation * (1 - entranceBlend) + bank * pathTaper)
+          rotateTargetMv.set(bank * pathTaper)
         },
       })
       stops.push(flight)
@@ -478,9 +474,9 @@ export function BookOpenTransition({
                     }}
                   >
                     <FlickeringGrid
-                      color="#7d2334"
+                      color="rgb(0, 0, 0)"
                       flickerChance={0.22}
-                      maxOpacity={0.32}
+                      maxOpacity={0.15}
                     />
                   </motion.div>
                 </motion.div>

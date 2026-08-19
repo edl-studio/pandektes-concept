@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FC, type PointerEvent, type ReactNode } from 'react'
+import { useRef, useState, type FC, type PointerEvent, type ReactNode } from 'react'
 import { animate } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -160,18 +160,11 @@ function SectionHeader({
 
 // ── TimelineItem ──────────────────────────────────────────────────────
 
-function randomBookTilt(): number {
-  const deg = 2 + Math.random() * 2
-  return Math.random() < 0.5 ? -deg : deg
-}
-
 function useBookThumb({
   caseSummary,
-  bookTilt,
   onOpen,
 }: {
   caseSummary: CaseSummary
-  bookTilt: number
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
 }) {
   const [bookOpen, setBookOpen] = useState(false)
@@ -250,14 +243,12 @@ function useBookThumb({
     // Preserve the held frame exactly when the overlay takes ownership;
     // otherwise releasing at 0.91 would pop straight back to full scale.
     const startScale = (bookOpen ? hoverScale : restScale) * press.current.value
-    const rotation = bookOpen ? bookTilt : 0
 
     onOpen(caseSummary, {
       x: originX,
       y: originY,
       width: BOOK_WIDTH * startScale,
       height: BOOK_HEIGHT * startScale,
-      rotation,
       open: bookOpen,
       clip: {
         top: Math.max(0, (thumbRect.top - originY) / startScale),
@@ -298,7 +289,6 @@ function TimelineItem({
   caseSummary,
   isFirst,
   isLast,
-  bookTilt,
   lifted,
   sinking,
   onOpen,
@@ -308,7 +298,6 @@ function TimelineItem({
   caseSummary: CaseSummary
   isFirst: boolean
   isLast: boolean
-  bookTilt: number
   lifted: boolean
   sinking: boolean
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
@@ -325,7 +314,7 @@ function TimelineItem({
     handlePointerCancel,
     handleOpen,
     bookClassName,
-  } = useBookThumb({ caseSummary, bookTilt, onOpen })
+  } = useBookThumb({ caseSummary, onOpen })
   const caseNumberDisplay = caseSummary.caseNumber.replace('/', ' · ')
 
   return (
@@ -352,7 +341,6 @@ function TimelineItem({
         {/* Document card */}
         <div
           className={`co-doc-card${lifted ? ' co-doc-card--lifted' : ''}`}
-          style={{ '--co-book-tilt': `${bookTilt}deg` } as CSSProperties}
           onMouseEnter={() => setBookOpen(true)}
           onMouseLeave={() => setBookOpen(false)}
           onPointerDown={handlePointerDown}
@@ -401,13 +389,11 @@ function TimelineItem({
 
 function DocumentCard({
   caseSummary,
-  bookTilt,
   lifted,
   sinking,
   onOpen,
 }: {
   caseSummary: CaseSummary
-  bookTilt: number
   lifted: boolean
   sinking: boolean
   onOpen: (caseSummary: CaseSummary, originRect: OriginRect) => void
@@ -423,12 +409,11 @@ function DocumentCard({
     handlePointerCancel,
     handleOpen,
     bookClassName,
-  } = useBookThumb({ caseSummary, bookTilt, onOpen })
+  } = useBookThumb({ caseSummary, onOpen })
 
   return (
     <div
       className={`co-doc-poster${lifted ? ' co-doc-poster--lifted' : ''}`}
-      style={{ '--co-book-tilt': `${bookTilt}deg` } as CSSProperties}
       role="button"
       tabIndex={0}
       aria-label={`Open ${filename}`}
@@ -479,13 +464,9 @@ const TIMELINE_ENTRIES = CASES.map((cs, i) => ({
   caseSummary: cs,
   instanceLabel: `Instance ${CASES.length - i} · ${cs.courtLabel}`,
   date: cs.judgmentDate,
-  bookTilt: randomBookTilt(),
 }))
 
-const DOCUMENT_ENTRIES = CASES.map((caseSummary) => ({
-  caseSummary,
-  bookTilt: randomBookTilt(),
-}))
+const DOCUMENT_ENTRIES = CASES
 
 export function CaseListPage() {
   const [active, setActive] = useState<{
@@ -537,11 +518,10 @@ export function CaseListPage() {
               <section className="co-section" aria-label="Case documents">
                 <SectionHeader title="Case documents" description={false} />
                 <div className="co-docs-grid">
-                  {DOCUMENT_ENTRIES.map(({ caseSummary, bookTilt }) => (
+                  {DOCUMENT_ENTRIES.map((caseSummary) => (
                     <DocumentCard
                       key={caseSummary.id}
                       caseSummary={caseSummary}
-                      bookTilt={bookTilt}
                       lifted={
                         active?.originKey === `docs:${caseSummary.id}` &&
                         !active.sinking
@@ -591,13 +571,12 @@ export function CaseListPage() {
                 )}
               />
               <div className="co-timeline" role="list">
-                {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date, bookTilt }, i) => (
+                {TIMELINE_ENTRIES.map(({ caseSummary, instanceLabel, date }, i) => (
                   <TimelineItem
                     key={caseSummary.id}
                     instanceLabel={instanceLabel}
                     date={date}
                     caseSummary={caseSummary}
-                    bookTilt={bookTilt}
                     isFirst={i === 0}
                     isLast={i === TIMELINE_ENTRIES.length - 1}
                     lifted={

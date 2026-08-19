@@ -667,9 +667,9 @@ export function CaseDocumentViewer({
                     frontSheetBackdrop={
                       <FlickeringGrid
                         className="case-document-viewer__flickering-grid"
-                        color="#7d2334"
+                        color="rgb(0, 0, 0)"
                         flickerChance={0.22}
-                        maxOpacity={0.32}
+                        maxOpacity={0.1}
                       />
                     }
                   />

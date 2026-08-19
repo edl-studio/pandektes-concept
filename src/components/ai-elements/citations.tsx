@@ -136,7 +136,7 @@ export function Citation({
     : `#${citationTargetId(idPrefix, citationId)}`
 
   const label = source?.pageNumber != null
-    ? <><span>{index}</span><span className="pk-citation-sep">· p{source.pageNumber}</span></>
+    ? <><span>{index}</span><span className="pk-citation-sep">· P{source.pageNumber}</span></>
     : index
 
   const marker = source?.caseId ? (
@@ -284,7 +284,7 @@ function CitationSubRow({
   idPrefix: string
 }) {
   const id = citationTargetId(idPrefix, citation.id)
-  const pageLabel = citation.pageNumber != null ? `p${citation.pageNumber}` : null
+  const pageLabel = citation.pageNumber != null ? `P${citation.pageNumber}` : null
   const href = citation.caseId
     ? `/case/${citation.caseId}?citation=${citation.id}`
     : undefined

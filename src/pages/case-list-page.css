@@ -491,7 +491,7 @@
 
 .co-doc-card:hover .co-doc-thumb-book,
 .co-doc-poster:hover .co-doc-thumb-book {
-  transform: scale(calc(var(--co-book-hover) * var(--co-press))) rotate(var(--co-book-tilt, 0deg));
+  transform: scale(calc(var(--co-book-hover) * var(--co-press)));
 }
 
 .co-doc-info {
