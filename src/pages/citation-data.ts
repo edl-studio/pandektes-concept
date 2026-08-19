@@ -57,7 +57,7 @@ export const CITATION_ITEMS: AppCitationItem[] = [
     quote:
       'Two questions before the Supreme Court: (1) Can a worker covered by vikarloven simultaneously be a salaried employee under funktionærloven? (2) When is a posting "temporary" within the meaning of vikarloven?',
     quoteText:
-      'Sagen rejser to hovedspørgsmål, som har betydning for Højesterets stillingtagen til de fremsatte krav. For det første er spørgsmålet navnlig, om vikarer, der er omfattet af vikarloven, samtidig kan være funktionærer omfattet af funktionærloven. For det andet er spørgsmålet, hvornår udsendelse af en lønmodtager må anses for midlertidig og dermed omfattet af vikarloven.',
+      'Sagen rejser to hovedspørgsmål, som har betydning for Højesterets stillingtagen til de fremsatte krav.',
   },
   {
     id: 'hjr-stadfaestes',
@@ -77,9 +77,9 @@ export const CITATION_ITEMS: AppCitationItem[] = [
     caseId: OLR.id,
     title: 'Abuse finding — four extensions',
     sourceTitle: OLR_SOURCE,
-    domain: 'page 28 · Misbrug — Appellant 3',
+    domain: 'page 29 · Misbrug — Appellant 3',
     url: OLR.documentUrl,
-    pageNumber: 28,
+    pageNumber: 29,
     quote:
       'Østre Landsret found that no objective explanation was given for the original posting in 2016 or for the extensions in 2017 and 2018. Given the overall duration, the posting and extensions constituted abuse and circumvention of funktionærloven.',
     quoteText:
@@ -90,9 +90,9 @@ export const CITATION_ITEMS: AppCitationItem[] = [
     caseId: OLR.id,
     title: 'DKK 282,338.09 awarded in full',
     sourceTitle: OLR_SOURCE,
-    domain: 'page 29 · Award — DKK 282,338.09',
+    domain: 'page 30 · Award — DKK 282,338.09',
     url: OLR.documentUrl,
-    pageNumber: 29,
+    pageNumber: 30,
     quote:
       'Østre Landsret upheld the full claim: DKK 257,338.09 for salary in the notice period and sick-pay arrears, plus DKK 25,000 in Fixed-Term Employment Act compensation — a total of DKK 282,338.09.',
     quoteText:
@@ -103,9 +103,9 @@ export const CITATION_ITEMS: AppCitationItem[] = [
     caseId: OLR.id,
     title: 'No objective explanation shown',
     sourceTitle: OLR_SOURCE,
-    domain: 'page 28 · No objective explanation',
+    domain: 'page 29 · No objective explanation',
     url: OLR.documentUrl,
-    pageNumber: 28,
+    pageNumber: 29,
     quote:
       "The alleged Boeing shutdown was not supported by any documentary evidence and was never explored through witness testimony from the user company or the Adecco staff who managed the engagement in 2016–2018.",
     quoteText:

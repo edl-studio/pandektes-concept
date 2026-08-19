@@ -44,7 +44,7 @@ const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
       body: 'The case raised two main questions: (1) Can a worker covered by vikarloven also be a salaried employee under funktionærloven? (2) When is a posting "temporary"?',
       pageNumber: 5,
       quoteText:
-        'Sagen rejser to hovedspørgsmål, som har betydning for Højesterets stillingtagen til de fremsatte krav. For det første er spørgsmålet navnlig, om vikarer, der er omfattet af vikarloven, samtidig kan være funktionærer omfattet af funktionærloven. For det andet er spørgsmålet, hvornår udsendelse af en lønmodtager må anses for midlertidig og dermed omfattet af vikarloven.',
+        'Sagen rejser to hovedspørgsmål, som har betydning for Højesterets stillingtagen til de fremsatte krav.',
     },
     {
       id: 'hjr-vikarloven-not-applicable',
@@ -77,7 +77,7 @@ const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
       id: 'olr-legal-standard',
       title: 'Standard for "temporary" posting',
       body: 'The duration and number of extensions do not in themselves remove a posting from vikarloven. The decisive question is whether there is an objective explanation for the successive extensions.',
-      pageNumber: 24,
+      pageNumber: 25,
       quoteText:
         'Landsretten finder, at det ikke i sig selv er i strid med vikarlovens eller vikardirektivets regler om "midlertidig" udsendelse successivt at udsende en vikar tidsbegrænset, hvad enten udsendelse sker til forskellige eller samme brugervirksomhed, jf. herved også vikarlovens § 3, stk. 4.',
     },
@@ -85,7 +85,7 @@ const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
       id: 'olr-no-objective-explanation',
       title: 'No objective explanation — Appellant 3',
       body: "The alleged Boeing shutdown was not supported by any documents and was not explored through witnesses. No objective explanation was given for why Boeing originally engaged the worker or why the 2017 and 2018 extensions occurred.",
-      pageNumber: 28,
+      pageNumber: 29,
       quoteText:
         'Adecco A/S har gjort gældende, at udsendelsen og forlængelserne skete som følge af brugervirksomhedens forventede forestående nedlukning i Danmark. Denne forklaring ses imidlertid ikke understøttet af sagens skriftlige materiale, og baggrunden for Appellant 3\'s, tidligere Sagsøger i BS-13671/2021-SHR udsendelse og forlængelser er heller ikke søgt belyst gennem vidneforklaringer fra brugervirksomheden eller medarbejdere hos Adecco A/S, der forestod kontakten med brugervirksomheden i 2016, 2017 eller 2018.',
     },
@@ -93,7 +93,7 @@ const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
       id: 'olr-misbrug-conclusion',
       title: 'Abuse finding — posting outside vikarloven',
       body: "Given the total duration and the absence of any objective explanation, the court found the posting and extensions constituted abuse and circumvention of funktionærloven and the Fixed-Term Employment Act.",
-      pageNumber: 28,
+      pageNumber: 29,
       quoteText:
         'sammenholdt med varigheden af Appellant 3\'s, tidligere Sagsøger i BS-13671/2021-SHR samlede udsendelse til brugervirksomheden, finder landsretten det godtgjort, at udsendelsen og forlængelserne udgør misbrug og er en omgåelse af funktionærloven og lov om tidsbegrænset ansættelse.',
     },
@@ -101,7 +101,7 @@ const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
       id: 'olr-award-282338',
       title: 'DKK 282,338.09 awarded',
       body: 'Østre Landsret awarded the full claim: DKK 257,338.09 in salary for the notice period and sick-pay arrears, plus DKK 25,000 in Fixed-Term Employment Act compensation.',
-      pageNumber: 29,
+      pageNumber: 30,
       quoteText:
         'Herefter tager landsretten Appellant 3\'s, tidligere Sagsøger i BS-13671/2021-SHR påstand til følge med 282.338,09 kr.',
     },
@@ -113,7 +113,7 @@ const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
       id: 'shr-facts',
       title: 'Four extensions over 3½ years',
       body: `The worker was posted to Boeing from 1 December 2016 to 31 July 2020 \u2014 3 years and 8 months \u2014 under an initial one-year contract extended four times. Each extension cited ongoing demand for the worker's skills.`,
-      pageNumber: 2,
+      pageNumber: 3,
       quoteText:
         'Ansættelseskontrakten blev herefter forlænget i alt fire gange (fra 2. december 2017 til 30. november 2018, fra 1. december 2018 til 30. november 2019, fra 1. december 2019 til 27. marts 2020 og fra 28. marts 2020 til 31. juli 2020).',
     },

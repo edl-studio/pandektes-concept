@@ -20,6 +20,30 @@ export interface SearchMatch {
 }
 
 const indexCache = new Map<string, Promise<PageTextIndex[]>>()
+const IGNORED_MATCH_CHARACTER = /[\s\u00ad\u2010\u2011\u2012\u2013\u2212-]/
+const MATCH_CHARACTER_EQUIVALENTS: Record<string, string> = {
+  '\u2018': "'",
+  '\u2019': "'",
+  '\u201c': '"',
+  '\u201d': '"',
+  '\u201e': '"',
+  '\u00ab': '"',
+  '\u00bb': '"',
+}
+
+function canonicalizeSearchText(text: string): string {
+  let canonical = ''
+
+  for (const character of text) {
+    if (!IGNORED_MATCH_CHARACTER.test(character)) {
+      canonical += (
+        MATCH_CHARACTER_EQUIVALENTS[character] ?? character
+      ).toLocaleLowerCase('da')
+    }
+  }
+
+  return canonical
+}
 
 /** Returns (and caches) a per-page text index for the PDF at `url`. */
 export function getTextIndex(url: string): Promise<PageTextIndex[]> {
@@ -60,19 +84,18 @@ async function buildIndex(url: string): Promise<PageTextIndex[]> {
  * Case-insensitive; respects Danish characters.
  */
 export function searchIndex(pages: PageTextIndex[], query: string): SearchMatch[] {
-  const trimmed = query.trim()
-  if (!trimmed) return []
+  const canonicalQuery = canonicalizeSearchText(query)
+  if (!canonicalQuery) return []
 
-  const lower = trimmed.toLowerCase()
   const results: SearchMatch[] = []
 
   for (const page of pages) {
-    const pageText = page.fullText.toLowerCase()
+    const pageText = canonicalizeSearchText(page.fullText)
     let count = 0
     let pos = 0
 
     while (true) {
-      const idx = pageText.indexOf(lower, pos)
+      const idx = pageText.indexOf(canonicalQuery, pos)
       if (idx === -1) break
       count++
       pos = idx + 1

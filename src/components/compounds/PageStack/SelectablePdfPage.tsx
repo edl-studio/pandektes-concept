@@ -28,6 +28,42 @@ interface HighlightRect {
   active: boolean
 }
 
+interface CanonicalCharLocation {
+  el: HTMLElement
+  start: number
+  end: number
+}
+
+const IGNORED_MATCH_CHARACTER = /[\s\u00ad\u2010\u2011\u2012\u2013\u2212-]/
+const MATCH_CHARACTER_EQUIVALENTS: Record<string, string> = {
+  '\u2018': "'",
+  '\u2019': "'",
+  '\u201c': '"',
+  '\u201d': '"',
+  '\u201e': '"',
+  '\u00ab': '"',
+  '\u00bb': '"',
+}
+
+/**
+ * PDF text layers split words at visual line endings and inconsistently
+ * include spaces between text items. Ignore those layout artifacts when
+ * matching passages.
+ */
+function canonicalizeMatchText(text: string): string {
+  let canonical = ''
+
+  for (const character of text) {
+    if (!IGNORED_MATCH_CHARACTER.test(character)) {
+      canonical += (
+        MATCH_CHARACTER_EQUIVALENTS[character] ?? character
+      ).toLocaleLowerCase('da')
+    }
+  }
+
+  return canonical
+}
+
 /**
  * Find all occurrences of `query` within the rendered text layer and return
  * viewport-relative rects converted to container-relative coordinates.
@@ -38,46 +74,68 @@ function findRects(
   containerEl: HTMLElement,
   active: boolean,
 ): HighlightRect[] {
-  const trimmed = query.trim()
-  if (!trimmed || textDivs.length === 0) return []
+  const canonicalQuery = canonicalizeMatchText(query)
+  if (!canonicalQuery || textDivs.length === 0) return []
 
-  const lowerQuery = trimmed.toLowerCase()
   const containerRect = containerEl.getBoundingClientRect()
   const result: HighlightRect[] = []
 
-  // Build a contiguous character map across all text spans.
-  let fullText = ''
-  const spanMap: Array<{ el: HTMLElement; start: number; len: number }> = []
+  // Build canonical text while retaining the original DOM position of every
+  // character, so normalized matches can still produce precise Range rects.
+  let canonicalText = ''
+  const characterMap: CanonicalCharLocation[] = []
+
   for (const div of textDivs) {
     const text = div.textContent ?? ''
-    spanMap.push({ el: div, start: fullText.length, len: text.length })
-    fullText += text
+
+    for (let offset = 0; offset < text.length;) {
+      const codePoint = text.codePointAt(offset)
+      if (codePoint == null) break
+
+      const character = String.fromCodePoint(codePoint)
+      const end = offset + character.length
+      const canonicalCharacter = canonicalizeMatchText(character)
+
+      for (const normalizedCharacter of canonicalCharacter) {
+        canonicalText += normalizedCharacter
+        characterMap.push({ el: div, start: offset, end })
+      }
+
+      offset = end
+    }
   }
 
-  const lowerFull = fullText.toLowerCase()
   let searchPos = 0
 
   while (true) {
-    const matchStart = lowerFull.indexOf(lowerQuery, searchPos)
+    const matchStart = canonicalText.indexOf(canonicalQuery, searchPos)
     if (matchStart === -1) break
-    const matchEnd = matchStart + lowerQuery.length
+    const matchEnd = matchStart + canonicalQuery.length
+    const spanBounds = new Map<HTMLElement, { start: number; end: number }>()
 
-    for (const { el, start, len } of spanMap) {
-      const spanEnd = start + len
-      if (spanEnd <= matchStart || start >= matchEnd) continue
+    for (const location of characterMap.slice(matchStart, matchEnd)) {
+      const existing = spanBounds.get(location.el)
+      if (existing) {
+        existing.start = Math.min(existing.start, location.start)
+        existing.end = Math.max(existing.end, location.end)
+      } else {
+        spanBounds.set(location.el, {
+          start: location.start,
+          end: location.end,
+        })
+      }
+    }
 
-      const charStart = Math.max(matchStart - start, 0)
-      const charEnd = Math.min(matchEnd - start, len)
-
+    for (const [el, bounds] of spanBounds) {
       try {
         const textNode = el.firstChild
         if (!textNode || textNode.nodeType !== Node.TEXT_NODE) continue
         const nodeLen = textNode.textContent?.length ?? 0
-        if (charStart >= nodeLen) continue
+        if (bounds.start >= nodeLen) continue
 
         const range = document.createRange()
-        range.setStart(textNode, charStart)
-        range.setEnd(textNode, Math.min(charEnd, nodeLen))
+        range.setStart(textNode, bounds.start)
+        range.setEnd(textNode, Math.min(bounds.end, nodeLen))
 
         for (const r of Array.from(range.getClientRects())) {
           if (r.width > 0.5 && r.height > 0.5) {
