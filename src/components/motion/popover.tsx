@@ -47,14 +47,8 @@ const GOO_CLOSE_SPRING = {
 } as const
 const HOVER_CLOSE_DELAY = 120
 const CIRCLE_KAPPA = 0.5523
-const TRANSITION_BLUR_PX = 5
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-
-function blurForProgress(progress: number) {
-  const t = Math.min(1, Math.max(0, progress))
-  return 4 * TRANSITION_BLUR_PX * t * (1 - t)
-}
 
 interface Rect {
   x: number
@@ -461,7 +455,6 @@ export function PopoverContent({ children, className }: PopoverContentProps) {
   const measureRef = contentRef
   const blobRef = useRef<HTMLDivElement>(null)
   const clipRef = useRef<HTMLDivElement>(null)
-  const layerRef = useRef<HTMLDivElement>(null)
   const geoRef = useRef<Geo | null>(null)
   const supportsShapeRef = useRef(false)
   const layout = usePopoverPortalPosition(triggerRef, measureRef, portalReady)
@@ -484,21 +477,13 @@ export function PopoverContent({ children, className }: PopoverContentProps) {
   )
 
   // Morph the same clip on the goo body and the content, so the whole popover
-  // oozes as one and the text reveals with it. A light layer blur peaks mid-
-  // transition and clears at rest so the morph reads softer without staying
-  // defocused when open.
+  // oozes as one and the text reveals with it.
   const render = useCallback((g: Geo | null, p: number) => {
     if (!g || g.layerW === 0) return
     const clip = clipForProgress(g, p, supportsShapeRef.current)
     if (blobRef.current) blobRef.current.style.clipPath = clip
     if (clipRef.current) clipRef.current.style.clipPath = clip
-    if (layerRef.current) {
-      const blur = reduce ? 0 : blurForProgress(p)
-      const active = blur > 0.05
-      layerRef.current.style.filter = active ? `blur(${blur.toFixed(2)}px)` : 'none'
-      layerRef.current.style.willChange = active ? 'filter' : ''
-    }
-  }, [reduce])
+  }, [])
 
   useLayoutEffect(() => {
     supportsShapeRef.current =
@@ -558,7 +543,7 @@ export function PopoverContent({ children, className }: PopoverContentProps) {
         </defs>
       </svg>
 
-      <div ref={layerRef} className="pk-popover-layer">
+      <div className="pk-popover-layer">
         {/* Goo body: static trigger pill + morphing blob. */}
         <div
           aria-hidden

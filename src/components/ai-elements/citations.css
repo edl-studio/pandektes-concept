@@ -19,6 +19,7 @@
   color: var(--pk-color-content-tertiary);
   background-color: var(--pk-color-surface-raised);
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .pk-citation::before {
@@ -36,11 +37,11 @@
 }
 
 .pk-citation:hover {
-  color: var(--pk-color-content-secondary);
+  color: var(--pk-color-accent-base);
 }
 
 .pk-citation-sep {
-  color: var(--pk-color-content-tertiary);
+  color: inherit;
 }
 
 .pk-citation:focus {
@@ -55,7 +56,7 @@
 
 .pk-citation[data-popup-open],
 .pk-citation[data-state='open'] {
-  color: var(--pk-color-content-secondary);
+  color: var(--pk-color-accent-base);
 }
 
 .pk-citation-wrap {
@@ -456,7 +457,8 @@
   scroll-margin-top: 96px;
 }
 
-.pk-citation-subrow:is(a):hover .pk-citation-subrow-title {
+.pk-citation-subrow:is(a):hover .pk-citation-subrow-title,
+.pk-citation-subrow:is(a):hover .pk-citation-subrow-page {
   color: var(--pk-color-accent-base);
 }
 
@@ -495,6 +497,7 @@
   font-weight: var(--pk-font-weight-medium);
   line-height: 16px;
   color: var(--pk-color-content-tertiary);
+  transition: color 0.15s ease;
 }
 
 .pk-citation-subrow-page::before {

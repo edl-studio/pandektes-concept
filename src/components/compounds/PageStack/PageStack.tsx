@@ -24,6 +24,8 @@ export interface PageStackProps {
   mode: 'fan' | 'list'
   /** Decorative content rendered behind the skeleton on the front sheet. */
   frontSheetBackdrop?: ReactNode
+  /** Whether skeleton bars run their shimmer animation. Defaults to true. */
+  skeletonShimmer?: boolean
   /**
    * Uniform growth factor from the base 180x233 unit. Sheet boxes grow via
    * real width/height (see page-stack.css) so border-radius/border stay
@@ -72,6 +74,7 @@ export function PageStack({
   pageCount,
   mode,
   frontSheetBackdrop,
+  skeletonShimmer = true,
   scale = 1,
   spread = 1,
   xSpread = spread,
@@ -96,7 +99,10 @@ export function PageStack({
   const rotationFan = mode === 'fan' ? rotationSpread : 1
 
   return (
-    <div className="pk-page-stack__root" style={{ width: 180 * scale, height }}>
+    <div
+      className={`pk-page-stack__root${skeletonShimmer ? '' : ' pk-page-stack__root--static-skeleton'}`}
+      style={{ width: 180 * scale, height }}
+    >
       {Array.from({ length: pageCount }, (_, i) => i)
         .slice()
         .reverse()

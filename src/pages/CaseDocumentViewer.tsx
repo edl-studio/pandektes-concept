@@ -34,6 +34,10 @@ const DOCUMENT_BOTTOM_INSET = 112
 const THUMBNAIL_WIDTH = 96
 const THUMBNAIL_FADE_HEIGHT = 112
 const WIPE_EDGE_WIDTH = 48
+const DOCUMENT_REVEAL_FALLBACK_MS = 2700
+const THUMBNAIL_STAGGER_MS = 80
+const THUMBNAIL_REVEAL_DURATION_MS = 650
+const SIDEBAR_REVEAL_LEAD_MS = 500
 
 const SUMMARY_BLOCKS_BY_CASE: Record<string, DocumentSummaryBlock[]> = {
   // ── Højesteret (12 pages) ──────────────────────────────────────────────
@@ -242,6 +246,8 @@ export function CaseDocumentViewer({
   const [pageCount, setPageCount] = useState(caseSummary.pageCount)
   const [activePage, setActivePage] = useState(1)
   const [activeSummaryId, setActiveSummaryId] = useState<string>()
+  const [documentRevealComplete, setDocumentRevealComplete] = useState(false)
+  const [thumbnailNavVisible, setThumbnailNavVisible] = useState(false)
   const pageRefs = useRef<Array<HTMLElement | null>>([])
   const documentScrollRef = useRef<HTMLDivElement>(null)
   const thumbnailListRef = useRef<HTMLOListElement>(null)
@@ -269,16 +275,55 @@ export function CaseDocumentViewer({
 
   useEffect(() => {
     thumbnailRevealReportedRef.current = false
+    setDocumentRevealComplete(false)
+    setThumbnailNavVisible(false)
   }, [caseSummary.id])
 
   useEffect(() => {
-    if (
-      contentVisible &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      reportThumbnailRevealComplete()
+    if (!contentVisible) return
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDocumentRevealComplete(true)
+      return
     }
-  }, [contentVisible, reportThumbnailRevealComplete])
+
+    // Transition events for registered custom properties are supported by
+    // current browsers; this timeout keeps the nav available if one is lost.
+    const fallback = window.setTimeout(
+      () => setDocumentRevealComplete(true),
+      DOCUMENT_REVEAL_FALLBACK_MS,
+    )
+    return () => window.clearTimeout(fallback)
+  }, [caseSummary.id, contentVisible])
+
+  useEffect(() => {
+    if (!documentRevealComplete) return
+
+    // Let the newly mounted thumbnails paint once in their hidden state before
+    // enabling the staggered entrance transition.
+    const frame = window.requestAnimationFrame(() => {
+      setThumbnailNavVisible(true)
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [documentRevealComplete])
+
+  useEffect(() => {
+    if (!thumbnailNavVisible) return
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      reportThumbnailRevealComplete()
+      return
+    }
+
+    const lastThumbnailEndMs =
+      Math.max(0, pageCount - 1) * THUMBNAIL_STAGGER_MS +
+      THUMBNAIL_REVEAL_DURATION_MS
+    const timer = window.setTimeout(
+      reportThumbnailRevealComplete,
+      Math.max(0, lastThumbnailEndMs - SIDEBAR_REVEAL_LEAD_MS),
+    )
+    return () => window.clearTimeout(timer)
+  }, [pageCount, reportThumbnailRevealComplete, thumbnailNavVisible])
 
   const goToPage = useCallback(
     (pageNumber: number) => {
@@ -497,7 +542,7 @@ export function CaseDocumentViewer({
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       list.scrollBy({ top: scrollDelta, behavior: reduceMotion ? 'auto' : 'smooth' })
     }
-  }, [activePage, pageCount])
+  }, [activePage, documentRevealComplete, pageCount])
 
   const pages = Array.from({ length: pageCount }, (_, index) => index + 1)
   const totalHeight =
@@ -510,6 +555,7 @@ export function CaseDocumentViewer({
       className="case-document-viewer"
       data-content-visible={contentVisible}
       data-sidebar-open={sidebarOpen}
+      data-thumbnail-nav-visible={thumbnailNavVisible}
     >
       <main className="case-document-viewer__main">
         <div className="case-document-viewer__workspace">
@@ -523,64 +569,66 @@ export function CaseDocumentViewer({
               />
               <span>of {pageCount}</span>
             </p>
-            <nav className="case-document-viewer__nav" aria-label="Document pages">
-              <SharedLayoutBg
-                as="ul"
-                ref={thumbnailListRef}
-                className="case-document-viewer__thumbnail-list"
-                activeIndex={activePage - 1}
-                inset={0}
-                pillClassName="case-document-viewer__thumbnail-pill"
-              >
-                {pages.map((pageNumber) => (
-                  <li key={pageNumber}>
-                    <button
-                      ref={(node) => {
-                        thumbnailRefs.current[pageNumber - 1] = node
-                      }}
-                      type="button"
-                      className="case-document-viewer__thumbnail-button"
-                      style={
-                        {
-                          '--pk-thumbnail-delay': `${(pageNumber - 1) * 80}ms`,
-                        } as CSSProperties
-                      }
-                      aria-label={`Go to page ${pageNumber}`}
-                      aria-current={activePage === pageNumber ? 'page' : undefined}
-                      onClick={() => goToPage(pageNumber)}
-                      onTransitionEnd={
-                        pageNumber === pageCount
-                          ? (event) => {
-                              if (
-                                event.target === event.currentTarget &&
-                                event.propertyName === 'transform'
-                              ) {
-                                reportThumbnailRevealComplete()
+            {documentRevealComplete && (
+              <nav className="case-document-viewer__nav" aria-label="Document pages">
+                <SharedLayoutBg
+                  as="ul"
+                  ref={thumbnailListRef}
+                  className="case-document-viewer__thumbnail-list"
+                  activeIndex={activePage - 1}
+                  inset={0}
+                  pillClassName="case-document-viewer__thumbnail-pill"
+                >
+                  {pages.map((pageNumber) => (
+                    <li key={pageNumber}>
+                      <button
+                        ref={(node) => {
+                          thumbnailRefs.current[pageNumber - 1] = node
+                        }}
+                        type="button"
+                        className="case-document-viewer__thumbnail-button"
+                        style={
+                          {
+                            '--pk-thumbnail-delay': `${(pageNumber - 1) * THUMBNAIL_STAGGER_MS}ms`,
+                          } as CSSProperties
+                        }
+                        aria-label={`Go to page ${pageNumber}`}
+                        aria-current={activePage === pageNumber ? 'page' : undefined}
+                        onClick={() => goToPage(pageNumber)}
+                        onTransitionEnd={
+                          pageNumber === pageCount
+                            ? (event) => {
+                                if (
+                                  event.target === event.currentTarget &&
+                                  event.propertyName === 'transform'
+                                ) {
+                                  reportThumbnailRevealComplete()
+                                }
                               }
-                            }
-                          : undefined
-                      }
-                    >
-                      <span className="case-document-viewer__thumbnail-preview">
-                        {caseSummary.documentUrl ? (
-                          <PdfPageCanvas
-                            url={caseSummary.documentUrl}
-                            pageNumber={pageNumber}
-                            targetWidth={THUMBNAIL_WIDTH}
-                            className="case-document-viewer__thumbnail-canvas"
-                          />
-                        ) : (
-                          <DocumentPageImage caseNumber={caseSummary.caseNumber} />
-                        )}
-                      </span>
-                      <span className="case-document-viewer__thumbnail-number">
-                        {pageNumber}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </SharedLayoutBg>
-            </nav>
+                            : undefined
+                        }
+                      >
+                        <span className="case-document-viewer__thumbnail-preview">
+                          {caseSummary.documentUrl ? (
+                            <PdfPageCanvas
+                              url={caseSummary.documentUrl}
+                              pageNumber={pageNumber}
+                              targetWidth={THUMBNAIL_WIDTH}
+                              className="case-document-viewer__thumbnail-canvas"
+                            />
+                          ) : (
+                            <DocumentPageImage caseNumber={caseSummary.caseNumber} />
+                          )}
+                        </span>
+                        <span className="case-document-viewer__thumbnail-number">
+                          {pageNumber}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </SharedLayoutBg>
+              </nav>
+            )}
           </aside>
 
           <div className="case-document-viewer__document-column">
@@ -667,6 +715,18 @@ export function CaseDocumentViewer({
                             isFirstPage ? ' pk-page-stack__reveal-overlay' : ''
                           }`}
                           style={style}
+                          onTransitionEnd={
+                            isFirstPage
+                              ? (event) => {
+                                  if (
+                                    event.target === event.currentTarget &&
+                                    event.propertyName === '--pk-wipe-y'
+                                  ) {
+                                    setDocumentRevealComplete(true)
+                                  }
+                                }
+                              : undefined
+                          }
                         >
                           {caseSummary.documentUrl ? (
                             <LazyPdfPage

@@ -11,6 +11,8 @@ export interface CaseSummary {
   pageCount: number
   /** URL to the real judgment PDF, when we have one. Falls back to the abstract placeholder image otherwise. */
   documentUrl?: string
+  /** Source filename displayed consistently on document cards and citations. */
+  documentTitle: string
   /** Court seal rendered on the case-book cover. */
   Logo?: ComponentType
   /** ISO-format judgment date, displayed in the timeline. */
@@ -38,6 +40,7 @@ export const CASES: CaseSummary[] = [
     coverColor: '#C31230',
     pageCount: 12,
     documentUrl: '/documents/bs-60017-2024-hjr.pdf',
+    documentTitle: 'Domsdatabasen_13870.pdf',
     Logo: HojesteretLogo,
     judgmentDate: '18 Jun 2026',
     status: 'Final',
@@ -51,6 +54,7 @@ export const CASES: CaseSummary[] = [
     coverColor: '#E1232D',
     pageCount: 32,
     documentUrl: '/documents/bs-8528-2023-olr.pdf',
+    documentTitle: 'Domsdatabasen_11189.pdf',
     Logo: OstreLandsretLogo,
     judgmentDate: '24 Apr 2024',
     status: 'Appealed',
@@ -64,6 +68,7 @@ export const CASES: CaseSummary[] = [
     coverColor: '#E1232D',
     pageCount: 29,
     documentUrl: '/documents/bs-13671-2021-shr.pdf',
+    documentTitle: 'Domsdatabasen_3417.pdf',
     Logo: SoHandelsrettenLogo,
     judgmentDate: '15 Aug 2022',
     status: 'Appealed',

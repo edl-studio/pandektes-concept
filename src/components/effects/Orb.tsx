@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import styles from './Orb.module.css'
 
 const STAGE = 28
@@ -64,6 +64,7 @@ export interface OrbProps {
   variant?: OrbVariant
   size?: number
   label?: string
+  labelContent?: ReactNode
   pill?: boolean
   className?: string
   style?: CSSProperties
@@ -73,6 +74,7 @@ export function Orb({
   variant = 'S3',
   size = SIZE,
   label,
+  labelContent,
   pill = false,
   className,
   style,
@@ -120,7 +122,13 @@ export function Orb({
           </span>
         </span>
       </span>
-      {pill && <span className={styles.label}>{text}</span>}
+      {pill && (
+        <span
+          className={`${styles.label}${labelContent ? ` ${styles.labelContentHost}` : ''}`}
+        >
+          {labelContent ?? text}
+        </span>
+      )}
     </span>
   )
 }

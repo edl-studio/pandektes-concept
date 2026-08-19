@@ -376,15 +376,14 @@
   transition:
     border-color 0.12s ease,
     color 0.12s ease,
-    opacity 0.5s ease
-      calc(1.12s + var(--pk-thumbnail-delay, 0ms)),
+    opacity 0.5s ease var(--pk-thumbnail-delay, 0ms),
     filter 0.65s cubic-bezier(0.16, 1, 0.3, 1)
-      calc(1.12s + var(--pk-thumbnail-delay, 0ms)),
+      var(--pk-thumbnail-delay, 0ms),
     transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)
-      calc(1.12s + var(--pk-thumbnail-delay, 0ms));
+      var(--pk-thumbnail-delay, 0ms);
 }
 
-.case-document-viewer[data-content-visible='true']
+.case-document-viewer[data-thumbnail-nav-visible='true']
   .case-document-viewer__thumbnail-button {
   opacity: 1;
   filter: blur(0);

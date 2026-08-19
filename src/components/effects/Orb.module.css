@@ -66,6 +66,13 @@
   animation: label-shine 2250ms cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
 }
 
+.labelContentHost {
+  color: #a1a1a1;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  animation: none;
+}
+
 @keyframes orbit {
   0% {
     opacity: 1;

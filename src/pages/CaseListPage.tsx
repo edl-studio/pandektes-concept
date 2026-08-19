@@ -160,14 +160,6 @@ function SectionHeader({
 
 // ── TimelineItem ──────────────────────────────────────────────────────
 
-function docFilename(cs: CaseSummary): string {
-  if (cs.documentUrl) {
-    const name = cs.documentUrl.split('/').pop()
-    if (name) return name
-  }
-  return `Domsdatabasen_${cs.caseNumber.replace(/[^A-Za-z0-9]/g, '_')}.pdf`
-}
-
 function randomBookTilt(): number {
   const deg = 2 + Math.random() * 2
   return Math.random() < 0.5 ? -deg : deg
@@ -302,7 +294,7 @@ function useBookThumb({
   }
 
   const Logo = caseSummary.Logo
-  const filename = docFilename(caseSummary)
+  const filename = caseSummary.documentTitle
   const bookClassName = `co-doc-thumb-book${holding ? ' co-doc-thumb-book--holding' : ''}${sinking ? ' co-doc-thumb-book--sinking' : ''}`
 
   return {
@@ -529,7 +521,7 @@ export function CaseListPage() {
 
   return (
     <>
-    <div className={`co-page${returningFromCaseDetail ? ' co-page--returning' : ''}${active ? ' co-page--transitioning' : ''}${active?.sinking ? ' co-page--exiting' : ''}`}>
+    <div className={`co-page${returningFromCaseDetail ? ' co-page--returning' : ''}${active ? ' co-page--transitioning' : ''}`}>
       <header className="co-appbar">
         <div className="co-appbar-inner">
           <Link to="/" className="co-appbar-logo">
@@ -569,7 +561,10 @@ export function CaseListPage() {
                       key={caseSummary.id}
                       caseSummary={caseSummary}
                       bookTilt={bookTilt}
-                      lifted={active?.originKey === `docs:${caseSummary.id}`}
+                      lifted={
+                        active?.originKey === `docs:${caseSummary.id}` &&
+                        !active.sinking
+                      }
                       sinking={active?.originKey === `docs:${caseSummary.id}` && active.sinking}
                       onOpen={(caseSummary, originRect) =>
                         setActive({ caseSummary, originRect, sinking: false, originKey: `docs:${caseSummary.id}` })
@@ -590,14 +585,14 @@ export function CaseListPage() {
                 <div className="co-holding-grid">
                   <HoldingCard
                     icon={<IThumbsUp />}
-                    verdict="Worker won — DKK 282,338.09 awarded."
+                    verdict="Worker awarded DKK 282,338.09"
                     detail={HOLDING_WIN}
                     citation={citationMarker('hjr-result', 1, HOLDING_WIN)}
                     variant="win"
                   />
                   <HoldingCard
                     icon={<IThumbsDown />}
-                    verdict="First instance — Adecco acquitted 2–1."
+                    verdict="Adecco acquitted"
                     detail={HOLDING_LOSE}
                     citation={citationMarker('shr-majority', 3, HOLDING_LOSE)}
                     variant="lose"
@@ -624,7 +619,10 @@ export function CaseListPage() {
                     bookTilt={bookTilt}
                     isFirst={i === 0}
                     isLast={i === TIMELINE_ENTRIES.length - 1}
-                    lifted={active?.originKey === `history:${caseSummary.id}`}
+                    lifted={
+                      active?.originKey === `history:${caseSummary.id}` &&
+                      !active.sinking
+                    }
                     sinking={active?.originKey === `history:${caseSummary.id}` && active.sinking}
                     onOpen={(caseSummary, originRect) =>
                       setActive({ caseSummary, originRect, sinking: false, originKey: `history:${caseSummary.id}` })

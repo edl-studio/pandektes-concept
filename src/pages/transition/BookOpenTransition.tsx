@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AnimatePresence,
   animate,
@@ -12,6 +12,7 @@ import {
   CASE_BOOK_HOVER_PAGE_LIFT,
   MAX_CASE_BOOK_SHEETS,
 } from '@/components/compounds/CaseBook'
+import { FlickeringGrid } from '@/components/effects/FlickeringGrid'
 import { Orb } from '@/components/effects/Orb'
 import type { CaseSummary } from '../case-data'
 import {
@@ -55,11 +56,16 @@ const BOUNCE_DOWN_Y = 20 // Lower extent; positive Y carries the wave below base
 const BOUNCE_UP_MS = 650 // Reverses the wave while its softer springs still carry upward momentum.
 const BOUNCE_DOWN_MS = 650 // Matches the upward phase so the wave is temporally symmetrical.
 const BOUNCE_COUNT = 3 // Number of fake-loading bounce cycles completed before restacking.
+const LOADING_LABELS = [
+  'Reading the document…',
+  'Identifying key arguments…',
+  'Tracing citations…',
+] as const
+// Leave enough time for each shimmer-sweep exit and entrance within the loading wave.
+const LOADING_LABEL_SWAP_DELAYS_MS = [950, 2050] as const
 const BACKGROUND_FADE_MS = 750 // CSS background fade delay (400ms) + fade (350ms); wave waits for completion.
 const EXTRACT_THRESHOLD = 0.2 // Flight progress (0–1) that starts the book sink, page fade, and bounce clock.
 const APEX_PROGRESS = 0.55 // Flight progress (0–1) at which the sheaf reaches the top of its arc.
-const MAX_FLIGHT_PITCH = 9 // Maximum whole-sheaf rotateX tilt while following the flight path.
-const FLIGHT_PERSPECTIVE = 900 // Restrained perspective depth for the airborne sheaf.
 const FLIGHT_SPRING = {
   type: 'spring',
   stiffness: 48,
@@ -70,11 +76,6 @@ const ROTATION_SPRING = {
   stiffness: 45,
   damping: 14,
   mass: 1.4,
-} as const
-const PITCH_SPRING = {
-  stiffness: 55,
-  damping: 18,
-  mass: 1.2,
 } as const
 
 type Phase =
@@ -113,6 +114,97 @@ function continuousArc(
   return cubicBezier((t - APEX_PROGRESS) / (1 - APEX_PROGRESS), apex, c3, c4, p2)
 }
 
+function ShimmerSweepLabel({
+  text,
+  reducedMotion,
+}: {
+  text: string
+  reducedMotion: boolean
+}) {
+  const stageRef = useRef<HTMLSpanElement>(null)
+  const labelRef = useRef<HTMLSpanElement>(null)
+  const displayedTextRef = useRef('')
+
+  useEffect(() => {
+    const stage = stageRef.current
+    const element = labelRef.current
+    if (!stage || !element) return
+
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const playbacks: Array<{ stop: () => void }> = []
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, ms)
+      })
+
+    async function swap(stage: HTMLSpanElement, element: HTMLSpanElement) {
+      if (reducedMotion) {
+        element.textContent = text
+        stage.style.width = 'auto'
+        displayedTextRef.current = text
+        return
+      }
+
+      const hasDisplayedText = Boolean(displayedTextRef.current)
+      if (hasDisplayedText) {
+        const exit = animate(
+          element,
+          { opacity: 0, x: 22, filter: 'blur(8px)' },
+          { duration: 0.468, ease: [0.7, 0, 0.84, 0] },
+        )
+        playbacks.push(exit)
+        await exit
+        if (cancelled) return
+      }
+
+      element.textContent = text
+      displayedTextRef.current = text
+      element.style.opacity = '0'
+      element.style.transform = 'translateX(-22px)'
+      element.style.filter = 'blur(8px)'
+      const nextWidth = element.getBoundingClientRect().width
+
+      if (hasDisplayedText) {
+        const layout = animate(
+          stage,
+          { width: nextWidth },
+          { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+        )
+        playbacks.push(layout)
+      } else {
+        stage.style.width = `${nextWidth}px`
+      }
+
+      if (displayedTextRef.current !== LOADING_LABELS[0]) {
+        await wait(36)
+        if (cancelled) return
+      }
+
+      const enter = animate(
+        element,
+        { opacity: 1, x: 0, filter: 'blur(0px)' },
+        { duration: 0.612, ease: [0.22, 1, 0.36, 1] },
+      )
+      playbacks.push(enter)
+      await enter
+    }
+
+    void swap(stage, element)
+    return () => {
+      cancelled = true
+      if (timer) clearTimeout(timer)
+      playbacks.forEach((playback) => playback.stop())
+    }
+  }, [reducedMotion, text])
+
+  return (
+    <span ref={stageRef} className="pk-book-transition__label-stage">
+      <span ref={labelRef} className="pk-book-transition__label-text" />
+    </span>
+  )
+}
+
 export function BookOpenTransition({
   caseSummary,
   originRect,
@@ -126,6 +218,7 @@ export function BookOpenTransition({
 }) {
   const [phase, setPhase] = useState<Phase>('extracting')
   const [bouncePhase, setBouncePhase] = useState<BouncePhase>('idle')
+  const [loadingLabelIndex, setLoadingLabelIndex] = useState(0)
   const prefersReducedMotion = useReducedMotion()
 
   const stackHandoffY = window.innerHeight / 2 - BOOK_HEIGHT / 2
@@ -179,13 +272,11 @@ export function BookOpenTransition({
     }
   }
 
-  const leftMv = useMotionValue(startLeft)
-  const topMv = useMotionValue(startTop)
+  const xMv = useMotionValue(startLeft)
+  const yMv = useMotionValue(startTop)
   const scaleMv = useMotionValue(startScale)
   const rotateTargetMv = useMotionValue(startRotation)
   const rotateMv = useSpring(rotateTargetMv, ROTATION_SPRING)
-  const pitchTargetMv = useMotionValue(0)
-  const pitchMv = useSpring(pitchTargetMv, PITCH_SPRING)
 
   useEffect(() => {
     let cancelled = false
@@ -225,10 +316,9 @@ export function BookOpenTransition({
         onUpdate(t) {
           const pathT = Math.max(0, Math.min(t, 1))
           const point = flightPoint(pathT)
-          const previousPoint = flightPoint(Math.max(pathT - 0.002, 0))
           const nextPoint = flightPoint(Math.min(pathT + 0.002, 1))
-          leftMv.set(point.x)
-          topMv.set(point.y)
+          xMv.set(point.x)
+          yMv.set(point.y)
 
           if (!extracted && t >= EXTRACT_THRESHOLD) {
             extracted = true
@@ -247,23 +337,12 @@ export function BookOpenTransition({
           const bank = Math.max(-12, Math.min(heading * 0.15, 12))
           const pathTaper = Math.sin(Math.PI * pathT)
           const entranceBlend = Math.min(pathT / EXTRACT_THRESHOLD, 1)
-          const tangentX = nextPoint.x - previousPoint.x
-          const tangentY = nextPoint.y - previousPoint.y
-          const tangentLength = Math.max(Math.hypot(tangentX, tangentY), 0.001)
-          const verticalDirection = tangentY / tangentLength
-          const pitchEnvelope = Math.pow(pathTaper, 0.8)
           scaleMv.set(startScale + (1 - startScale) * flyProgress)
           rotateTargetMv.set(startRotation * (1 - entranceBlend) + bank * pathTaper)
-          pitchTargetMv.set(
-            prefersReducedMotion
-              ? 0
-              : verticalDirection * MAX_FLIGHT_PITCH * pitchEnvelope,
-          )
         },
       })
       stops.push(flight)
       await flight
-      pitchTargetMv.set(0)
       if (cancelled) return
 
       if (!centeringX) setPhase('centering-x')
@@ -271,6 +350,14 @@ export function BookOpenTransition({
       if (cancelled) return
 
       setPhase('spreading')
+      setLoadingLabelIndex(0)
+      LOADING_LABEL_SWAP_DELAYS_MS.forEach((delay, index) => {
+        timers.push(
+          setTimeout(() => {
+            if (!cancelled) setLoadingLabelIndex(index + 1)
+          }, delay),
+        )
+      })
       await Promise.all([wait(CENTER_SPREAD_MS), backgroundReady])
       if (cancelled) return
 
@@ -293,10 +380,10 @@ export function BookOpenTransition({
       if (cancelled) return
 
       setPhase('scaling')
-      const scalingX = animate(leftMv, stackLeftLarge, {
+      const scalingX = animate(xMv, stackLeftLarge, {
         ...STACK_LAYOUT_SPRING,
       })
-      const scalingY = animate(topMv, stackRestY, {
+      const scalingY = animate(yMv, stackRestY, {
         ...STACK_LAYOUT_SPRING,
       })
       stops.push(scalingX, scalingY)
@@ -307,7 +394,6 @@ export function BookOpenTransition({
     void run()
     return () => {
       cancelled = true
-      pitchTargetMv.set(0)
       stops.forEach((playback) => playback.stop())
       timers.forEach(clearTimeout)
     }
@@ -334,50 +420,78 @@ export function BookOpenTransition({
   const tile = originRect.tile
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none">
+    <div className="pk-book-transition fixed inset-0 z-[100] pointer-events-none">
+      <div
+        aria-hidden="true"
+        className={`pk-book-transition__backdrop${isExtracting ? '' : ' pk-book-transition__backdrop--visible'}`}
+      />
+
       <motion.div
-        className="fixed z-[2]"
+        className="fixed top-0 left-0 z-[2]"
         style={{
-          left: leftMv,
-          top: topMv,
+          x: xMv,
+          y: yMv,
           scale: scaleMv,
           rotate: rotateMv,
           transformOrigin: 'top left',
-          perspective: FLIGHT_PERSPECTIVE,
         }}
       >
-        <motion.div
-          style={{
-            rotateX: pitchMv,
-            transformOrigin: 'center center',
-          }}
-        >
-          <PageStack
-            pageCount={Math.min(caseSummary.pageCount, MAX_CASE_BOOK_SHEETS)}
-            mode={isReorganized ? 'list' : 'fan'}
-            scale={isScaled ? SCALE : 1}
-            initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
-            initialXSpread={flightXSpread}
-            xSpread={currentXSpread}
-            ySpread={currentYSpread}
-            rotationSpread={flightRotationSpread}
-            springFan={isFanned}
-            gentleFan={isFanned}
-            bounceY={
-              bouncePhase === 'up'
-                ? BOUNCE_UP_Y
-                : bouncePhase === 'down'
-                  ? BOUNCE_DOWN_Y
-                  : 0
-            }
-            bouncePhase={bouncePhase}
-            alignRotation={isFlying || isCenteringX || isSpreading || isAligningX}
-            alignX={isCenteringX || isAligningX}
-            alignedXStep={isCenteringX ? 1 : 0}
-            listGap={isBounceRestacking ? RESTACK_LIST_GAP : undefined}
-            restackFromBounce={isBounceRestacking}
-          />
-        </motion.div>
+        <PageStack
+          pageCount={Math.min(caseSummary.pageCount, MAX_CASE_BOOK_SHEETS)}
+          mode={isReorganized ? 'list' : 'fan'}
+          frontSheetBackdrop={
+            <AnimatePresence>
+              {isSpreading && (
+                <motion.div
+                  className="pk-book-transition__flickering-grid"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: 0.25,
+                    transition: {
+                      duration: prefersReducedMotion ? 0.12 : 1.2,
+                      ease: [0.16, 1, 0.3, 1],
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    transition: {
+                      duration: prefersReducedMotion ? 0.12 : 0.25,
+                      ease: 'easeOut',
+                    },
+                  }}
+                >
+                  <FlickeringGrid
+                    color="#7d2334"
+                    flickerChance={0.22}
+                    maxOpacity={0.32}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          }
+          skeletonShimmer={false}
+          scale={isScaled ? SCALE : 1}
+          initialSpread={wasOpen ? OPEN_PAGE_SPREAD : 1}
+          initialXSpread={flightXSpread}
+          xSpread={currentXSpread}
+          ySpread={currentYSpread}
+          rotationSpread={flightRotationSpread}
+          springFan={isFanned}
+          gentleFan={isFanned}
+          bounceY={
+            bouncePhase === 'up'
+              ? BOUNCE_UP_Y
+              : bouncePhase === 'down'
+                ? BOUNCE_DOWN_Y
+                : 0
+          }
+          bouncePhase={bouncePhase}
+          alignRotation={isFlying || isCenteringX || isSpreading || isAligningX}
+          alignX={isCenteringX || isAligningX}
+          alignedXStep={isCenteringX ? 1 : 0}
+          listGap={isBounceRestacking ? RESTACK_LIST_GAP : undefined}
+          restackFromBounce={isBounceRestacking}
+        />
       </motion.div>
 
       <AnimatePresence>
@@ -401,7 +515,17 @@ export function BookOpenTransition({
             }
             transition={{ duration: prefersReducedMotion ? 0.12 : 0.22, ease: 'easeOut' }}
           >
-            <Orb label="Loading document..." pill variant="S3" />
+            <Orb
+              label={LOADING_LABELS[loadingLabelIndex]}
+              labelContent={
+                <ShimmerSweepLabel
+                  reducedMotion={Boolean(prefersReducedMotion)}
+                  text={LOADING_LABELS[loadingLabelIndex]}
+                />
+              }
+              pill
+              variant="S3"
+            />
           </motion.div>
         )}
       </AnimatePresence>

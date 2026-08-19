@@ -17,6 +17,19 @@
     position: relative;
   }
 
+  .pk-book-transition__backdrop {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    background-color: var(--pk-color-surface-body);
+    opacity: 0;
+    transition: opacity 0.35s ease 0.4s;
+  }
+
+  .pk-book-transition__backdrop--visible {
+    opacity: 1;
+  }
+
   .pk-book-transition__loader {
     position: fixed;
     z-index: 1;
@@ -24,6 +37,17 @@
     left: 50%;
     color: var(--pk-color-accent-base);
     transform: translateX(-50%);
+  }
+
+  .pk-book-transition__label-stage {
+    display: inline-block;
+  }
+
+  .pk-book-transition__label-text {
+    display: inline-block;
+    backface-visibility: hidden;
+    transform-origin: 50% 55%;
+    will-change: transform, opacity, filter;
   }
 
   /*
@@ -91,6 +115,11 @@
       var(--pk-color-surface-body) 90%,
       rgb(var(--pk-color-core-black))
     );
+  }
+
+  .pk-page-stack__root--static-skeleton
+    .pk-case-book__skeleton-bar::after {
+    display: none;
   }
 
   /*
