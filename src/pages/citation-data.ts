@@ -14,12 +14,17 @@ const SHR = CASES[2] // bs-13671-2021-shr  (29 pages)
 
 export const CITATION_PREFIX = 'case-sources'
 
+const HJR_SOURCE = 'Domsdatabasen_13870.pdf'
+const OLR_SOURCE = 'Domsdatabasen_11189.pdf'
+const SHR_SOURCE = 'Domsdatabasen_3417.pdf'
+
 export const CITATION_ITEMS: AppCitationItem[] = [
   // ── Højesteret ────────────────────────────────────────────────────────
   {
     id: 'hjr-result',
     caseId: HJR.id,
-    title: 'Domsdatabasen_13870 (instance 3).pdf',
+    title: 'vikarloven not applicable — Appellant 3',
+    sourceTitle: HJR_SOURCE,
     domain: 'page 9 · Result — Appellant 3',
     url: HJR.documentUrl,
     pageNumber: 9,
@@ -31,7 +36,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'hjr-compensation',
     caseId: HJR.id,
-    title: 'Domsdatabasen_13870 (instance 3).pdf',
+    title: 'DKK 25,000 compensation confirmed',
+    sourceTitle: HJR_SOURCE,
     domain: 'page 9 · § 8, stk. 1 — godtgørelse',
     url: HJR.documentUrl,
     pageNumber: 9,
@@ -43,7 +49,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'hjr-two-questions',
     caseId: HJR.id,
-    title: 'Domsdatabasen_13870 (instance 3).pdf',
+    title: 'Two legal questions framed',
+    sourceTitle: HJR_SOURCE,
     domain: 'page 5 · Two main questions',
     url: HJR.documentUrl,
     pageNumber: 5,
@@ -55,7 +62,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'hjr-stadfaestes',
     caseId: HJR.id,
-    title: 'Domsdatabasen_13870 (instance 3).pdf',
+    title: 'Appellate judgment affirmed',
+    sourceTitle: HJR_SOURCE,
     domain: 'page 11 · THI KENDES FOR RET',
     url: HJR.documentUrl,
     pageNumber: 11,
@@ -67,7 +75,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'olr-misbrug',
     caseId: OLR.id,
-    title: 'Domsdatabasen_11189 (instance 2).pdf',
+    title: 'Abuse finding — four extensions',
+    sourceTitle: OLR_SOURCE,
     domain: 'page 28 · Misbrug — Appellant 3',
     url: OLR.documentUrl,
     pageNumber: 28,
@@ -79,7 +88,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'olr-award',
     caseId: OLR.id,
-    title: 'Domsdatabasen_11189 (instance 2).pdf',
+    title: 'DKK 282,338.09 awarded in full',
+    sourceTitle: OLR_SOURCE,
     domain: 'page 29 · Award — DKK 282,338.09',
     url: OLR.documentUrl,
     pageNumber: 29,
@@ -91,7 +101,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'olr-no-objective',
     caseId: OLR.id,
-    title: 'Domsdatabasen_11189 (instance 2).pdf',
+    title: 'No objective explanation shown',
+    sourceTitle: OLR_SOURCE,
     domain: 'page 28 · No objective explanation',
     url: OLR.documentUrl,
     pageNumber: 28,
@@ -105,7 +116,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'shr-majority',
     caseId: SHR.id,
-    title: 'Domsdatabasen_3417 (instance 1).pdf',
+    title: 'Majority — vikarloven applies',
+    sourceTitle: SHR_SOURCE,
     domain: 'page 26 · Majority — vikarloven applies',
     url: SHR.documentUrl,
     pageNumber: 26,
@@ -117,7 +129,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'shr-dissent',
     caseId: SHR.id,
-    title: 'Domsdatabasen_3417 (instance 1).pdf',
+    title: 'Dissent — 3 yrs 8 months not temporary',
+    sourceTitle: SHR_SOURCE,
     domain: 'page 27 · Dissent — 3 yrs 8 months not temporary',
     url: SHR.documentUrl,
     pageNumber: 27,
@@ -129,7 +142,8 @@ export const CITATION_ITEMS: AppCitationItem[] = [
   {
     id: 'shr-ruling',
     caseId: SHR.id,
-    title: 'Domsdatabasen_3417 (instance 1).pdf',
+    title: 'Adecco A/S acquitted',
+    sourceTitle: SHR_SOURCE,
     domain: 'page 28 · THI KENDES FOR RET',
     url: SHR.documentUrl,
     pageNumber: 28,

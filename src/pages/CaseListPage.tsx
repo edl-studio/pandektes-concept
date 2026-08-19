@@ -136,10 +136,10 @@ const MATTER_DESCRIPTION =
   `A quality controller recruited by Boeing and placed via Adecco A/S (now Flair Group A/S) worked without interruption at Boeing's Kastrup facility for 3\u00bd years under four successive fixed-term contracts. The central question across all three instances was whether that posting was "temporary" under the Temporary Agency Work Act (vikarloven) \u2014 and whether the worker was therefore entitled to salaried-employee protections under funktionærloven.`
 
 const HOLDING_WIN =
-  `Højesteret confirmed that the four successive extensions lacked any objective explanation, bringing the posting outside vikarloven. The worker was therefore a salaried employee (funktionær) entitled to sick pay and a four-month notice period. Østre Landsret's award of DKK 282,338.09 \u2014 comprising salary in the notice period, sick-pay arrears, and a DKK 25,000 Fixed-Term Employment Act compensation \u2014 was affirmed in full.`
+  `The four successive extensions lacked any objective explanation, taking the posting outside vikarloven. The worker was a salaried employee (funktionær) entitled to sick pay and a four-month notice period. DKK 282,338.09 awarded in full.`
 
 const HOLDING_LOSE =
-  `Sø- og Handelsretten acquitted Adecco by a 2\u20131 majority, holding that the posting fell within vikarloven and that the collective agreement (Funktionæroverenskomsten) displaced the successive-extension prohibition in \u00a7 3, stk. 4. The dissenting judge would have awarded three months' salary, sick-pay, and one month's compensation.`
+  `Adecco was acquitted 2\u20131. The collective agreement (Funktionæroverenskomsten) displaced the successive-extension prohibition in vikarloven \u00a7\u00a03, stk.\u00a04. One judge dissented, finding the posting objectively non-temporary.`
 
 function SectionHeader({
   title,
@@ -638,6 +638,7 @@ export function CaseListPage() {
             <Citations
               citations={CITATION_ITEMS}
               idPrefix={CITATION_PREFIX}
+              grouped
               defaultOpen
             />
             <Divider />

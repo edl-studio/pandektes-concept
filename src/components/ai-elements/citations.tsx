@@ -1,4 +1,5 @@
 import {
+  ArrowUpRight,
   BookOpen,
   BookmarkPlus,
   ChevronDown,
@@ -26,7 +27,10 @@ const SPRING_LAYOUT = { type: 'spring' as const, stiffness: 400, damping: 30 }
 
 export interface CitationItem {
   id: string
+  /** Per-passage label shown in the sub-row (grouped mode) or the row title (flat mode). */
   title: ReactNode
+  /** Document-level label shown as the group header. Falls back to `title` when absent. */
+  sourceTitle?: ReactNode
   domain?: ReactNode
   url?: string
   pageNumber?: number
@@ -44,6 +48,8 @@ export interface CitationsProps {
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
   idPrefix?: string
+  /** When true, citations are grouped by source document. */
+  grouped?: boolean
   className?: string
 }
 
@@ -125,9 +131,16 @@ export function Citation({
   text,
   className,
 }: CitationProps) {
-  const href = `#${citationTargetId(idPrefix, citationId)}`
-  const marker = (
-    <a href={href} aria-label={`View citation ${index}`} className={cn('pk-citation', className)}>
+  const docHref = source?.caseId
+    ? `/case/${source.caseId}?citation=${citationId}`
+    : `#${citationTargetId(idPrefix, citationId)}`
+
+  const marker = source?.caseId ? (
+    <Link to={docHref} aria-label={`View citation ${index}`} className={cn('pk-citation', className)}>
+      {index}
+    </Link>
+  ) : (
+    <a href={docHref} aria-label={`View citation ${index}`} className={cn('pk-citation', className)}>
       {index}
     </a>
   )
@@ -231,6 +244,108 @@ function CitationRow({
   )
 }
 
+// ── Grouped rendering ────────────────────────────────────────────────────────
+
+interface CitationGroup {
+  key: string
+  url: string | undefined
+  sourceTitle: ReactNode
+  caseId: string | undefined
+  items: CitationItem[]
+}
+
+function groupCitations(citations: CitationItem[]): CitationGroup[] {
+  const groups = new Map<string, CitationGroup>()
+  for (const citation of citations) {
+    const key = citation.url ?? `__ungrouped__${citation.id}`
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        url: citation.url,
+        sourceTitle: citation.sourceTitle ?? citation.title,
+        caseId: citation.caseId,
+        items: [],
+      })
+    }
+    groups.get(key)!.items.push(citation)
+  }
+  return Array.from(groups.values())
+}
+
+function CitationSubRow({
+  citation,
+  idPrefix,
+}: {
+  citation: CitationItem
+  idPrefix: string
+}) {
+  const id = citationTargetId(idPrefix, citation.id)
+  const pageLabel = citation.pageNumber != null ? `p${citation.pageNumber}` : null
+  const href = citation.caseId
+    ? `/case/${citation.caseId}?citation=${citation.id}`
+    : undefined
+
+  const content = (
+    <>
+      <span className="pk-citation-subrow-title">{citation.title}</span>
+      {pageLabel && <span className="pk-citation-subrow-page">{pageLabel}</span>}
+      <span className="pk-citation-subrow-icon" aria-hidden="true">
+        <ArrowUpRight size={ICON_SIZE} strokeWidth={ICON_STROKE} absoluteStrokeWidth />
+      </span>
+    </>
+  )
+
+  return href ? (
+    <Link id={id} to={href} className="pk-citation-subrow">
+      {content}
+    </Link>
+  ) : (
+    <div id={id} className="pk-citation-subrow">
+      {content}
+    </div>
+  )
+}
+
+function CitationGroupedList({
+  citations,
+  idPrefix,
+  className,
+}: CitationListProps) {
+  const baseId = useId()
+  const resolvedPrefix = idPrefix ?? `citation-group-${baseId.replace(/:/g, '')}`
+  const groups = groupCitations(citations)
+
+  return (
+    <div className={cn('pk-citation-grouped-list', className)}>
+      {groups.map((group) => {
+        const headerHref = group.caseId ? `/case/${group.caseId}` : undefined
+        const headerInner = (
+          <>
+            <CitationFavicon url={group.url} pageNumber={group.items[0]?.pageNumber} />
+            <span className="pk-citation-group-title">{group.sourceTitle}</span>
+          </>
+        )
+        return (
+          <div key={group.key} className="pk-citation-group">
+            {headerHref ? (
+              <Link to={headerHref} className="pk-citation-group-header">
+                {headerInner}
+              </Link>
+            ) : (
+              <div className="pk-citation-group-header">{headerInner}</div>
+            )}
+            <div className="pk-citation-subitems">
+              {group.items.map((citation) => (
+                <CitationSubRow key={citation.id} citation={citation} idPrefix={resolvedPrefix} />
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export function CitationList({
   citations,
   idPrefix,
@@ -275,11 +390,16 @@ export function Citations({
   defaultOpen = false,
   onOpenChange,
   idPrefix,
+  grouped = false,
   className,
 }: CitationsProps) {
   const baseId = useId()
   const contentId = `${baseId}-content`
   const resolvedPrefix = idPrefix ?? `citation-${baseId.replace(/:/g, '')}`
+
+  const count = grouped
+    ? new Set(citations.map((c) => c.url ?? c.id)).size
+    : citations.length
 
   return (
     <Collapsible
@@ -295,7 +415,7 @@ export function Citations({
           absoluteStrokeWidth
         />
         <span>{title}</span>
-        <span className="pk-citations-count">{citations.length}</span>
+        <span className="pk-citations-count">{count}</span>
         <span className="pk-citations-chevron" aria-hidden="true">
           <ChevronDown
             size={ICON_SIZE}
@@ -305,11 +425,19 @@ export function Citations({
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent id={contentId} className="pk-citations-panel-wrap">
-        <CitationList
-          citations={citations}
-          idPrefix={resolvedPrefix}
-          className="pk-citations-panel"
-        />
+        {grouped ? (
+          <CitationGroupedList
+            citations={citations}
+            idPrefix={resolvedPrefix}
+            className="pk-citations-panel"
+          />
+        ) : (
+          <CitationList
+            citations={citations}
+            idPrefix={resolvedPrefix}
+            className="pk-citations-panel"
+          />
+        )}
       </CollapsibleContent>
     </Collapsible>
   )
